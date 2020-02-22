@@ -12,6 +12,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,12 +25,17 @@ public class Prestamo implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotNull
 	@Column(nullable = false)
-	private Usuario usuario;
+	// private Usuario usuario;
+	private Long usuario_id;
 
+	@NotNull
 	@Column(nullable = false)
-	private Libro libro;
+	// private Libro libro;
+	private Long libro_id;
 
+	@NotNull
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-mm-dd")
 	private Date fecha_despacho;
@@ -54,20 +60,20 @@ public class Prestamo implements Serializable {
 		this.id = id;
 	}
 
-	public Usuario getUsuario() {
-		return usuario;
+	public Long getUsuario_id() {
+		return usuario_id;
 	}
 
-	public void setUsuario(Usuario usuario) {
-		this.usuario = usuario;
+	public void setUsuario_id(Long usuario_id) {
+		this.usuario_id = usuario_id;
 	}
 
-	public Libro getLibro() {
-		return libro;
+	public Long getLibro_id() {
+		return libro_id;
 	}
 
-	public void setLibro(Libro libro) {
-		this.libro = libro;
+	public void setLibro_id(Long libro_id) {
+		this.libro_id = libro_id;
 	}
 
 	public Date getFecha_despacho() {
@@ -94,11 +100,11 @@ public class Prestamo implements Serializable {
 		this.observaciones = observaciones;
 	}
 
-	public Prestamo(Usuario usuario, Libro libro, Date fecha_despacho, Boolean devolucion,
+	public Prestamo(Long usuario_id, Long libro_id, Date fecha_despacho, Boolean devolucion,
 			@Size(min = 1, max = 255) String observaciones) {
 		super();
-		this.usuario = usuario;
-		this.libro = libro;
+		this.usuario_id = usuario_id;
+		this.libro_id = libro_id;
 		this.fecha_despacho = fecha_despacho;
 		this.devolucion = devolucion;
 		this.observaciones = observaciones;
@@ -106,8 +112,8 @@ public class Prestamo implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Prestamo [id=" + id + ", usuario=" + usuario + ", libro=" + libro + ", fecha_despacho=" + fecha_despacho
-				+ ", devolucion=" + devolucion + ", observaciones=" + observaciones + "]";
+		return "Prestamo [id=" + id + ", usuario_id=" + usuario_id + ", libro_id=" + libro_id + ", fecha_despacho="
+				+ fecha_despacho + ", devolucion=" + devolucion + ", observaciones=" + observaciones + "]";
 	}
 
 	/**

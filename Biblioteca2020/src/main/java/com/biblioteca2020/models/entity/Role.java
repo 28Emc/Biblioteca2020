@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "authorities", uniqueConstraints = { @UniqueConstraint(columnNames = { "usuario_id", "authority" }) })
@@ -17,6 +18,7 @@ public class Role implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@NotEmpty
 	@Column(length = 30)
 	private String authority;
 

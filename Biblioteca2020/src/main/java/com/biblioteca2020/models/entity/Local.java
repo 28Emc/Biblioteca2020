@@ -14,6 +14,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import com.biblioteca2020.models.entity.Empresa;
 
@@ -25,19 +27,22 @@ public class Local implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotNull
 	@ManyToMany
 	@JoinTable(name = "locales_libros", joinColumns = @JoinColumn(name = "local_id"), inverseJoinColumns = @JoinColumn(name = "libro_id"))
 	private Set<Libro> libros;
-
+	
+	@NotNull
 	@JoinColumn(name = "empresa_id")
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Empresa empresa;
 
+	@NotEmpty
 	@Column(length = 100)
 	@Size(min = 10, max = 100)
 	private String direccion;
 
-	@Column(length = 100, nullable = true)
+	@Column(length = 255, nullable = true)
 	@Size(min = 1, max = 255)
 	private String observaciones;
 

@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 @Entity
@@ -18,13 +19,15 @@ public class Empresa implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(length = 100)
+	@NotEmpty
+	@Column(length = 100, unique = true)
 	@Size(min = 1, max = 100)
 	private String razon_social;
 
-	@Column(length = 11)
+	@NotEmpty
+	@Column(length = 11, unique = true)
 	@Size(min = 1, max = 11)
-	private Integer ruc;
+	private String ruc;
 
 	@Column(length = 100, nullable = true)
 	@Size(min = 1, max = 100)
@@ -53,11 +56,11 @@ public class Empresa implements Serializable {
 		this.razon_social = razon_social;
 	}
 
-	public Integer getRuc() {
+	public String getRuc() {
 		return ruc;
 	}
 
-	public void setRuc(Integer ruc) {
+	public void setRuc(String ruc) {
 		this.ruc = ruc;
 	}
 
@@ -77,7 +80,7 @@ public class Empresa implements Serializable {
 		this.estado = estado;
 	}
 
-	public Empresa(@Size(min = 1, max = 100) String razon_social, @Size(min = 1, max = 11) Integer ruc,
+	public Empresa(@Size(min = 1, max = 100) String razon_social, @Size(min = 1, max = 11) String ruc,
 			@Size(min = 1, max = 100) String direccion, Boolean estado) {
 		super();
 		this.razon_social = razon_social;

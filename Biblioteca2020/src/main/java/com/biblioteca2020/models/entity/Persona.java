@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -24,7 +25,8 @@ public class Persona implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
+	
+	@NotNull
 	@OneToOne
 	@JoinColumn(name = "usuario_id")
 	private Usuario usuario;

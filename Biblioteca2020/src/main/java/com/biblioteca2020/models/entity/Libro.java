@@ -11,6 +11,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -22,10 +23,12 @@ public class Libro implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotEmpty
 	@Column(length = 100)
 	@Size(min = 1, max = 100)
 	private String titulo;
-
+	
+	@NotEmpty
 	@Column(length = 100)
 	@Size(min = 1, max = 100)
 	private String autor;
@@ -34,10 +37,12 @@ public class Libro implements Serializable {
 	@Size(min = 1, max = 255)
 	private String descripcion;
 
+	@NotEmpty
 	@Column(length = 50)
 	@Size(min = 1, max = 50)
 	private String categoria;
 
+	@NotEmpty
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-mm-dd")
 	private Date fecha_publicacion;

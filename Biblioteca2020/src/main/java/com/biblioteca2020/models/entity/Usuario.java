@@ -14,6 +14,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import com.biblioteca2020.models.entity.Role;
 
 @Entity
@@ -23,17 +26,20 @@ public class Usuario implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
+	
+	@NotNull
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "usuario_id")
 	private List<Role> roles;
 
 	@OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
 	private Persona persona;
-
+	
+	@NotEmpty
 	@Column(unique = true, length = 30)
 	private String username;
 
+	@NotEmpty
 	@Column(length = 60)
 	private String password;
 
