@@ -27,10 +27,10 @@ INSERT INTO libros (autor, categoria, descripcion, estado, fecha_registro, fecha
 INSERT INTO locales (direccion, estado, observaciones, empresa_id) VALUES ('Direccion Local 1', 1, 'Observaciones Local 1', 1);
 INSERT INTO locales (direccion, estado, observaciones, empresa_id) VALUES ('Direccion Local 2', 1, 'Observaciones Local 2', 2);
 /* LOCALES-LIBROS */
-INSERT INTO locales_libros (local_id, libro_id) VALUES (1, 1);
-INSERT INTO locales_libros (local_id, libro_id) VALUES (1, 2);
-INSERT INTO locales_libros (local_id, libro_id) VALUES (2, 1);
-INSERT INTO locales_libros (local_id, libro_id) VALUES (2, 2);
+INSERT INTO locales_libros (locales_id, libros_id) VALUES (1, 1);
+INSERT INTO locales_libros (locales_id, libros_id) VALUES (1, 2);
+INSERT INTO locales_libros (locales_id, libros_id) VALUES (2, 1);
+INSERT INTO locales_libros (locales_id, libros_id) VALUES (2, 2);
 /* PRESTAMOS */
 INSERT INTO prestamos (devolucion, fecha_despacho, libro_id, observaciones, usuario_id) VALUES (0, '2019-08-19', 1, 'Observaciones prèstamo 1', 4);
 INSERT INTO prestamos (devolucion, fecha_despacho, libro_id, observaciones, usuario_id) VALUES (0, '2019-07-16', 2, 'Observaciones prèstamo 1', 5);

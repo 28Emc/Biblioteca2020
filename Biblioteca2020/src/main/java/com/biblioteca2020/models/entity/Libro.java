@@ -2,11 +2,18 @@ package com.biblioteca2020.models.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -23,11 +30,14 @@ public class Libro implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@ManyToMany(mappedBy = "libros")
+	private Set<Local> locales;
+
 	@NotEmpty
 	@Column(length = 100)
 	@Size(min = 1, max = 100)
 	private String titulo;
-	
+
 	@NotEmpty
 	@Column(length = 100)
 	@Size(min = 1, max = 100)
@@ -53,6 +63,9 @@ public class Libro implements Serializable {
 	private Date fechaRegistro;
 
 	private Boolean estado;
+
+	@OneToMany(mappedBy = "libro", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Prestamo> prestamos;
 
 	@PrePersist
 	public void prePersist() {
@@ -124,9 +137,9 @@ public class Libro implements Serializable {
 		this.estado = estado;
 	}
 
-	public Libro(@Size(min = 1, max = 100) String titulo, @Size(min = 1, max = 100) String autor,
-			@Size(min = 1, max = 255) String descripcion, @Size(min = 1, max = 50) String categoria,
-			Date fecha_publicacion, Date fechaRegistro, Boolean estado) {
+	public Libro(@NotEmpty @Size(min = 1, max = 100) String titulo, @NotEmpty @Size(min = 1, max = 100) String autor,
+			@Size(min = 1, max = 255) String descripcion, @NotEmpty @Size(min = 1, max = 50) String categoria,
+			@NotEmpty Date fecha_publicacion, Date fechaRegistro, Boolean estado) {
 		super();
 		this.titulo = titulo;
 		this.autor = autor;
@@ -135,13 +148,6 @@ public class Libro implements Serializable {
 		this.fecha_publicacion = fecha_publicacion;
 		this.fechaRegistro = fechaRegistro;
 		this.estado = estado;
-	}
-
-	@Override
-	public String toString() {
-		return "Libro [id=" + id + ", titulo=" + titulo + ", autor=" + autor + ", descripcion=" + descripcion
-				+ ", categoria=" + categoria + ", fecha_publicacion=" + fecha_publicacion + ", fechaRegistro="
-				+ fechaRegistro + ", estado=" + estado + "]";
 	}
 
 	/**

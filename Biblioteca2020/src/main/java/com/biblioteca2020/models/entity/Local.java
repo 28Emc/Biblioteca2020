@@ -9,7 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
@@ -27,11 +26,15 @@ public class Local implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull
+	// LOGICA DE DETALLE-LOCAL (DESPUES DE VER-LOCALES)
+	// -EN EL FORM SELECCIONO EL NOMBRE DEL LIBRO (CAPTURO ID),
+	// EN EL CONTROLLER BUSCO EL LIBRO POR ESE ID,
+	// BUSCO EL LOCAL SEGUN EL ID DE ESE MISMO LOCAL,
+	// LOCAL.ADDLIBROS(['AQUI VA EL LIBRO ENCONTRADO AL INICIO'])
+	// GUARDO CON SAVE() EL LOCAL
 	@ManyToMany
-	@JoinTable(name = "locales_libros", joinColumns = @JoinColumn(name = "local_id"), inverseJoinColumns = @JoinColumn(name = "libro_id"))
 	private Set<Libro> libros;
-	
+
 	@NotNull
 	@JoinColumn(name = "empresa_id")
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -101,6 +104,11 @@ public class Local implements Serializable {
 		this.libros = libros;
 	}
 
+	// METODO MANY TO MANY
+	public void addLibros(Libro libro) {
+		libros.add(libro);
+	}
+
 	public Local(Set<Libro> libros, Empresa empresa, @Size(min = 10, max = 100) String direccion,
 			@Size(min = 1, max = 255) String observaciones, Boolean estado) {
 		super();
@@ -113,7 +121,7 @@ public class Local implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Local [id=" + id + ", libros=" + libros + ", empresa=" + empresa + ", direccion=" + direccion
+		return "Local [id=" + id + ", libros=" + libros + ", empresa=" + empresa.getId() + ", direccion=" + direccion
 				+ ", observaciones=" + observaciones + ", estado=" + estado + "]";
 	}
 

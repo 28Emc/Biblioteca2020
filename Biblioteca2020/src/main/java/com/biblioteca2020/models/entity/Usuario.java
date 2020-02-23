@@ -35,6 +35,9 @@ public class Usuario implements Serializable {
 	@OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
 	private Persona persona;
 	
+	@OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Prestamo> prestamos;
+	
 	@NotEmpty
 	@Column(unique = true, length = 30)
 	private String username;
