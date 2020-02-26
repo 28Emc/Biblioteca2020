@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+		$(document).ready(function() {
+
+			$("#buscar_libro").autocomplete({
+
+				source : function(request, response) {
+					$.ajax({
+						url : "/tickets/cargarLibros/" + request.term,
+						minLength : 2,
+						dataType : "json",
+						data : {
+							term : request.term
+						},
+						success : function(data) {
+							response($.map(data, function(item) {
+								return {
+									value : item.id,
+									label : item.nombre,
+									autor : item.autor
+								};
+							}));
+						}
+					});
+				},
+				focus : function(event, ui) {
+					event.preventDefault();
+				},
+				select : function(event, ui) {
+					$("#buscar_libro").val(ui.item.label);
+					$("#id_libro").val(ui.item.value);
+					$("#autor_libro").val(ui.item.autor);
+					return false;
+				}
+			});
+		});
+	</script>
+</body>
+
+</html>

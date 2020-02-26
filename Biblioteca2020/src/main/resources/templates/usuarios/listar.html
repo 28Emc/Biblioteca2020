@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container-fluid my-5">
+		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<p>
+			<a class="btn btn-primary btn-xs" th:href="@{/usuarios/crear}">Crear
+				Usuario</a>
+		</p>
+		<table class="table table-responsive">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Nombres</th>
+					<th>Apellidos</th>
+					<th>Nro Documento</th>
+					<th>Dirección</th>
+					<th>Email</th>
+					<th>Celular</th>
+					<th>Fecha Registro</th>
+					<th>Username</th>
+					<th>Estado</th>
+					<th colspan="2">Opciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="usuario: ${usuarios}">
+					<td th:text="${usuario.id}"></td>
+					<td th:text="${usuario.nombres}"></td>
+					<td th:text="${usuario.apellidos}"></td>
+					<td th:text="${usuario.nroDocumento}"></td>
+					<td th:text="${usuario.direccion}"></td>
+					<td th:text="${usuario.email}"></td>
+					<td th:text="${usuario.celular}"></td>
+					<td th:text="${usuario.fecha_registro}"></td>
+					<td th:text="${usuario.username}"></td>
+					<td th:text="${usuario.estado}"></td>
+					<td><a class="btn btn-success btn-xs"
+						th:href="@{/usuarios/editar/}+${usuario.id}" th:text="'Editar'"></a></td>
+					<td><a class="btn btn-warning btn-xs"
+						th:href="@{/usuarios/deshabilitar/}+${usuario.id}"
+						th:text="'Deshabilitar'"
+						onclick="return confirm('Seguro de querer deshabilitar el usuario?');"></a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+
+</body>
+</html>

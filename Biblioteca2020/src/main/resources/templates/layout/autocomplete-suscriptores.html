@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+		$(document).ready(function() {
+			$("#buscar_suscriptor").autocomplete({
+				source : function(request, response) {
+					$.ajax({
+						url : "/tickets/cargarSuscriptores/" + request.term,
+						minLength : 2,
+						dataType : "json",
+						data : {
+							term : request.term
+						},
+						success : function(data) {
+							response($.map(data, function(item) {
+								return {
+									value : item.id,
+									label : item.nombre,
+									documento : item.nro_documento,
+									full : item.nombre + ", " + item.apellidos,
+									error : item.error
+								};
+							}));
+						}
+					});
+				},
+				focus : function(event, ui) {
+					event.preventDefault();
+				},
+				select : function(event, ui) {
+					$("#buscar_suscriptor").val(ui.item.documento);
+					$("#id_suscriptor").val(ui.item.value);
+					$("#nombre_suscriptor").val(ui.item.full);
+					return false;
+				}
+			});
+		});
+	</script>
+</body>
+
+</html>

@@ -1,22 +1,20 @@
 /* EL ORDEN DE LAS TABLAS ES IMPORTANTE */
 /* USUARIOS */
-INSERT INTO usuarios (estado, password, username) VALUES (1,'$2a$10$DCDKy8zxMgnhv7BoTopltOq2qlT1icvmk/JMzT51BWmdWcKGOFFjS', 'admin');
-INSERT INTO usuarios (estado, password, username) VALUES (1, '$2a$10$QWZkTkJyiKy55FcJwk1yAeUDTdAx7U4wifIaZT9kbicQmhbGvyhpa', 'empleado');
-INSERT INTO usuarios (estado, password, username) VALUES (1, '$2a$10$rE9nFn/v1kcabjkQW/QABeuKGHirYoLWjcG.WHDVSfth7bhZM7JWi', 'empleada');
-INSERT INTO usuarios (estado, password, username) VALUES (1, '$2a$10$VKuMvd4UAx7ZJbsZLOQ8/u1z44jmL/MxZzhtMKL8xubi4iqKpIRyO', 'usuario');
-INSERT INTO usuarios (estado, password, username) VALUES (1, '$2a$10$RgVfaCIlKua4ogo4rsBfJeE5hqGT5aoEjZMyOPop4u61/KVSZeFWK', 'usuaria');
+INSERT INTO usuarios (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username) VALUES ('apellidoAdmin', 98989898, 'No disponible', 'admin@gmail.com', 1, '2019-08-19', 'nombreAdmin', 11111111, '$2a$10$DCDKy8zxMgnhv7BoTopltOq2qlT1icvmk/JMzT51BWmdWcKGOFFjS', 'admin');
+INSERT INTO usuarios (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username) VALUES ('apellidoEmpleado', 87878787, 'Av. Lima 123', 'empleado@gmail.com', 1, '2019-08-19', 'nombreEmpleado', 22222222, '$2a$10$QWZkTkJyiKy55FcJwk1yAeUDTdAx7U4wifIaZT9kbicQmhbGvyhpa', 'empleado');
+INSERT INTO usuarios (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username) VALUES ('apellidoEmpleada', 76767676, 'Av. Lima 456', 'empleada@gmail.com', 1, '2019-08-19', 'nombreEmpleada', 33333333, '$2a$10$rE9nFn/v1kcabjkQW/QABeuKGHirYoLWjcG.WHDVSfth7bhZM7JWi', 'empleada');
+INSERT INTO usuarios (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username) VALUES ('apellidoUsuario', 65656565, 'Av. Lima 789', 'usuario@gmail.com', 1, '2019-08-19', 'nombreUsuario', 44444444, '$2a$10$VKuMvd4UAx7ZJbsZLOQ8/u1z44jmL/MxZzhtMKL8xubi4iqKpIRyO', 'usuario');
+INSERT INTO usuarios (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username) VALUES ('apellidoUsuaria', 54545454, 'Av. Lima 101', 'usuaria@gmail.com', 1, '2019-08-19', 'nombreUsuaria', 55555555, '$2a$10$RgVfaCIlKua4ogo4rsBfJeE5hqGT5aoEjZMyOPop4u61/KVSZeFWK', 'usuaria');
 /* ROLES/AUTHORITIES */
-INSERT INTO authorities (authority, usuario_id) VALUES ('ROLE_ADMIN', 1);
-INSERT INTO authorities (authority, usuario_id) VALUES ('ROLE_EMPLEADO', 2);
-INSERT INTO authorities (authority, usuario_id) VALUES ('ROLE_EMPLEADO', 3);
-INSERT INTO authorities (authority, usuario_id) VALUES ('ROLE_USER', 4);
-INSERT INTO authorities (authority, usuario_id) VALUES ('ROLE_USER', 5);
-/* PERSONAS */
-INSERT INTO personas (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, usuario_id) VALUES ('Admin Ape.', 999999999, 'No disponible', 'admin@gmail.com', true, '2012-04-11', 'Admin', 99999999, 1);
-INSERT INTO personas (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, usuario_id) VALUES ('Hombre', 888888888, 'Av. Lima 123', 'empleado1@gmail.com', true, '2012-07-20','Empleado', 66666666, 2);
-INSERT INTO personas (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, usuario_id) VALUES ('Mujer', 777777777, 'Av. Arequipa 456', 'empleada2@gmail.com', true, '2012-01-10', 'Empleada', 55555555, 3);
-INSERT INTO personas (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, usuario_id) VALUES ('De La Torre Ugarte', 123456789, 'Direccion Suscriptor 1', 'suscriptor1@gmail.com', 1, '2012-09-10', 'Alfredo', 87654321, 4);
-INSERT INTO personas (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, usuario_id) VALUES ('Mercedes Rojas', 987654321, 'Direccion Suscriptor 2', 'suscriptor2@gmail.com', 1, '2018-08-18', 'Rosa', 24682468, 5);
+INSERT INTO authorities (authority) VALUES ('ROLE_ADMIN');
+INSERT INTO authorities (authority) VALUES ('ROLE_EMPLEADO');
+INSERT INTO authorities (authority) VALUES ('ROLE_USER');
+/* USUARIOS-ROLES */
+INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (1,1);
+INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (2,2);
+INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (3,2);
+INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (4,3);
+INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (5,3);
 /* EMPRESAS */
 INSERT INTO empresas (direccion, estado, razon_social, ruc) VALUES ('Av. Lima 456', 1, 'Empresa Ejemplo 1', 11111111111);
 INSERT INTO empresas (direccion, estado, razon_social, ruc) VALUES ('Av. Arequipa 789', 1, 'Empresa Ejemplo 2', 22222222222);

@@ -2,6 +2,8 @@ package com.biblioteca2020.models.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ public class JpaUserDetailsService implements UserDetailsService {
 	@Override
 	@Transactional(readOnly = true)
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Usuario usuario = usuarioDao.findByUsername(username);
+		Optional<Usuario> usuario = usuarioDao.findByUsername(username);
 
 		if (usuario == null) {
 			logger.error("No existe el usuario '" + username + "'");
@@ -37,7 +39,7 @@ public class JpaUserDetailsService implements UserDetailsService {
 
 		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 
-		for (Role role : usuario.getRoles()) {
+		for (Role role : usuario.get().getRoles()) {
 			logger.info("Rol: '".concat(role.getAuthority()));
 			authorities.add(new SimpleGrantedAuthority(role.getAuthority()));
 		}
@@ -47,7 +49,7 @@ public class JpaUserDetailsService implements UserDetailsService {
 			throw new UsernameNotFoundException("Username " + username + " no tiene roles asignados.");
 		}
 
-		return new User(usuario.getUsername(), usuario.getPassword(), usuario.getEstado(), true, true, true,
+		return new User(usuario.get().getUsername(), usuario.get().getPassword(), usuario.get().getEstado(), true, true, true,
 				authorities);
 	}
 	
