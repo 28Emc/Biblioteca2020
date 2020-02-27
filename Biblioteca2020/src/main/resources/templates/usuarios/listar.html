@@ -9,6 +9,7 @@
 	<header th:replace="layout/layout :: header"></header>
 
 	<div class="container-fluid my-5">
+
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<p>
 			<a class="btn btn-primary btn-xs" th:href="@{/usuarios/crear}">Crear
@@ -27,7 +28,7 @@
 					<th>Fecha Registro</th>
 					<th>Username</th>
 					<th>Estado</th>
-					<th colspan="2">Opciones</th>
+					<th colspan="3">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -45,15 +46,43 @@
 					<td><a class="btn btn-success btn-xs"
 						th:href="@{/usuarios/editar/}+${usuario.id}" th:text="'Editar'"></a></td>
 					<td><a class="btn btn-warning btn-xs"
-						th:href="@{/usuarios/deshabilitar/}+${usuario.id}"
-						th:text="'Deshabilitar'"
-						onclick="return confirm('Seguro de querer deshabilitar el usuario?');"></a></td>
+						th:onclick="'javascript:confirmDeshabilitar(\''+ ${usuario.id} +'\');'"
+						th:text="'Deshabilitar'"></a></td>
+					<td><a sec:authorize="hasRole('ROLE_ADMIN')"
+						class="btn btn-danger btn-xs text-white"
+						th:onclick="'javascript:confirmDelete(\''+ ${usuario.id} +'\');'"
+						th:text="'Eliminar'"></a></td>
 				</tr>
 			</tbody>
 		</table>
+
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>
+	<div th:include="usuarios/confirm-delete-modal.html" th:remove="tag"></div>
+	<div th:include="usuarios/confirm-deshabilitar-modal.html" th:remove="tag"></div>
+
+	<script type="text/javascript">
+		function confirmDeshabilitar(id) {
+			$('#deshabilitarModal').modal('show');
+			$("#userIdHiddenInput").val(id);
+		}
+
+		function deshabilitar() {
+			var id = $("#userIdHiddenInput").val();
+			window.location = "deshabilitar/" + id;
+		}
+		
+		function confirmDelete(id) {
+			$('#deleteModal').modal('show');
+			$("#userIdHiddenInput").val(id);
+		}
+
+		function eliminar() {
+			var id = $("#userIdHiddenInput").val();
+			window.location = "eliminar/" + id;
+		}
+	</script>
 
 </body>
 </html>

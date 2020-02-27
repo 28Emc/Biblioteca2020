@@ -28,12 +28,11 @@ public class Prestamo implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull
+/*
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "usuario_id", nullable = false)
 	private Usuario usuario;
-
-	@NotNull
+*/
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "libro_id", nullable = false)
 	private Libro libro;
@@ -62,7 +61,7 @@ public class Prestamo implements Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
+/*
 	public Usuario getUsuario() {
 		return usuario;
 	}
@@ -70,7 +69,7 @@ public class Prestamo implements Serializable {
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
 	}
-
+*/
 	public Libro getLibro() {
 		return libro;
 	}
@@ -103,10 +102,14 @@ public class Prestamo implements Serializable {
 		this.observaciones = observaciones;
 	}
 
-	public Prestamo(@NotNull Usuario usuario, @NotNull Libro libro, @NotNull Date fecha_despacho, Boolean devolucion,
+	public Prestamo() {
+	}
+
+	public Prestamo(
+			//@NotNull Usuario usuario, 
+			@NotNull Libro libro, @NotNull Date fecha_despacho, Boolean devolucion,
 			@Size(min = 1, max = 255) String observaciones) {
-		super();
-		this.usuario = usuario;
+		//this.usuario = usuario;
 		this.libro = libro;
 		this.fecha_despacho = fecha_despacho;
 		this.devolucion = devolucion;
@@ -115,7 +118,9 @@ public class Prestamo implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Prestamo [id=" + id + ", usuario=" + usuario.getId() + ", libro=" + libro.getId() + ", fecha_despacho="
+		return "Prestamo [id=" + id + ""
+				//+ ", usuario=" + usuario.getId() + 
+				+ ", libro=" + libro.getId() + ", fecha_despacho="
 				+ fecha_despacho + ", devolucion=" + devolucion + ", observaciones=" + observaciones + "]";
 	}
 

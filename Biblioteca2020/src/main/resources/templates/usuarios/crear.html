@@ -5,11 +5,12 @@
 <head th:replace="layout/layout :: head"></head>
 <body>
 	<header th:replace="layout/layout :: header"></header>
-
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<form class="form" role="form" th:action="${editable}?@{/usuarios/editar}:@{/usuarios/crear}"
+		<form class="form" role="form"
+			th:action="${editable} ?@{/usuarios/editar} :@{/usuarios/crear}"
 			th:object="${usuario}" method="post">
+			<h3 th:text="'Datos personales'"></h3>
 			<div class="form-group">
 				<label class="col-sm-2 col-form-label">Nombre(s)</label>
 				<div class="col-sm-6">
@@ -28,7 +29,8 @@
 						th:field="${usuario.apellidos}"
 						th:errorclass="'form-control alert-danger'" /> <small
 						class="form-text text-danger"
-						th:if="${#fields.hasErrors('apellidos')}" th:errors="${usuario.apellidos}"></small>
+						th:if="${#fields.hasErrors('apellidos')}"
+						th:errors="${usuario.apellidos}"></small>
 				</div>
 			</div>
 			<div class="form-group">
@@ -42,36 +44,7 @@
 						th:errors="${usuario.nroDocumento}"></small>
 				</div>
 			</div>
-			<div class="form-group">
-				<label class="col-sm-2 col-form-label">Dirección</label>
-				<div class="col-sm-6">
-					<input class="form-control" type="text"
-						th:field="${usuario.direccion}"
-						th:errorclass="'form-control alert-danger'" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('direccion')}" th:errors="${usuario.direccion}"></small>
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-sm-2 col-form-label">Email</label>
-				<div class="col-sm-6">
-					<input class="form-control" type="email"
-						th:field="${usuario.email}"
-						th:errorclass="'form-control alert-danger'" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('email')}" th:errors="${usuario.email}"></small>
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-sm-2 col-form-label">Celular</label>
-				<div class="col-sm-6">
-					<input class="form-control" type="number"
-						th:field="${usuario.celular}"
-						th:errorclass="'form-control alert-danger'" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('celular')}" th:errors="${usuario.celular}"></small>
-				</div>
-			</div>
+			<h3 th:text="'Datos de usuario'"></h3>
 			<div class="form-group">
 				<label class="col-sm-2 col-form-label">Usuario</label>
 				<div class="col-sm-6">
@@ -79,7 +52,8 @@
 						th:field="${usuario.username}"
 						th:errorclass="'form-control alert-danger'" /> <small
 						class="form-text text-danger"
-						th:if="${#fields.hasErrors('username')}" th:errors="${usuario.username}"></small>
+						th:if="${#fields.hasErrors('username')}"
+						th:errors="${usuario.username}"></small>
 				</div>
 			</div>
 			<div class="form-group" th:if="${editable==null or editable==false}">
@@ -89,7 +63,8 @@
 						th:field="${usuario.password}"
 						th:errorclass="'form-control alert-danger'" /> <small
 						class="form-text text-danger"
-						th:if="${#fields.hasErrors('password')}" th:errors="${usuario.password}"></small>
+						th:if="${#fields.hasErrors('password')}"
+						th:errors="${usuario.password}"></small>
 				</div>
 			</div>
 			<div class="form-group" th:if="${editable==null or editable==false}">
@@ -114,6 +89,40 @@
 						th:if="${#fields.hasErrors('roles')}" th:errors="${usuario.roles}"></small>
 				</div>
 			</div>
+			<h3 th:text="'Otros'"></h3>
+			<div class="form-group">
+				<label class="col-sm-2 col-form-label">Dirección</label>
+				<div class="col-sm-6">
+					<input class="form-control" type="text"
+						th:field="${usuario.direccion}"
+						th:errorclass="'form-control alert-danger'" /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('direccion')}"
+						th:errors="${usuario.direccion}"></small>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 col-form-label">Email</label>
+				<div class="col-sm-6">
+					<input class="form-control" type="email"
+						th:field="${usuario.email}"
+						th:errorclass="'form-control alert-danger'" /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('email')}" th:errors="${usuario.email}"></small>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 col-form-label">Celular</label>
+				<div class="col-sm-6">
+					<input class="form-control" type="number"
+						th:field="${usuario.celular}"
+						th:errorclass="'form-control alert-danger'" /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('celular')}"
+						th:errors="${usuario.celular}"></small>
+				</div>
+			</div>
+
 			<div class="form-group row">
 				<div class="col-sm-6">
 					<a class="btn btn-light btn-block"
@@ -124,13 +133,13 @@
 						th:value="${editable}?'Guardar Usuario':'Crear Usuario'" />
 				</div>
 			</div>
-			
-			<input class="form-control" type="hidden" th:field="${usuario.id}"
-				th:if="${editable}" /> 
-			<input class="form-control" type="hidden" name="password" 
-				value="xxxx" th:if="${editable}" /> 
-			<input class="form-control" type="hidden" name="passwordConfirmacion"
-				value="xxxx" th:if="${editable}" />			
+
+			<!-- <input class="form-control" th:field="${usuario.id}"
+				th:if="${editable}" sec:authorize="hasRole('ROLE_ADMIN')" hidden/> 
+			<input class="form-control" th:field="${usuario.password}" 
+				 th:if="${editable}" sec:authorize="hasRole('ROLE_ADMIN')" hidden />
+			<input class="form-control" name="passwordConfirmacion"
+				 th:if="${editable}" sec:authorize="hasRole('ROLE_ADMIN')" hidden /> -->
 		</form>
 	</div>
 

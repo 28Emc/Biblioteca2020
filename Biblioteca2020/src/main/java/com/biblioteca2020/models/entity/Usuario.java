@@ -34,11 +34,9 @@ public class Usuario implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Size(min=1)
+	@Size(min = 1)
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "usuarios_roles",
-		joinColumns=@JoinColumn(name="usuario_id"),
-		inverseJoinColumns=@JoinColumn(name="rol_id"))
+	@JoinTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
 	private Set<Role> roles;
 
 	@Column(length = 30)
@@ -53,7 +51,7 @@ public class Usuario implements Serializable {
 
 	@Column(length = 8, name = "nro_documento")
 	@NotBlank
-	@Size(max = 8)
+	@Size(min = 8, max = 8)
 	private String nroDocumento;
 
 	@Column(length = 200, nullable = true)
@@ -77,20 +75,20 @@ public class Usuario implements Serializable {
 	@NotBlank
 	@Column(length = 30)
 	private String username;
-	
+
 	@NotBlank
 	@Column(length = 60)
 	private String password;
-	
-	@NotBlank
+
 	@Transient
 	private String passwordConfirmacion;
 
 	private Boolean estado;
 
 	// USER(1):PRESTAMOS(*)
-	@OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<Prestamo> prestamos;
+	// @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade =
+	// CascadeType.ALL)
+	// private List<Prestamo> prestamos;
 
 	@PrePersist
 	public void prePersist() {
@@ -140,9 +138,6 @@ public class Usuario implements Serializable {
 
 	public void roleSize() {
 		roles.size();
-	}
-
-	public Usuario() {
 	}
 
 	public String getNombres() {
@@ -209,18 +204,25 @@ public class Usuario implements Serializable {
 		this.passwordConfirmacion = passwordConfirmacion;
 	}
 
-	public List<Prestamo> getPrestamos() {
-		return prestamos;
+	/*
+	 * public List<Prestamo> getPrestamos() { return prestamos; }
+	 * 
+	 * public void setPrestamos(List<Prestamo> prestamos) { this.prestamos =
+	 * prestamos; }
+	 */
+
+	public Usuario(
+	// prestamos = new Prestamos();
+	) {
 	}
 
-	public void setPrestamos(List<Prestamo> prestamos) {
-		this.prestamos = prestamos;
-	}
-
-	public Usuario(Set<Role> roles, @NotBlank @Size(min = 3, max = 30) String nombres,
-			@NotBlank @Size(min = 4, max = 60) String apellidos, @NotBlank @Size(max = 8) String nroDocumento,
+	public Usuario(@Size(min = 1) Set<Role> roles, @NotBlank @Size(min = 3, max = 30) String nombres,
+			@NotBlank @Size(min = 4, max = 60) String apellidos, @NotBlank @Size(min = 8, max = 8) String nroDocumento,
 			@Size(max = 200) String direccion, @Size(max = 30) @Email String email, @Size(max = 9) String celular,
-			@NotBlank String username) {
+			@NotBlank String username, @NotBlank String password
+	// , List<Prestamo> prestamos
+	) {
+		super();
 		this.roles = roles;
 		this.nombres = nombres;
 		this.apellidos = apellidos;
@@ -229,6 +231,115 @@ public class Usuario implements Serializable {
 		this.email = email;
 		this.celular = celular;
 		this.username = username;
+		this.password = password;
+		// this.prestamos = prestamos;
+	}
+
+	@Override
+	public String toString() {
+		return "Usuario [id=" + id + ", roles=" + roles + ", nombres=" + nombres + ", apellidos=" + apellidos
+				+ ", nroDocumento=" + nroDocumento + ", direccion=" + direccion + ", email=" + email + ", celular="
+				+ celular + ", fecha_registro=" + fecha_registro + ", username=" + username + ", password=" + password
+				+ ", passwordConfirmacion=" + passwordConfirmacion + ", estado=" + estado + ""
+				// + ", prestamos=" + prestamos
+				+ "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((apellidos == null) ? 0 : apellidos.hashCode());
+		result = prime * result + ((celular == null) ? 0 : celular.hashCode());
+		result = prime * result + ((direccion == null) ? 0 : direccion.hashCode());
+		result = prime * result + ((email == null) ? 0 : email.hashCode());
+		result = prime * result + ((estado == null) ? 0 : estado.hashCode());
+		result = prime * result + ((fecha_registro == null) ? 0 : fecha_registro.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((nombres == null) ? 0 : nombres.hashCode());
+		result = prime * result + ((nroDocumento == null) ? 0 : nroDocumento.hashCode());
+		result = prime * result + ((password == null) ? 0 : password.hashCode());
+		result = prime * result + ((passwordConfirmacion == null) ? 0 : passwordConfirmacion.hashCode());
+		result = prime * result + ((roles == null) ? 0 : roles.hashCode());
+		result = prime * result + ((username == null) ? 0 : username.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Usuario other = (Usuario) obj;
+		if (apellidos == null) {
+			if (other.apellidos != null)
+				return false;
+		} else if (!apellidos.equals(other.apellidos))
+			return false;
+		if (celular == null) {
+			if (other.celular != null)
+				return false;
+		} else if (!celular.equals(other.celular))
+			return false;
+		if (direccion == null) {
+			if (other.direccion != null)
+				return false;
+		} else if (!direccion.equals(other.direccion))
+			return false;
+		if (email == null) {
+			if (other.email != null)
+				return false;
+		} else if (!email.equals(other.email))
+			return false;
+		if (estado == null) {
+			if (other.estado != null)
+				return false;
+		} else if (!estado.equals(other.estado))
+			return false;
+		if (fecha_registro == null) {
+			if (other.fecha_registro != null)
+				return false;
+		} else if (!fecha_registro.equals(other.fecha_registro))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (nombres == null) {
+			if (other.nombres != null)
+				return false;
+		} else if (!nombres.equals(other.nombres))
+			return false;
+		if (nroDocumento == null) {
+			if (other.nroDocumento != null)
+				return false;
+		} else if (!nroDocumento.equals(other.nroDocumento))
+			return false;
+		if (password == null) {
+			if (other.password != null)
+				return false;
+		} else if (!password.equals(other.password))
+			return false;
+		if (passwordConfirmacion == null) {
+			if (other.passwordConfirmacion != null)
+				return false;
+		} else if (!passwordConfirmacion.equals(other.passwordConfirmacion))
+			return false;
+		if (roles == null) {
+			if (other.roles != null)
+				return false;
+		} else if (!roles.equals(other.roles))
+			return false;
+		if (username == null) {
+			if (other.username != null)
+				return false;
+		} else if (!username.equals(other.username))
+			return false;
+		return true;
 	}
 
 	/**

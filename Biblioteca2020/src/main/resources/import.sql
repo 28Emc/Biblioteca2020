@@ -30,5 +30,5 @@ INSERT INTO locales_libros (locales_id, libros_id) VALUES (1, 2);
 INSERT INTO locales_libros (locales_id, libros_id) VALUES (2, 1);
 INSERT INTO locales_libros (locales_id, libros_id) VALUES (2, 2);
 /* PRESTAMOS */
-INSERT INTO prestamos (devolucion, fecha_despacho, libro_id, observaciones, usuario_id) VALUES (0, '2019-08-19', 1, 'Observaciones prèstamo 1', 4);
-INSERT INTO prestamos (devolucion, fecha_despacho, libro_id, observaciones, usuario_id) VALUES (0, '2019-07-16', 2, 'Observaciones prèstamo 1', 5);
+/*INSERT INTO prestamos (devolucion, fecha_despacho, libro_id, observaciones, usuario_id) VALUES (0, '2019-08-19', 1, 'Observaciones prèstamo 1', 4);*/
+/*INSERT INTO prestamos (devolucion, fecha_despacho, libro_id, observaciones, usuario_id) VALUES (0, '2019-07-16', 2, 'Observaciones prèstamo 1', 5);*/
