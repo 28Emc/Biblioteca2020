@@ -34,6 +34,7 @@ public class Usuario implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	// USER(*):ROLE(*)
 	@Size(min = 1)
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
@@ -49,7 +50,7 @@ public class Usuario implements Serializable {
 	@Size(min = 4, max = 60)
 	private String apellidos;
 
-	@Column(length = 8, name = "nro_documento")
+	@Column(length = 8, name = "nro_documento", unique = true)
 	@NotBlank
 	@Size(min = 8, max = 8)
 	private String nroDocumento;
@@ -58,12 +59,12 @@ public class Usuario implements Serializable {
 	@Size(max = 200)
 	private String direccion;
 
-	@Column(length = 30, nullable = true)
+	@Column(length = 30, nullable = true, unique = true)
 	@Size(max = 30)
 	@Email
 	private String email;
 
-	@Column(length = 9)
+	@Column(length = 9, nullable = true, unique = true)
 	@Size(max = 9)
 	private String celular;
 
@@ -73,7 +74,7 @@ public class Usuario implements Serializable {
 	private Date fecha_registro;
 
 	@NotBlank
-	@Column(length = 30)
+	@Column(length = 30, unique = true)
 	private String username;
 
 	@NotBlank
@@ -86,9 +87,8 @@ public class Usuario implements Serializable {
 	private Boolean estado;
 
 	// USER(1):PRESTAMOS(*)
-	// @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade =
-	// CascadeType.ALL)
-	// private List<Prestamo> prestamos;
+	@OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Prestamo> prestamos;
 
 	@PrePersist
 	public void prePersist() {
@@ -204,25 +204,22 @@ public class Usuario implements Serializable {
 		this.passwordConfirmacion = passwordConfirmacion;
 	}
 
-	/*
-	 * public List<Prestamo> getPrestamos() { return prestamos; }
-	 * 
-	 * public void setPrestamos(List<Prestamo> prestamos) { this.prestamos =
-	 * prestamos; }
-	 */
+	public List<Prestamo> getPrestamos() {
+		return prestamos;
+	}
 
-	public Usuario(
-	// prestamos = new Prestamos();
-	) {
+	public void setPrestamos(List<Prestamo> prestamos) {
+		this.prestamos = prestamos;
+	}
+
+	public Usuario() {
 	}
 
 	public Usuario(@Size(min = 1) Set<Role> roles, @NotBlank @Size(min = 3, max = 30) String nombres,
 			@NotBlank @Size(min = 4, max = 60) String apellidos, @NotBlank @Size(min = 8, max = 8) String nroDocumento,
 			@Size(max = 200) String direccion, @Size(max = 30) @Email String email, @Size(max = 9) String celular,
-			@NotBlank String username, @NotBlank String password
-	// , List<Prestamo> prestamos
-	) {
-		super();
+			Date fecha_registro, @NotBlank String username, @NotBlank String password, String passwordConfirmacion,
+			Boolean estado, List<Prestamo> prestamos) {
 		this.roles = roles;
 		this.nombres = nombres;
 		this.apellidos = apellidos;
@@ -230,19 +227,12 @@ public class Usuario implements Serializable {
 		this.direccion = direccion;
 		this.email = email;
 		this.celular = celular;
+		this.fecha_registro = fecha_registro;
 		this.username = username;
 		this.password = password;
-		// this.prestamos = prestamos;
-	}
-
-	@Override
-	public String toString() {
-		return "Usuario [id=" + id + ", roles=" + roles + ", nombres=" + nombres + ", apellidos=" + apellidos
-				+ ", nroDocumento=" + nroDocumento + ", direccion=" + direccion + ", email=" + email + ", celular="
-				+ celular + ", fecha_registro=" + fecha_registro + ", username=" + username + ", password=" + password
-				+ ", passwordConfirmacion=" + passwordConfirmacion + ", estado=" + estado + ""
-				// + ", prestamos=" + prestamos
-				+ "]";
+		this.passwordConfirmacion = passwordConfirmacion;
+		this.estado = estado;
+		this.prestamos = prestamos;
 	}
 
 	@Override
@@ -260,6 +250,7 @@ public class Usuario implements Serializable {
 		result = prime * result + ((nroDocumento == null) ? 0 : nroDocumento.hashCode());
 		result = prime * result + ((password == null) ? 0 : password.hashCode());
 		result = prime * result + ((passwordConfirmacion == null) ? 0 : passwordConfirmacion.hashCode());
+		result = prime * result + ((prestamos == null) ? 0 : prestamos.hashCode());
 		result = prime * result + ((roles == null) ? 0 : roles.hashCode());
 		result = prime * result + ((username == null) ? 0 : username.hashCode());
 		return result;
@@ -328,6 +319,11 @@ public class Usuario implements Serializable {
 			if (other.passwordConfirmacion != null)
 				return false;
 		} else if (!passwordConfirmacion.equals(other.passwordConfirmacion))
+			return false;
+		if (prestamos == null) {
+			if (other.prestamos != null)
+				return false;
+		} else if (!prestamos.equals(other.prestamos))
 			return false;
 		if (roles == null) {
 			if (other.roles != null)

@@ -19,6 +19,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private LoginSuccessHandler successHandler;
 
+	@Bean
+	public BCryptPasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
 	// INSTANCIA DE CODIFICADOR DE CONTRASEÑAS
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
@@ -28,24 +33,19 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private JpaUserDetailsService userDetailsService;
 
-	// ESTE MÉTODO SIRVE PARA ESTABLECER LOS ROLES...
+	// ESTE MÉTODO SIRVE PARA ESTABLECER LOS ROLES Y LA ENCRIPTACIÒN DE LA
+	// CONTRASEÑA
 	@Autowired
 	public void configurerGlobal(AuthenticationManagerBuilder builder) throws Exception {
 		builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
-	}
-
-	// ..Y LA ENCRIPTACIÒN DE LA CONTRASEÑA
-	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
 	}
 
 	// MÉTODO DE FILTRO DE PETICIONES HTTP MEDIANTE LOS ROLES ESTABLECIDOS
 	// ANTERIORMENTE
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests().antMatchers("/css/**", "/js/**", "/images/**").permitAll()
-				.anyRequest().authenticated().and().formLogin().successHandler(successHandler)
+		http.authorizeRequests().antMatchers("/css/**", "/js/**", "/images/**").permitAll().anyRequest().authenticated()
+				.and().formLogin().successHandler(successHandler)
 				// es AQUI que yo realmente gestiono mi LOGIN
 				.loginPage("/login").permitAll().and().logout().permitAll().and().exceptionHandling()
 				.accessDeniedPage("/error_403");

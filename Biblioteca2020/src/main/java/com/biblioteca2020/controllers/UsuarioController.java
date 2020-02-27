@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.entity.Usuario;
-import com.biblioteca2020.models.service.IRoleService;
 import com.biblioteca2020.models.service.IUsuarioService;
 
 @Controller
@@ -28,27 +27,12 @@ public class UsuarioController {
 	@Autowired
 	private IUsuarioService usuarioService;
 
-	@Autowired
-	private IRoleService roleService;
-
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/listar")
 	public String listarUsuarios(Model model, Principal principal) {
-		// AQUÍ BUSCO EL USUARIO LOGUEADO POR SU USERNAME
-		Usuario user = usuarioService.findByUsername(principal.getName());
-		// AQUÍ VERIFICO SI EL SET<ROLE> DE ESTE USUARIO (CONVERTIDO EN CADENA)
-		// CONTIENE LA PALABRA "ROLE_ADMIN"
-		Boolean isAdmin = user.getRoles().toString().contains("ROLE_ADMIN");
-		// System.out.println(isAdmin);
-		model.addAttribute("usuario", new Usuario());
-		// SI ES ADMIN, MUESTRO TODOS LOS USUARIOS ...
-		if (isAdmin) {
-			model.addAttribute("usuarios", usuarioService.findAll());
-		} else {
-			// ... SI NO LO ES, MUESTRO SOLO LOS EMPLEADOS (EL USUARIO COMÚN NO PUEDE ENTRAR
-			// A ESTE MÉTODO)
-			model.addAttribute("usuarios", usuarioService.fetchByIdWithRoles());
-		}
+		
+		usuarioService.isAdminListar(model, principal);
+		
 		model.addAttribute("titulo", "Listado de Usuarios");
 		return "usuarios/listar";
 	}
@@ -61,32 +45,39 @@ public class UsuarioController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/crear")
-	public String crearFormUsuario(Map<String, Object> model) {
-		model.put("usuario", new Usuario());
-		model.put("roles", roleService.findAll());
-		model.put("titulo", "Registro de Usuario");
+	public String crearFormUsuario(Map<String, Object> modelMap, Principal principal) {
+		usuarioService.isAdminEditar(modelMap, principal);
+		modelMap.put("usuario", new Usuario());
+		
+		usuarioService.isAdminEditar(modelMap, principal);
+		
+		modelMap.put("titulo", "Registro de Usuario");
 		return "usuarios/crear";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@PostMapping(value = "/crear")
-	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash) {
+	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap, SessionStatus status,
+			RedirectAttributes flash, Principal principal) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
-			model.addAttribute("roles", roleService.findAll());
+			
+			usuarioService.isAdminEditar(modelMap, principal);
+			
 			model.addAttribute("titulo", "Registro de Usuario");
 			return "/usuarios/crear";
 		}
 		try {
-			usuarioService.saveNew(usuario);
+			usuarioService.save(usuario);
 			flash.addFlashAttribute("success",
 					"El usuario ha sido registrado en la base de datos (Código " + usuario.getId() + ")");
 			status.setComplete();
 			return "redirect:/usuarios/listar";
 		} catch (Exception e) {
 			model.addAttribute("usuario", usuario);
-			model.addAttribute("roles", roleService.findAll());
+			
+			usuarioService.isAdminEditar(modelMap, principal);
+			
 			model.addAttribute("titulo", "Registro de Usuario");
 			model.addAttribute("error", e.getMessage());
 			return "/usuarios/crear";
@@ -95,15 +86,17 @@ public class UsuarioController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/editar/{id}")
-	public String editarFormUsuario(@PathVariable(value = "id") Long id, Map<String, Object> model,
-			RedirectAttributes flash) {
+	public String editarFormUsuario(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
+			Principal principal, RedirectAttributes flash) {
 		Usuario usuario = null;
-		model.put("editable", true);
-		model.put("roles", roleService.findAll());
-		model.put("titulo", "Modificar Usuario");
+		modelMap.put("editable", true);
+		
+		usuarioService.isAdminEditar(modelMap, principal);
+		
+		modelMap.put("titulo", "Modificar Usuario");
 		try {
 			usuario = usuarioService.findById(id);
-			model.put("usuario", usuario);
+			modelMap.put("usuario", usuario);
 			return "/usuarios/crear";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
@@ -114,16 +107,18 @@ public class UsuarioController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@PostMapping(value = "/editar")
 	public String guardarUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash) {
+			RedirectAttributes flash, Map<String, Object> modelMap, Principal principal) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
-			model.addAttribute("roles", roleService.findAll());
+			
+			usuarioService.isAdminEditar(modelMap, principal);
+			
 			model.addAttribute("titulo", "Modificar Usuario");
 			return "/usuarios/editar";
 		}
 		try {
-			usuarioService.save(usuario);
+			usuarioService.update(usuario);
 			flash.addFlashAttribute("success",
 					"El usuario con código " + usuario.getId() + " ha sido actualizado en la base de datos.");
 			status.setComplete();
@@ -131,7 +126,9 @@ public class UsuarioController {
 		} catch (Exception e) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
-			model.addAttribute("roles", roleService.findAll());
+			
+			usuarioService.isAdminEditar(modelMap, principal);
+			
 			model.addAttribute("titulo", "Modificar Usuario");
 			model.addAttribute("error", e.getMessage());
 			return "/usuarios/crear";
@@ -145,7 +142,7 @@ public class UsuarioController {
 		try {
 			usuario = usuarioService.findById(id);
 			usuario.setEstado(false);
-			usuarioService.save(usuario);
+			usuarioService.update(usuario);
 			flash.addFlashAttribute("warning", "El usuario con código " + usuario.getId() + " ha sido deshabilitado.");
 			return "redirect:/usuarios/listar";
 		} catch (Exception e) {

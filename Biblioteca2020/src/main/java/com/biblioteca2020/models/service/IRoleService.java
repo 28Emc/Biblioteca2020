@@ -7,4 +7,5 @@ public interface IRoleService {
 	
 	public List<Role> findAll();
 
+	public List<Role> findNotAdmins();
 }

@@ -19,4 +19,9 @@ public interface IUsuarioDao extends CrudRepository<Usuario, Long> {
 	@Query("select u from Usuario u join fetch u.roles r where r.authority='ROLE_EMPLEADO'")
 	public List<Usuario> fetchByIdWithRoles();
 
+	@Query("select u from Usuario u where u.username not in ?1")
+	public List<Usuario> findByAnotherUsername(String username);
+
+	public Usuario findByCelular(String celular);
+
 }
