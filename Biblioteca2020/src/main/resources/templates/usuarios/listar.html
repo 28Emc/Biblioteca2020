@@ -9,14 +9,13 @@
 	<header th:replace="layout/layout :: header"></header>
 
 	<div class="container-fluid my-5">
-
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<p>
 			<a class="btn btn-primary btn-xs" th:href="@{/usuarios/crear}">Crear
 				Usuario</a>
 		</p>
 		<table class="table table-responsive">
-			<thead>
+			  <thead>
 				<tr>
 					<th>Id</th>
 					<th>Nombres</th>
@@ -55,12 +54,12 @@
 				</tr>
 			</tbody>
 		</table>
-
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>
 	<div th:include="usuarios/confirm-delete-modal.html" th:remove="tag"></div>
-	<div th:include="usuarios/confirm-deshabilitar-modal.html" th:remove="tag"></div>
+	<div th:include="usuarios/confirm-deshabilitar-modal.html"
+		th:remove="tag"></div>
 
 	<script type="text/javascript">
 		function confirmDeshabilitar(id) {
@@ -72,7 +71,7 @@
 			var id = $("#userIdHiddenInput").val();
 			window.location = "deshabilitar/" + id;
 		}
-		
+
 		function confirmDelete(id) {
 			$('#deleteModal').modal('show');
 			$("#userIdHiddenInput").val(id);

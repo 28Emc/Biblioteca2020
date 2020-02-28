@@ -8,7 +8,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Entity
@@ -19,16 +20,18 @@ public class Empresa implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotEmpty
-	@Column(length = 100, unique = true)
+	@NotBlank
+	@Column(length = 100, name = "razon_social", unique = true)
 	@Size(min = 1, max = 100)
-	private String razon_social;
+	private String razonSocial;
 
-	@NotEmpty
+	@NotBlank
 	@Column(length = 11, unique = true)
-	@Size(min = 1, max = 11)
+	//@Size(min = 11, max = 11)
+	@Pattern(regexp = "^\\d{11}$")
 	private String ruc;
 
+	@NotBlank
 	@Column(length = 100, nullable = true)
 	@Size(min = 1, max = 100)
 	private String direccion;
@@ -48,12 +51,12 @@ public class Empresa implements Serializable {
 		this.id = id;
 	}
 
-	public String getRazon_social() {
-		return razon_social;
+	public String getRazonSocial() {
+		return razonSocial;
 	}
 
-	public void setRazon_social(String razon_social) {
-		this.razon_social = razon_social;
+	public void setRazonSocial(String razonSocial) {
+		this.razonSocial = razonSocial;
 	}
 
 	public String getRuc() {
@@ -80,19 +83,71 @@ public class Empresa implements Serializable {
 		this.estado = estado;
 	}
 
-	public Empresa(@Size(min = 1, max = 100) String razon_social, @Size(min = 1, max = 11) String ruc,
+	public Empresa(@Size(min = 1, max = 100) String razonSocial, @Size(min = 1, max = 11) String ruc,
 			@Size(min = 1, max = 100) String direccion, Boolean estado) {
 		super();
-		this.razon_social = razon_social;
+		this.razonSocial = razonSocial;
 		this.ruc = ruc;
 		this.direccion = direccion;
 		this.estado = estado;
 	}
 
+	public Empresa() {
+	}
+
 	@Override
 	public String toString() {
-		return "Empresa [id=" + id + ", razon_social=" + razon_social + ", ruc=" + ruc + ", direccion=" + direccion
+		return "Empresa [id=" + id + ", razonSocial=" + razonSocial + ", ruc=" + ruc + ", direccion=" + direccion
 				+ ", estado=" + estado + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((direccion == null) ? 0 : direccion.hashCode());
+		result = prime * result + ((estado == null) ? 0 : estado.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((razonSocial == null) ? 0 : razonSocial.hashCode());
+		result = prime * result + ((ruc == null) ? 0 : ruc.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Empresa other = (Empresa) obj;
+		if (direccion == null) {
+			if (other.direccion != null)
+				return false;
+		} else if (!direccion.equals(other.direccion))
+			return false;
+		if (estado == null) {
+			if (other.estado != null)
+				return false;
+		} else if (!estado.equals(other.estado))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (razonSocial == null) {
+			if (other.razonSocial != null)
+				return false;
+		} else if (!razonSocial.equals(other.razonSocial))
+			return false;
+		if (ruc == null) {
+			if (other.ruc != null)
+				return false;
+		} else if (!ruc.equals(other.ruc))
+			return false;
+		return true;
 	}
 
 	/**

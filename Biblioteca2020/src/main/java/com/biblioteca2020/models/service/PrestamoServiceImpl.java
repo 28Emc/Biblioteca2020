@@ -32,14 +32,8 @@ public class PrestamoServiceImpl implements IPrestamoService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Prestamo findOne(Long id) {
+	public Prestamo findById(Long id) {
 		return prestamoDao.findById(id).orElse(null);
-	}
-
-	@Override
-	@Transactional
-	public void delete(Long id) {
-		prestamoDao.deleteById(id);
 	}
 
 	@Override

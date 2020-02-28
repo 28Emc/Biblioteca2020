@@ -10,9 +10,7 @@ public interface IPrestamoService {
 
 	public void save(Prestamo prestamo);
 
-	public Prestamo findOne(Long id);
-
-	public void delete(Long id);
+	public Prestamo findById(Long id);
 	
 	public List<Prestamo> findByDevolucion(String devolucion);
 	

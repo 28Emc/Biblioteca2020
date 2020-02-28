@@ -22,6 +22,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.biblioteca2020.models.entity.Role;
@@ -52,7 +53,8 @@ public class Usuario implements Serializable {
 
 	@Column(length = 8, name = "nro_documento", unique = true)
 	@NotBlank
-	@Size(min = 8, max = 8)
+	//@Size(min = 8, max = 8)
+	@Pattern(regexp = "^\\d{8}$")
 	private String nroDocumento;
 
 	@Column(length = 200, nullable = true)
@@ -66,6 +68,7 @@ public class Usuario implements Serializable {
 
 	@Column(length = 9, nullable = true, unique = true)
 	@Size(max = 9)
+	//@Pattern(regexp = "^\\d{9}+$")
 	private String celular;
 
 	@Column(name = "fecha_registro")

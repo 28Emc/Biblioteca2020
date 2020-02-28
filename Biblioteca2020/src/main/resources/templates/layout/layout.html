@@ -35,13 +35,10 @@
 						th:href="@{/libros/listar}">Libros</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="isAuthenticated() && hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
-						th:href="@{/categorias/listar}">Categorias</a></li>
-					<li class="nav-item"><a class="nav-link"
-						sec:authorize="isAuthenticated() && hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
 						th:href="@{/usuarios/listar}">Usuarios</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="isAuthenticated() && hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
-						th:href="@{/tickets/listar}">Tickets</a></li>
+						th:href="@{/prestamos/listar}">Préstamos</a></li>
 				</ul>
 
 				<ul class="navbar-nav">
@@ -96,7 +93,7 @@
 
 	<div class="container"></div>
 
-	<footer th:fragment="footer" class="container">
+	<footer th:fragment="footer" class="container-fluid">
 		<span class="text-muted">Biblioteca ©2020 </span>
 		<p sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')">
 			Usuario: <span sec:authentication="name"></span> | Rol: <span

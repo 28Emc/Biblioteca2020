@@ -29,10 +29,8 @@ public class UsuarioController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/listar")
-	public String listarUsuarios(Model model, Principal principal) {
-		
+	public String listarUsuarios(Model model, Principal principal) {	
 		usuarioService.isAdminListar(model, principal);
-		
 		model.addAttribute("titulo", "Listado de Usuarios");
 		return "usuarios/listar";
 	}
@@ -48,9 +46,7 @@ public class UsuarioController {
 	public String crearFormUsuario(Map<String, Object> modelMap, Principal principal) {
 		usuarioService.isAdminEditar(modelMap, principal);
 		modelMap.put("usuario", new Usuario());
-		
 		usuarioService.isAdminEditar(modelMap, principal);
-		
 		modelMap.put("titulo", "Registro de Usuario");
 		return "usuarios/crear";
 	}
@@ -60,10 +56,8 @@ public class UsuarioController {
 	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap, SessionStatus status,
 			RedirectAttributes flash, Principal principal) {
 		if (result.hasErrors()) {
-			model.addAttribute("usuario", usuario);
-			
-			usuarioService.isAdminEditar(modelMap, principal);
-			
+			model.addAttribute("usuario", usuario);			
+			usuarioService.isAdminEditar(modelMap, principal);			
 			model.addAttribute("titulo", "Registro de Usuario");
 			return "/usuarios/crear";
 		}
@@ -75,9 +69,7 @@ public class UsuarioController {
 			return "redirect:/usuarios/listar";
 		} catch (Exception e) {
 			model.addAttribute("usuario", usuario);
-			
-			usuarioService.isAdminEditar(modelMap, principal);
-			
+			usuarioService.isAdminEditar(modelMap, principal);			
 			model.addAttribute("titulo", "Registro de Usuario");
 			model.addAttribute("error", e.getMessage());
 			return "/usuarios/crear";
@@ -119,7 +111,7 @@ public class UsuarioController {
 		}
 		try {
 			usuarioService.update(usuario);
-			flash.addFlashAttribute("success",
+			flash.addFlashAttribute("info",
 					"El usuario con código " + usuario.getId() + " ha sido actualizado en la base de datos.");
 			status.setComplete();
 			return "redirect:/usuarios/listar";
