@@ -78,17 +78,35 @@
 						th:errors="${usuario.passwordConfirmacion}"></small>
 				</div>
 			</div>
-			<div class="form-group">
+			
+			<div class="form-group" sec:authorize="hasRole('ROLE_ADMIN')">
 				<label class="col-sm-2 col-form-label">Rol</label>
 				<div class="col-sm-6">
-					<select class="form-control" th:field="${usuario.roles}"
+					<select class="form-control" multiple="multiple" size="3"
+						th:field="${usuario.roles}"
 						th:errorclass="'form-control alert-danger'">
 						<option th:each="rol :${roles}" th:value="${rol.id}"
-							th:text="${rol.authority}"></option>
+							th:text="${rol.authority}">
+						</option>					
 					</select> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('roles')}" th:errors="${usuario.roles}"></small>
 				</div>
 			</div>
+			
+			<div class="form-group" sec:authorize="hasRole('ROLE_EMPLEADO')" hidden>
+				<label class="col-sm-2 col-form-label">Rol</label>
+				<div class="col-sm-6">
+					<select class="form-control"
+						th:field="${usuario.roles}"
+						th:errorclass="'form-control alert-danger'">					
+						<option th:if="${#authorization.expression('hasRole(''ROLE_EMPLEADO'')')}" 
+						th:text="ROLE_USUARIO" th:value="3">
+						</option>					
+					</select> <small class="form-text text-danger"
+						th:if="${#fields.hasErrors('roles')}" th:errors="${usuario.roles}"></small>
+				</div>
+			</div>
+			
 			<h3 th:text="'Otros'"></h3>
 			<div class="form-group">
 				<label class="col-sm-2 col-form-label">Dirección</label>

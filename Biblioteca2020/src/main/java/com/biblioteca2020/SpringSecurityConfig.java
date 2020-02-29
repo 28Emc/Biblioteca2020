@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.biblioteca2020.auth.handler.LoginSuccessHandler;
+import com.biblioteca2020.models.service.JpaEmpleadoDetailsService;
 import com.biblioteca2020.models.service.JpaUserDetailsService;
 
 // CLASE DE CONFIGURACIÒN DE SPRING SECURITY
@@ -32,12 +33,16 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	// JPA
 	@Autowired
 	private JpaUserDetailsService userDetailsService;
+	
+	@Autowired
+	private JpaEmpleadoDetailsService empleadoDetailsService;
 
 	// ESTE MÉTODO SIRVE PARA ESTABLECER LOS ROLES Y LA ENCRIPTACIÒN DE LA
 	// CONTRASEÑA
 	@Autowired
 	public void configurerGlobal(AuthenticationManagerBuilder builder) throws Exception {
 		builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+		builder.userDetailsService(empleadoDetailsService).passwordEncoder(passwordEncoder);
 	}
 
 	// MÉTODO DE FILTRO DE PETICIONES HTTP MEDIANTE LOS ROLES ESTABLECIDOS

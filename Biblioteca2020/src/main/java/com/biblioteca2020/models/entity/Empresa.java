@@ -1,16 +1,19 @@
 package com.biblioteca2020.models.entity;
 
 import java.io.Serializable;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "empresas")
@@ -22,21 +25,27 @@ public class Empresa implements Serializable {
 
 	@NotBlank
 	@Column(length = 100, name = "razon_social", unique = true)
-	@Size(min = 1, max = 100)
 	private String razonSocial;
 
 	@NotBlank
 	@Column(length = 11, unique = true)
-	//@Size(min = 11, max = 11)
 	@Pattern(regexp = "^\\d{11}$")
 	private String ruc;
 
 	@NotBlank
 	@Column(length = 100, nullable = true)
-	@Size(min = 1, max = 100)
 	private String direccion;
 
 	private Boolean estado;
+
+	// EMPRESA(1):LOCAL(*)
+	// @JsonIgnore
+	@OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Local> locales;
+	
+	// EMPRESA(1):EMPLEADO(*)
+	@OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Empleado> empleados;
 
 	@PrePersist
 	public void prePersist() {
@@ -83,8 +92,7 @@ public class Empresa implements Serializable {
 		this.estado = estado;
 	}
 
-	public Empresa(@Size(min = 1, max = 100) String razonSocial, @Size(min = 1, max = 11) String ruc,
-			@Size(min = 1, max = 100) String direccion, Boolean estado) {
+	public Empresa(String razonSocial, String ruc, String direccion, Boolean estado) {
 		super();
 		this.razonSocial = razonSocial;
 		this.ruc = ruc;

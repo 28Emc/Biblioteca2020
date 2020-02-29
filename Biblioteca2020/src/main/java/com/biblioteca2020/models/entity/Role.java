@@ -37,6 +37,13 @@ public class Role implements Serializable {
 		this.authority = authority;
 	}
 
+	public Role(@NotEmpty String authority) {
+		this.authority = authority;
+	}
+
+	public Role() {
+	}
+
 	@Override
 	public String toString() {
 		return "Role [id=" + id + ", authority=" + authority + "]";

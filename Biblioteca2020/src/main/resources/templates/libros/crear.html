@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+<body>
+	<header th:replace="layout/layout :: header"></header>
+	<div class="container-fluid my-5">
+		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<form th:action="${editable} ?@{/libros/editar} :@{/libros/crear}"
+		th:object="${libro}" method="post">
+			<h3 class="mb-4">Nombre</h3>
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<input class="form-control" type="text" name="nombre"
+						th:field="*{nombre}" />
+				</div>
+			</div>
+
+			<h3 class="mb-4">Autor</h3>
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<input class="form-control" type="text" name="autor"
+						th:field="*{autor}" />
+				</div>
+			</div>
+
+			<h3 class="mb-4">Descripción</h3>
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<textarea class="form-control" rows="3" name="descripcion"
+						th:field="*{descripcion}" /></textarea>
+				</div>
+			</div>
+
+			<h3 class="mb-4">Categoría</h3>
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<input type="text" name="buscar_categoria" id="buscar_categoria"
+						class="form-control" placeholder="Buscar categoría..."
+						th:field="*{categoria.nombre}" />
+				</div>
+				<div class="col-sm-2">
+					<input type="text" name="id_categoria" id="id_categoria"
+						placeholder="Id Categoria" class="form-control"
+						th:field="*{categoria}" readonly />
+
+				</div>
+			</div>
+
+			<h3 class="mb-4">Local</h3>
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<input type="text" name="buscar_local" id="buscar_local"
+						class="form-control" placeholder="Buscar local por su nombre..."
+						th:field="*{local.nombre}" />
+				</div>
+				<div class="col-sm-2">
+					<input type="text" name="id_local" id="id_local"
+						placeholder="Id Local" class="form-control" readonly
+						th:field="*{local}" />
+
+				</div>
+				<div class="col-sm-4">
+					<input type="text" name="direccion_local" id="direccion_local"
+						placeholder="Dirección Local" class="form-control"
+						th:field="*{local.direccion}" readonly />
+				</div>
+			</div>
+
+			<h3 class="mb-4">Fecha Edición</h3>
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<input class="form-control" type="date" name="fechaEdicion" />
+				</div>
+				<div class="col-sm-6">
+					<input class="form-control" type="text" th:field="*{fechaEdicion}"
+						readonly />
+				</div>
+			</div>
+
+			<h3 class="mb-4">Total de Páginas</h3>
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<input class="form-control" type="number" name="totalPaginas"
+						th:field="*{totalPaginas}" />
+				</div>
+			</div>
+
+			<h3 class="mb-4">Versión</h3>
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<input class="form-control" type="number" name="version"
+						th:field="*{version}" />
+				</div>
+			</div>
+
+			<div class="form-group row mt-5">
+				<div class="col-sm-6">
+					<input class="btn btn-outline-dark btn-block" type="reset"
+						value="Resetear Libro" />
+				</div>
+				<div class="col-sm-6">
+					<input class="btn btn-outline-success btn-block" type="submit"
+						value="Registrar Libro" />
+				</div>
+			</div>
+
+		</form>
+	</div>
+	<footer th:replace="layout/layout :: footer"></footer>
+	<script th:replace="layout/autocomplete-categorias :: javascript"></script>
+	<script th:replace="layout/autocomplete-locales :: javascript"></script>
+</body>
+</html>

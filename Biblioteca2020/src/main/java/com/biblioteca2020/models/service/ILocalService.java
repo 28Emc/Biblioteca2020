@@ -7,9 +7,11 @@ public interface ILocalService {
 	
 	public List<Local> findAll();
 
-	public void save(Local local);
+	public void save(Local local) throws Exception;
+	
+	public void update(Local local) throws Exception;
 
-	public Local findOne(Long id);
+	public Local findOne(Long id) throws Exception;
 
 	public void delete(Long id);
 	
@@ -17,5 +19,10 @@ public interface ILocalService {
 
 	public List<Local> findByDireccionLikeIgnoreCase(String term);
 	
+	public Local findByDireccion(String direccion);
+	
 	public List<Local> fetchByIdWithLibro();
+	
+	public List<Local> fetchByIdWithEmpresa(Long id);
+
 }

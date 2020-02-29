@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+	<div class="container-fluid my-5">
+		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<p>
+			<a class="btn btn-primary btn-xs" th:href="@{/libros/crear}">Registrar
+				Libro</a>
+		</p>
+		<table class="table table-responsive">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Nombre</th>
+					<th>Autor</th>
+					<th>Descripción</th>
+					<th>Categoría</th>
+					<th>Total Páginas</th>
+					<th>Versión</th>
+					<th>Fecha Edición</th>
+					<th>Fecha Registro</th>
+					<th>Local</th>
+					<th colspan="2">Opciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="libro: ${libros}">
+					<td th:text="${libro.id}"></td>
+					<td th:text="${libro.nombre}"></td>
+					<td th:text="${libro.autor}"></td>
+					<td th:text="${libro.descripcion}"></td>
+					<td th:text="${libro.categoria.nombre}"></td>
+					<td th:text="${libro.totalPaginas}"></td>
+					<td th:text="${libro.version}"></td>
+					<td th:text="${libro.fechaEdicion}"></td>
+					<td th:text="${libro.fechaRegistro}"></td>
+					<td th:text="${libro.local.nombre} + '-' + ${libro.local.direccion}"></td>
+					<td><a class="btn btn-success btn-xs"
+						th:href="@{/libros/crear/}+${libro.id}" th:text="'Editar'"></a></td>
+					<td><a sec:authorize="hasRole('ROLE_ADMIN')"
+						class="btn btn-warning btn-xs"
+						th:href="@{/libros/deshabilitar/}+${libro.id}"
+						th:text="'Deshabilitar'"
+						onclick="return confirm('Seguro de querer deshabilitar el libro?');"></a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

@@ -16,7 +16,7 @@ public interface IUsuarioDao extends CrudRepository<Usuario, Long> {
 
 	public Usuario findByUsernameAndEstado(String username, boolean estado);
 
-	@Query("select u from Usuario u join fetch u.roles r where r.authority='ROLE_EMPLEADO'")
+	@Query("select u from Usuario u join fetch u.roles r where r.authority='ROLE_USER'")
 	public List<Usuario> fetchByIdWithRoles();
 
 	@Query("select u from Usuario u where u.username not in ?1")

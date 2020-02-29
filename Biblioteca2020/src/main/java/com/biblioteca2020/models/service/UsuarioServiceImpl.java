@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.validation.ConstraintViolationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -21,6 +22,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
 	@Autowired
 	private IRoleService roleService;
+	
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
 
 	/*
 	 * MÉTODO PARA BUSCAR TODOS LOS USUARIOS POR SU NOMBRE Y ESTADO.
@@ -74,7 +78,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	@Transactional
 	public void save(Usuario usuario) throws Exception {
 		if (verificarUsername(usuario) && verificarPassword(usuario) && verificarDNI(usuario)) {
-			usuario = usuarioDao.save(usuario);
+			String passwordHash = passwordEncoder.encode(usuario.getPassword());
+			usuario.setPassword(passwordHash);
+			usuarioDao.save(usuario);
 		}
 	}
 
@@ -186,7 +192,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 		if (isAdmin) {
 			model.put("roles", roleService.findAll());
 		} else {
-			model.put("roles", roleService.findNotAdmins());
+			model.put("roles", roleService.findOnlyUsers());
 		}
 	}
 

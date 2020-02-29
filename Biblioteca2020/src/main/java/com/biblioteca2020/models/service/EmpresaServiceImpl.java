@@ -21,17 +21,26 @@ public class EmpresaServiceImpl implements IEmpresaService {
 	}
 
 	@Override
-	@Transactional
-	public void save(Empresa empresa) throws Exception {
-		if (verificarRazonSocial(empresa) && verificarRuc(empresa)) {
-			empresaDao.save(empresa);
-		}
+	@Transactional(readOnly = true)
+	public Empresa findOne(Long id) throws Exception {
+		return empresaDao.findById(id).orElseThrow(() -> new Exception("La empresa con id " + id + " no existe."));
 	}
 
 	@Override
 	@Transactional
-	public void update(Empresa empresa) throws Exception {
-		empresaDao.save(empresa);
+	public void delete(Long id) {
+		empresaDao.deleteById(id);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Empresa> findByEstado(Boolean estado) {
+		return empresaDao.findByEstado(estado);
+	}
+
+	@Override
+	public List<Empresa> findByRucAndEstado(String ruc, boolean estado) {
+		return empresaDao.findByRucAndEstado(ruc, estado);
 	}
 
 	private boolean verificarRuc(Empresa empresa) throws ConstraintViolationException {
@@ -51,21 +60,22 @@ public class EmpresaServiceImpl implements IEmpresaService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public Empresa findOne(Long id) throws Exception {
-		return empresaDao.findById(id).orElseThrow(() -> new Exception("La empresa no existe."));
+	@Transactional
+	public void save(Empresa empresa) throws Exception {
+		if (verificarRazonSocial(empresa) && verificarRuc(empresa)) {
+			empresaDao.save(empresa);
+		}
 	}
 
 	@Override
 	@Transactional
-	public void delete(Long id) {
-		empresaDao.deleteById(id);
+	public void update(Empresa empresa) throws Exception {
+		empresaDao.save(empresa);
 	}
 
 	@Override
-	@Transactional(readOnly = true)
-	public List<Empresa> findByEstado(Boolean estado) {
-		return empresaDao.findByEstado(estado);
+	public Empresa fetchByIdWithEmpleado(Long id) {
+		return empresaDao.fetchByIdWithEmpleado(id);
 	}
 
 }

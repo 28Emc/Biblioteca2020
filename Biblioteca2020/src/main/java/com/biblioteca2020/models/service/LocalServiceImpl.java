@@ -1,6 +1,7 @@
 package com.biblioteca2020.models.service;
 
 import java.util.List;
+import javax.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,14 +22,22 @@ public class LocalServiceImpl implements ILocalService {
 
 	@Override
 	@Transactional
-	public void save(Local local) {
+	public void save(Local local) throws Exception {
+		if (verificarDireccion(local)) {
+			localDao.save(local);
+		}
+	}
+
+	@Override
+	@Transactional
+	public void update(Local local) throws Exception {
 		localDao.save(local);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Local findOne(Long id) {
-		return localDao.findById(id).orElse(null);
+	public Local findOne(Long id) throws Exception {
+		return localDao.findById(id).orElseThrow(() -> new Exception("El local no existe."));
 	}
 
 	@Override
@@ -53,6 +62,26 @@ public class LocalServiceImpl implements ILocalService {
 	@Transactional(readOnly = true)
 	public List<Local> fetchByIdWithLibro() {
 		return localDao.fetchByIdWithLibro();
+	}
+
+	@Override
+	@Transactional
+	public Local findByDireccion(String direccion) {
+		return localDao.findByDireccion(direccion);
+	}
+
+	public boolean verificarDireccion(Local local) throws ConstraintViolationException {
+		Local localEncontrado = findByDireccion(local.getDireccion());
+		if (localEncontrado != null) {
+			throw new ConstraintViolationException("La dirección ya está en uso.", null);
+		}
+		return true;
+	}
+
+	@Override
+	@Transactional
+	public List<Local> fetchByIdWithEmpresa(Long id) {
+		return localDao.fetchByIdWithEmpresa(id);
 	}
 
 }

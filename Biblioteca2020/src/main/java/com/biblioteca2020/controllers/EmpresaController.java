@@ -1,6 +1,7 @@
 package com.biblioteca2020.controllers;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +14,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Empresa;
+import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.IEmpresaService;
 
 @Controller
-@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 @RequestMapping("/empresas")
 @SessionAttributes("empresa")
 public class EmpresaController {
@@ -28,18 +32,38 @@ public class EmpresaController {
 	@Autowired
 	private IEmpresaService empresaService;
 
+	@Autowired
+	private IEmpleadoService empleadoService;
+
+	/*
+	 * @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	 * 
+	 * @GetMapping(value = "/listarAll") public String listarEmpresas(Model model) {
+	 * model.addAttribute("titulo", "Listado de Empresas");
+	 * model.addAttribute("empresas", empresaService.findAll()); return
+	 * "empresas/listar"; }
+	 */
+	
+	// AQUI BUSCO EL ID DEL EMPLEADO PARA FILTRAR LA TABLA SEGUN SU EMPRESA DONDE
+	// PERTENECE
+	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@GetMapping(value = "/listar")
-	public String listarEmpresas(Model model) {
-		model.addAttribute("titulo", "Listado de Empresas");
-		model.addAttribute("empresas", empresaService.findAll());
-		return "empresas/listar";
+	public String listarEmpresaPorEmpleado(Model model, Principal principal) {
+		Empleado empleado = empleadoService.findByUsername(principal.getName());
+		Empresa empresa = empresaService.fetchByIdWithEmpleado(empleado.getId());
+		model.addAttribute("titulo", "Datos de '" + empleado.getEmpresa().getRazonSocial() + "' (RUC "
+				+ empleado.getEmpresa().getRuc() + ")");
+		model.addAttribute("empresas", empresa);
+		return "/empresas/listar";
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/cancelar")
 	public String cancelar(ModelMap modelMap) {
 		return "redirect:/empresas/listar";
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/crear")
 	public String crearEmpresa(Map<String, Object> model) {
 		model.put("titulo", "Registro de Empresa");
@@ -47,8 +71,20 @@ public class EmpresaController {
 		return "empresas/crear";
 	}
 
+	// MÉTODO PARA REALIZAR LA BUSQUEDA DE EMPRESAS MEDIANTE AUTOCOMPLETADO
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@RequestMapping(value = "/cargarEmpresas/{term}", produces = { "application/json" })
+	public @ResponseBody List<Empresa> cargarEmpresas(@PathVariable String term) {
+		return empresaService.findByRucAndEstado(term, true);
+	}
+
+	// ESTE MÉTODO SE SUPONE QUE RECOGE EL RUC DE MANERA "EXTERNA", AL TOMAR UN
+	// VALOR CORRECTO,
+	// ME DEVUELVE LOS DEMÁS CAMPOS, COMO LA DIRECCIÓN Y LA RAZÓN SOCIAL.
+	// POR AHORA SOLO GUARDO INSERTANDO LOS DATOS MANUALMENTE.
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
-	public String guardarEmpresa(@Valid Empresa empresa, BindingResult result, Model model, SessionStatus status,
+	public String crearEmpresa(@Valid Empresa empresa, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash) {
 		if (result.hasErrors()) {
 			model.addAttribute("empresa", empresa);
@@ -68,10 +104,10 @@ public class EmpresaController {
 			model.addAttribute("titulo", "Registro de Empresa");
 			return "/empresas/crear";
 		}
-
 	}
 
-	@GetMapping(value = "/crear/{id}")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@GetMapping(value = "/editar/{id}")
 	public String editarFormEmpresa(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
 			RedirectAttributes flash) {
 		Empresa empresa = null;
@@ -80,15 +116,14 @@ public class EmpresaController {
 		try {
 			empresa = empresaService.findOne(id);
 			modelMap.put("empresa", empresa);
-			flash.addFlashAttribute("info", "Los datos de la empresa con código " + empresa.getId()
-					+ " han sido actualizados en la base de datos.");
 			return "/empresas/crear";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "redirect:/empresas/listar";
 		}
 	}
-	
+
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarEmpresa(@Valid Empresa empresa, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Map<String, Object> modelMap, Principal principal) {
@@ -113,6 +148,8 @@ public class EmpresaController {
 		}
 	}
 
+	// ESTE MÉTODO ESTA INACTIVO, POR AHORA.
+	/*@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@RequestMapping(value = "/eliminar/{id}")
 	public String eliminarEmpresa(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Empresa empresa = null;
@@ -127,8 +164,9 @@ public class EmpresaController {
 			return "redirect:/empresas/listar";
 		}
 
-	}
+	}*/
 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@RequestMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarEmpresa(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Empresa empresa = null;

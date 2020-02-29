@@ -21,8 +21,8 @@ public class RoleServiceImpl implements IRoleService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Role> findNotAdmins() {
-		return roleDao.findNotAdmins();
+	public List<Role> findOnlyUsers() {
+		return roleDao.findOnlyUsers();
 	}
 
 }

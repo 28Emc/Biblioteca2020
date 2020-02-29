@@ -26,7 +26,7 @@ public class UsuarioController {
 
 	@Autowired
 	private IUsuarioService usuarioService;
-
+	
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/listar")
 	public String listarUsuarios(Model model, Principal principal) {	
@@ -44,7 +44,6 @@ public class UsuarioController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/crear")
 	public String crearFormUsuario(Map<String, Object> modelMap, Principal principal) {
-		usuarioService.isAdminEditar(modelMap, principal);
 		modelMap.put("usuario", new Usuario());
 		usuarioService.isAdminEditar(modelMap, principal);
 		modelMap.put("titulo", "Registro de Usuario");
@@ -139,7 +138,6 @@ public class UsuarioController {
 			return "redirect:/usuarios/listar";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
-			System.out.println(e.getMessage());
 			return "redirect:/usuarios/listar";
 		}
 	}
@@ -160,5 +158,4 @@ public class UsuarioController {
 			return "redirect:/usuarios/listar";
 		}
 	}
-
 }

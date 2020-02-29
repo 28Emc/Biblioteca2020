@@ -9,10 +9,13 @@
 	<header th:replace="layout/layout :: header"></header>
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<p>
-			<a class="btn btn-primary btn-xs" th:href="@{/empresas/crear}">Crear
-				Empresa</a>
-		</p>
+		<th:block sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')">
+			<p hidden>
+				<a class="btn btn-primary btn-xs" th:href="@{/empresas/crear}">Crear
+					Empresa</a>
+			</p>
+		</th:block>
+
 		<table class="table table-responsive">
 			<thead>
 				<tr>
@@ -21,7 +24,8 @@
 					<th>Dirección</th>
 					<th>Ruc</th>
 					<th>Estado</th>
-					<th colspan="3">Opciones</th>
+					<th sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')" colspan="3">Opciones</th>
+					<th sec:authorize="isAuthenticated() && hasRole('ROLE_SUPERVISOR')">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -31,16 +35,28 @@
 					<td th:text="${empresa.direccion}"></td>
 					<td th:text="${empresa.ruc}"></td>
 					<td th:text="${empresa.estado}"></td>
-					<td><a class="btn btn-success btn-xs"
-						th:href="@{/empresas/crear/}+${empresa.id}" th:text="'Editar'"></a></td>
-					<td><a class="btn btn-warning btn-xs"
+					<td><a
+						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"
+						class="btn btn-success btn-xs"
+						th:href="@{/empresas/editar/}+${empresa.id}" th:text="'Editar'"></a></td>
+					<td><a
+						sec:authorize="isAuthenticated() && hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')"
+						class="btn btn-dark btn-xs"
+						th:href="@{/locales/listar/}+${empresa.id}"
+						th:text="'Ver Locales'"></a></td>
+					<td><a
+						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"
+						class="btn btn-warning btn-xs"
 						th:href="@{/empresas/deshabilitar/}+${empresa.id}"
 						th:text="'Deshabilitar'"
-						onclick="return confirm('Seguro de querer deshabilitar la empresa?');"></a></td>	
-					<td><a class="btn btn-danger btn-xs"
+						onclick="return confirm('Seguro de querer deshabilitar la empresa?');"></a></td>
+					<th:block
+						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')">
+						<!-- td><a class="btn btn-danger btn-xs"
 						th:href="@{/empresas/eliminar/}+${empresa.id}"
 						th:text="'Eliminar'"
-						onclick="return confirm('Seguro de querer eliminar la empresa?');"></a></td>					
+						onclick="return confirm('Seguro de querer eliminar la empresa?');"></a></td -->
+					</th:block>
 				</tr>
 			</tbody>
 		</table>

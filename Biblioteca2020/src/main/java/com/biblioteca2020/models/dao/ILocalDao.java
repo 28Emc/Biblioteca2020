@@ -10,8 +10,13 @@ public interface ILocalDao extends CrudRepository<Local, Long> {
 	public List<Local> findByEstado(Boolean estado);
 
 	public List<Local> findByDireccionLikeIgnoreCase(String term);
+	
+	public Local findByDireccion(String direccion);
 
 	@Query("select l from Local l join fetch l.libros li")
 	public List<Local> fetchByIdWithLibro();
+	
+	@Query("select l from Local l join fetch l.empresa em where em.id=?1")
+	public List<Local> fetchByIdWithEmpresa(Long id);
 
 }

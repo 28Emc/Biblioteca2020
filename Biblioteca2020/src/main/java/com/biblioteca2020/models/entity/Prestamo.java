@@ -2,7 +2,6 @@ package com.biblioteca2020.models.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -17,7 +16,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
@@ -29,11 +27,18 @@ public class Prestamo implements Serializable {
 	private Long id;
 
 	// PRESTAMOS(*):USER(1)
+	// @JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "usuario_id", nullable = false)
 	private Usuario usuario;
 
+	// PRESTAMOS(*):EMPLEADO(1)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "empleado_id", nullable = false)
+	private Empleado empleado;
+
 	// PRESTAMOS(*):LIBRO(1)
+	// @JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "libro_id", nullable = false)
 	private Libro libro;
@@ -106,19 +111,14 @@ public class Prestamo implements Serializable {
 	public Prestamo() {
 	}
 
-	public Prestamo(@NotNull Usuario usuario, @NotNull Libro libro, @NotNull Date fecha_despacho, Boolean devolucion,
+	public Prestamo(Usuario usuario, Empleado empleado, Libro libro, @NotNull Date fecha_despacho, Boolean devolucion,
 			@Size(min = 1, max = 255) String observaciones) {
 		this.usuario = usuario;
+		this.empleado = empleado;
 		this.libro = libro;
 		this.fecha_despacho = fecha_despacho;
 		this.devolucion = devolucion;
 		this.observaciones = observaciones;
-	}
-
-	@Override
-	public String toString() {
-		return "Prestamo [id=" + id + ", usuario=" + usuario.getId() + ", libro=" + libro.getId() + ", fecha_despacho="
-				+ fecha_despacho + ", devolucion=" + devolucion + ", observaciones=" + observaciones + "]";
 	}
 
 	/**

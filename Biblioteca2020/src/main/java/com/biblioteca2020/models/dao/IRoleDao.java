@@ -10,7 +10,7 @@ public interface IRoleDao extends CrudRepository<Role, Long> {
 	
 	public List<Role> findAll();
 
-	@Query("select r from Role r where r.authority not like 'ROLE_ADMIN'")
-	public List<Role> findNotAdmins();
+	@Query("select r from Role r where r.authority like 'ROLE_USER'")
+	public List<Role> findOnlyUsers();
 	
 }

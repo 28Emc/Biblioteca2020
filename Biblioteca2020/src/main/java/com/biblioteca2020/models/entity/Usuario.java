@@ -41,6 +41,11 @@ public class Usuario implements Serializable {
 	@JoinTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
 	private Set<Role> roles;
 
+	// USER(1):PRESTAMOS(*)
+	// @JsonIgnore
+	@OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Prestamo> prestamos;
+
 	@Column(length = 30)
 	@NotBlank
 	@Size(min = 3, max = 30)
@@ -53,7 +58,6 @@ public class Usuario implements Serializable {
 
 	@Column(length = 8, name = "nro_documento", unique = true)
 	@NotBlank
-	//@Size(min = 8, max = 8)
 	@Pattern(regexp = "^\\d{8}$")
 	private String nroDocumento;
 
@@ -68,7 +72,6 @@ public class Usuario implements Serializable {
 
 	@Column(length = 9, nullable = true, unique = true)
 	@Size(max = 9)
-	//@Pattern(regexp = "^\\d{9}+$")
 	private String celular;
 
 	@Column(name = "fecha_registro")
@@ -88,10 +91,6 @@ public class Usuario implements Serializable {
 	private String passwordConfirmacion;
 
 	private Boolean estado;
-
-	// USER(1):PRESTAMOS(*)
-	@OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<Prestamo> prestamos;
 
 	@PrePersist
 	public void prePersist() {
