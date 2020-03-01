@@ -52,7 +52,6 @@ public class LocalController {
 	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@GetMapping(value = "/listar/{id}")
 	public String listarLocalesPorEmpresa(@PathVariable(value = "id") Long id, Model model, Principal principal) {
-		System.out.println(principal.getName());
 		List<Local> locales = localService.fetchByIdWithEmpresa(id);
 		model.addAttribute("titulo", "Listado de Locales");
 		model.addAttribute("locales", locales);
@@ -127,10 +126,8 @@ public class LocalController {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "redirect:/locales/listar/" + empresaLocales.getId();
 		}
-
 	}
 
-	// TE QUEDASTE AQUI PAPU - NO ACTUALIZA, MANDA ERROR DE ROLLBACKEXCEPTION - 29.02.2020 - 1:19:00 AM
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarLocal(@Valid Local local, BindingResult result, Model model, SessionStatus status,
@@ -155,6 +152,9 @@ public class LocalController {
 			model.addAttribute("editable", true);
 			model.addAttribute("titulo", "Modificar Local");
 			model.addAttribute("error", e.getMessage());
+			System.out.println(e.getLocalizedMessage());
+			System.out.println(e.getStackTrace());
+			
 			return "/locales/crear";
 		}
 	}

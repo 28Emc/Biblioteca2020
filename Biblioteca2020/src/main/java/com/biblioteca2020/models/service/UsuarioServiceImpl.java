@@ -1,16 +1,11 @@
 package com.biblioteca2020.models.service;
 
-import java.security.Principal;
 import java.util.List;
-import java.util.Map;
-
 import javax.validation.ConstraintViolationException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import com.biblioteca2020.models.dao.IUsuarioDao;
 import com.biblioteca2020.models.entity.Usuario;
 
@@ -19,9 +14,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
 	@Autowired
 	private IUsuarioDao usuarioDao;
-
-	@Autowired
-	private IRoleService roleService;
 	
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
@@ -105,14 +97,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	}
 
 	/*
-	 * MÉTODO PARA LISTAR EL USUARIO CON SU ROL.
-	 */
-	@Override
-	public List<Usuario> fetchByIdWithRoles() {
-		return usuarioDao.fetchByIdWithRoles();
-	}
-
-	/*
 	 * MÉTODO PARA VERIFICAR EL CAMPO USERNAME EN LA BD. EL CAMPO ES ÚNICO, Y
 	 * CAPTURO SU EXCEPCION ESPECÍFICA PARA MOSTAR UN MENSJAE DE ERROR
 	 * PERSONALIZADO.
@@ -163,37 +147,4 @@ public class UsuarioServiceImpl implements IUsuarioService {
 		}
 		return true;
 	}
-
-	/*
-	 * MÉTODO DONDE BUSCO EL USUARIO LOGUEADO POR SU USERNAME, VERIFICO SI EL
-	 * SET<ROLE> DE ESTE USUARIO (CONVERTIDO EN CADENA) CONTIENE LA PALABRA
-	 * "ROLE_ADMIN", SI ES ADMIN, MUESTRO TODOS LOS USUARIOS, SI NO LO ES, MUESTRO
-	 * SOLO LOS EMPLEADOS.
-	 */
-	@Override
-	public void isAdminListar(Model model, Principal principal) {
-		Usuario user = findByUsername(principal.getName());
-		Boolean isAdmin = user.getRoles().toString().contains("ROLE_ADMIN");
-		model.addAttribute("usuario", new Usuario());
-		if (isAdmin) {
-			model.addAttribute("usuarios", findAll());
-		} else {
-			model.addAttribute("usuarios", fetchByIdWithRoles());
-		}
-	}
-
-	/*
-	 * MÉTODO SIMILAR AL ANTERIOR, CON LA DIFERENCIA QUE MUESTRO EL ROL.
-	 */
-	@Override
-	public void isAdminEditar(Map<String, Object> model, Principal principal) {
-		Usuario user = findByUsername(principal.getName());
-		Boolean isAdmin = user.getRoles().toString().contains("ROLE_ADMIN");
-		if (isAdmin) {
-			model.put("roles", roleService.findAll());
-		} else {
-			model.put("roles", roleService.findOnlyUsers());
-		}
-	}
-
 }

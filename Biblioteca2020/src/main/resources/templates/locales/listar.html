@@ -21,7 +21,9 @@
 					<th>Dirección Local</th>
 					<th>Observaciones</th>
 					<th>Estado</th>
-					<th colspan="2">Opciones</th>
+					<th:block sec:authorize="hasRole('ROLE_ADMIN')">
+						<th colspan="2">Opciones</th>
+					</th:block>
 				</tr>
 			</thead>
 			<tbody>
@@ -31,9 +33,11 @@
 					<td th:text="${local.direccion}"></td>
 					<td th:text="${local.observaciones}"></td>
 					<td th:text="${local.estado}"></td>
-					<td><a class="btn btn-success btn-xs"
+					<td sec:authorize="hasRole('ROLE_ADMIN')">
+					<a class="btn btn-success btn-xs"
 						th:href="@{/locales/editar/}+${local.id}" th:text="'Editar'"></a></td>
-					<td><a class="btn btn-warning btn-xs"
+					<td sec:authorize="hasRole('ROLE_ADMIN')">
+					<a class="btn btn-warning btn-xs"
 						th:href="@{/locales/deshabilitar/}+${local.id}"
 						th:text="'Deshabilitar'"
 						onclick="return confirm('Seguro de querer deshabilitar el local?');"></a></td>

@@ -29,8 +29,8 @@ public class LocalServiceImpl implements ILocalService {
 	}
 
 	@Override
-	@Transactional
-	public void update(Local local) throws Exception {
+	@Transactional()
+	public void update(Local local) {
 		localDao.save(local);
 	}
 
@@ -65,7 +65,7 @@ public class LocalServiceImpl implements ILocalService {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public Local findByDireccion(String direccion) {
 		return localDao.findByDireccion(direccion);
 	}

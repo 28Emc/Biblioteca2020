@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.entity.Usuario;
+import com.biblioteca2020.models.service.IRoleService;
 import com.biblioteca2020.models.service.IUsuarioService;
 
 @Controller
@@ -27,36 +28,40 @@ public class UsuarioController {
 	@Autowired
 	private IUsuarioService usuarioService;
 	
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@Autowired
+	private IRoleService roleService;
+
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping("/listar")
-	public String listarUsuarios(Model model, Principal principal) {	
-		usuarioService.isAdminListar(model, principal);
+	public String listarUsuarios(Model model, Principal principal) {
+		model.addAttribute("usuario", new Usuario());
+		model.addAttribute("usuarios", usuarioService.findAll());
 		model.addAttribute("titulo", "Listado de Usuarios");
 		return "usuarios/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping("/cancelar")
 	public String cancelar(ModelMap modelMap) {
 		return "redirect:/usuarios/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/crear")
 	public String crearFormUsuario(Map<String, Object> modelMap, Principal principal) {
 		modelMap.put("usuario", new Usuario());
-		usuarioService.isAdminEditar(modelMap, principal);
+		modelMap.put("roles", roleService.findOnlyUsers());
 		modelMap.put("titulo", "Registro de Usuario");
 		return "usuarios/crear";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
-	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap, SessionStatus status,
-			RedirectAttributes flash, Principal principal) {
+	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
+			SessionStatus status, RedirectAttributes flash, Principal principal) {
 		if (result.hasErrors()) {
-			model.addAttribute("usuario", usuario);			
-			usuarioService.isAdminEditar(modelMap, principal);			
+			model.addAttribute("usuario", usuario);
+			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Registro de Usuario");
 			return "/usuarios/crear";
 		}
@@ -68,22 +73,20 @@ public class UsuarioController {
 			return "redirect:/usuarios/listar";
 		} catch (Exception e) {
 			model.addAttribute("usuario", usuario);
-			usuarioService.isAdminEditar(modelMap, principal);			
+			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Registro de Usuario");
 			model.addAttribute("error", e.getMessage());
 			return "/usuarios/crear";
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@GetMapping("/editar/{id}")
 	public String editarFormUsuario(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
 			Principal principal, RedirectAttributes flash) {
 		Usuario usuario = null;
 		modelMap.put("editable", true);
-		
-		usuarioService.isAdminEditar(modelMap, principal);
-		
+		modelMap.put("roles", roleService.findOnlyUsers());
 		modelMap.put("titulo", "Modificar Usuario");
 		try {
 			usuario = usuarioService.findById(id);
@@ -95,16 +98,14 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Map<String, Object> modelMap, Principal principal) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
-			
-			usuarioService.isAdminEditar(modelMap, principal);
-			
+			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Modificar Usuario");
 			return "/usuarios/editar";
 		}
@@ -117,16 +118,14 @@ public class UsuarioController {
 		} catch (Exception e) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
-			
-			usuarioService.isAdminEditar(modelMap, principal);
-			
+			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Modificar Usuario");
 			model.addAttribute("error", e.getMessage());
 			return "/usuarios/crear";
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Usuario usuario = null;

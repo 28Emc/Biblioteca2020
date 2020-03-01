@@ -17,11 +17,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import com.biblioteca2020.models.entity.Empresa;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "locales")
@@ -39,7 +35,6 @@ public class Local implements Serializable {
 	// GUARDO CON SAVE() EL LOCAL
 
 	// LOCAL(*):LIBRO(*)
-	@Size(min = 1)
 	@ManyToMany
 	//@JsonIgnore
 	@JoinTable(name = "locales_libros", joinColumns = @JoinColumn(name = "local_id"), inverseJoinColumns = @JoinColumn(name = "libro_id"))
