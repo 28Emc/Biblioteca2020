@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container-fluid my-5">
+		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<th:block sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')">
+			<p>
+				<a class="btn btn-primary btn-xs" th:href="@{/empleados/crear}">Crear
+					Empleado</a>
+			</p>
+		</th:block>
+		<table class="table table-responsive">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Nombre</th>
+					<th>Apellidos</th>
+					<th>Empresa</th>
+					<th>Dirección</th>
+					<th>Email</th>
+					<th>DNI</th>
+					<th>Celular</th>
+					<th>Fecha Registro</th>
+					<th>Username</th>
+					<th>Estado</th>
+					<th sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"
+						colspan="2">Opciones</th>
+					<th sec:authorize="isAuthenticated() && hasRole('ROLE_SUPERVISOR')">Opciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="empleado: ${empleados}">
+					<td th:text="${empleado.id}"></td>
+					<td th:text="${empleado.nombres}"></td>
+					<td th:text="${empleado.apellidos}"></td>
+					<td th:text="${empleado.empresa.razonSocial}"></td>
+					<td th:text="${empleado.direccion}"></td>
+					<td th:text="${empleado.email}"></td>
+					<td th:text="${empleado.nroDocumento}"></td>
+					<td th:text="${empleado.celular}"></td>
+					<td th:text="${empleado.fecha_registro}"></td>
+					<td th:text="${empleado.username}"></td>
+					<td th:text="${empleado.estado}"></td>
+					<td sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"><a
+						class="btn btn-success btn-xs"
+						th:href="@{/empleados/editar/}+${empleado.id}" th:text="'Editar'"></a></td>
+					<td
+						sec:authorize="isAuthenticated() && hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
+						<a class="btn btn-warning btn-xs"
+						th:href="@{/empleados/deshabilitar/}+${empleado.id}"
+						th:text="'Deshabilitar'"
+						onclick="return confirm('Seguro de querer deshabilitar el empleado?');"></a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+
+</body>
+</html>

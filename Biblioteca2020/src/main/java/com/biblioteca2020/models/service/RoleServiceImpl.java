@@ -25,4 +25,9 @@ public class RoleServiceImpl implements IRoleService {
 		return roleDao.findOnlyUsers();
 	}
 
+	@Override
+	public List<Role> findEmpleadoAndSupervisor() {
+		return roleDao.findEmpleadoAndSupervisor();
+	}
+
 }

@@ -15,6 +15,9 @@ public interface IEmpleadoDao extends CrudRepository<Empleado, Long> {
 	public Empleado findByNroDocumento(String nroDocumento);
 
 	public Empleado findByUsernameAndEstado(String username, boolean estado);
+	
+	@Query("select e from Empleado e join fetch e.empresa em where em.id=?1")
+	public List<Empleado> fetchByIdWithEmpresa(Long id);
 
 	@Query("select e from Empleado e join fetch e.roles r where r.authority='ROLE_EMPLEADO'")
 	public List<Empleado> fetchByIdWithRoles();

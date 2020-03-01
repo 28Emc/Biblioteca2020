@@ -148,4 +148,9 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		}
 	}
 
+	@Override
+	public List<Empleado> fetchByIdWithEmpresa(Long id) {
+		return empleadoDao.fetchByIdWithEmpresa(id);
+	}
+
 }

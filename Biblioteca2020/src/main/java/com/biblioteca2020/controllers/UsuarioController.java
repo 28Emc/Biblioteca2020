@@ -1,6 +1,5 @@
 package com.biblioteca2020.controllers;
 
-import java.security.Principal;
 import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +26,13 @@ public class UsuarioController {
 
 	@Autowired
 	private IUsuarioService usuarioService;
-	
+
 	@Autowired
 	private IRoleService roleService;
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping("/listar")
-	public String listarUsuarios(Model model, Principal principal) {
+	public String listarUsuarios(Model model) {
 		model.addAttribute("usuario", new Usuario());
 		model.addAttribute("usuarios", usuarioService.findAll());
 		model.addAttribute("titulo", "Listado de Usuarios");
@@ -48,7 +47,7 @@ public class UsuarioController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/crear")
-	public String crearFormUsuario(Map<String, Object> modelMap, Principal principal) {
+	public String crearFormUsuario(Map<String, Object> modelMap) {
 		modelMap.put("usuario", new Usuario());
 		modelMap.put("roles", roleService.findOnlyUsers());
 		modelMap.put("titulo", "Registro de Usuario");
@@ -58,7 +57,7 @@ public class UsuarioController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
 	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
-			SessionStatus status, RedirectAttributes flash, Principal principal) {
+			SessionStatus status, RedirectAttributes flash) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("roles", roleService.findOnlyUsers());
@@ -83,7 +82,7 @@ public class UsuarioController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@GetMapping("/editar/{id}")
 	public String editarFormUsuario(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
-			Principal principal, RedirectAttributes flash) {
+			RedirectAttributes flash) {
 		Usuario usuario = null;
 		modelMap.put("editable", true);
 		modelMap.put("roles", roleService.findOnlyUsers());
@@ -98,10 +97,10 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@PostMapping(value = "/editar")
 	public String guardarUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Map<String, Object> modelMap, Principal principal) {
+			RedirectAttributes flash, Map<String, Object> modelMap) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);

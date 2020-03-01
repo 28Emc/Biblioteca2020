@@ -32,13 +32,13 @@
 						th:href="@{/locales/listar}">Locales</a></li -->
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO')"
-						th:href="@{/libros/listar}">Libros</a></li>
+						th:href="@{/libros/listar}">Libros(?)</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO')"
 						th:href="@{/usuarios/listar}">Usuarios</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO')"
-						th:href="@{/prestamos/listar}">Préstamos</a></li>
+						th:href="@{/prestamos/listar}">Préstamos(?)</a></li>
 				</ul>
 
 				<ul class="navbar-nav">
@@ -95,7 +95,7 @@
 
 	<footer th:fragment="footer" class="container-fluid">
 		<span class="text-muted">Biblioteca ©2020 </span>
-		<p sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')">
+		<p sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
 			Usuario: <span sec:authentication="name"></span> | Rol: <span
 				sec:authentication="principal.authorities"></span>
 		</p>
