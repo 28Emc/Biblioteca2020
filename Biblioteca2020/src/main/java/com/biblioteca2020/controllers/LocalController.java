@@ -48,14 +48,37 @@ public class LocalController {
 	 */
 
 	// LOS SUPERVISORES Y ADMIN DE ESA EMPRESA PUEDEN VER LOS LOCALES ANEXOS A ESA
-	// EMPRESA
+	// EMPRESA, EN CASO CONTRARIO NO TENGO ACCESO.
 	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@GetMapping(value = "/listar/{id}")
 	public String listarLocalesPorEmpresa(@PathVariable(value = "id") Long id, Model model, Principal principal) {
-		List<Local> locales = localService.fetchByIdWithEmpresa(id);
-		model.addAttribute("titulo", "Listado de Locales");
-		model.addAttribute("locales", locales);
-		return "/locales/listar";
+		Empleado empleado = empleadoService.findByUsername(principal.getName());
+		List<Local> locales;
+		try {
+			locales = localService.fetchByIdWithEmpresaWithEmpleado(id, empleado.getId());
+			model.addAttribute("titulo", "Listado de Locales de '"  + empleado.getEmpresa().getRazonSocial() + "'");
+			model.addAttribute("locales", locales);
+			return "/locales/listar";
+		} catch (Exception e) {
+			model.addAttribute("error", e.getMessage());
+			return "/home";
+		}
+
+	}
+
+	// AQUÍ TENDRÍA QUE AGREGAR UN MÈTODO PARA AGREGAR LIBROS A UNO O MAS LOCALES
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@GetMapping(value = "/agregarLibro/{id}")
+	public String agregarLibroALocal(@PathVariable(value = "id") Long id, Model model, Principal principal) {
+		try {
+			Local local = localService.findOne(id);
+			System.out.println(local);
+			model.addAttribute("titulo", "Agregar Libro al Local " + local.getDireccion());
+			model.addAttribute("local", local);
+		} catch (Exception e) {
+			model.addAttribute("error", e.getMessage());
+		}
+		return "/locales/agregarLibro";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
@@ -152,9 +175,6 @@ public class LocalController {
 			model.addAttribute("editable", true);
 			model.addAttribute("titulo", "Modificar Local");
 			model.addAttribute("error", e.getMessage());
-			System.out.println(e.getLocalizedMessage());
-			System.out.println(e.getStackTrace());
-			
 			return "/locales/crear";
 		}
 	}

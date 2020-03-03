@@ -7,18 +7,19 @@
 	<header th:replace="layout/layout :: header"></header>
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<h1 hidden th:text="${id}"></h1>
 		<form th:action="${editable} ?@{/libros/editar} :@{/libros/crear}"
-		th:object="${libro}" method="post">
+			th:object="${libro}" method="post">
 			<h3 class="mb-4">Nombre</h3>
-			<div class="form-group row">
+			<div class="form-group">
 				<div class="col-sm-6">
-					<input class="form-control" type="text" name="nombre"
-						th:field="*{nombre}" />
+					<input class="form-control" type="text" name="titulo"
+						th:field="*{titulo}" />
 				</div>
 			</div>
 
 			<h3 class="mb-4">Autor</h3>
-			<div class="form-group row">
+			<div class="form-group">
 				<div class="col-sm-6">
 					<input class="form-control" type="text" name="autor"
 						th:field="*{autor}" />
@@ -26,7 +27,7 @@
 			</div>
 
 			<h3 class="mb-4">Descripción</h3>
-			<div class="form-group row">
+			<div class="form-group">
 				<div class="col-sm-6">
 					<textarea class="form-control" rows="3" name="descripcion"
 						th:field="*{descripcion}" /></textarea>
@@ -34,75 +35,40 @@
 			</div>
 
 			<h3 class="mb-4">Categoría</h3>
-			<div class="form-group row">
+			<div class="form-group">
 				<div class="col-sm-6">
-					<input type="text" name="buscar_categoria" id="buscar_categoria"
-						class="form-control" placeholder="Buscar categoría..."
-						th:field="*{categoria.nombre}" />
-				</div>
-				<div class="col-sm-2">
-					<input type="text" name="id_categoria" id="id_categoria"
-						placeholder="Id Categoria" class="form-control"
-						th:field="*{categoria}" readonly />
-
+					<input type="text" name="categoria" id="categoria"
+						placeholder="Categoria" class="form-control"
+						th:field="*{categoria}" />
 				</div>
 			</div>
 
 			<h3 class="mb-4">Local</h3>
-			<div class="form-group row">
+			<div class="form-group">
 				<div class="col-sm-6">
-					<input type="text" name="buscar_local" id="buscar_local"
-						class="form-control" placeholder="Buscar local por su nombre..."
-						th:field="*{local.nombre}" />
-				</div>
-				<div class="col-sm-2">
-					<input type="text" name="id_local" id="id_local"
-						placeholder="Id Local" class="form-control" readonly
-						th:field="*{local}" />
-
-				</div>
-				<div class="col-sm-4">
-					<input type="text" name="direccion_local" id="direccion_local"
-						placeholder="Dirección Local" class="form-control"
-						th:field="*{local.direccion}" readonly />
+					<select class="form-control" th:field="${locales}"
+						th:errorclass="'form-control alert-danger'">
+						<option th:each="local :${locales}" th:value="${local.id}"
+							th:text="${local.direccion}"></option>
+					</select> <small class="form-text text-danger"
+						th:if="${#fields.hasErrors('locales')}" th:errors="${local.id}"></small>
 				</div>
 			</div>
 
-			<h3 class="mb-4">Fecha Edición</h3>
-			<div class="form-group row">
+			<h3 class="mb-4">Fecha Publicación</h3>
+			<div class="form-group">
 				<div class="col-sm-6">
-					<input class="form-control" type="date" name="fechaEdicion" />
-				</div>
-				<div class="col-sm-6">
-					<input class="form-control" type="text" th:field="*{fechaEdicion}"
-						readonly />
+					<input class="form-control" type="date" name="fecha_publicacion" />
 				</div>
 			</div>
 
-			<h3 class="mb-4">Total de Páginas</h3>
 			<div class="form-group row">
 				<div class="col-sm-6">
-					<input class="form-control" type="number" name="totalPaginas"
-						th:field="*{totalPaginas}" />
-				</div>
-			</div>
-
-			<h3 class="mb-4">Versión</h3>
-			<div class="form-group row">
-				<div class="col-sm-6">
-					<input class="form-control" type="number" name="version"
-						th:field="*{version}" />
-				</div>
-			</div>
-
-			<div class="form-group row mt-5">
-				<div class="col-sm-6">
-					<input class="btn btn-outline-dark btn-block" type="reset"
-						value="Resetear Libro" />
+					<a class="btn btn-light btn-block" th:href="@{'/libros/cancelar/'+${id}}">Cancelar</a>
 				</div>
 				<div class="col-sm-6">
-					<input class="btn btn-outline-success btn-block" type="submit"
-						value="Registrar Libro" />
+					<input class="btn btn-dark btn-block" type="submit"
+						th:value="${editable}?'Guardar Libro':'Registrar Libro'" />
 				</div>
 			</div>
 

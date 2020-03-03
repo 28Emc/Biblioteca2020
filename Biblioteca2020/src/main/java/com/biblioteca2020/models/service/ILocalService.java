@@ -23,6 +23,8 @@ public interface ILocalService {
 	
 	public List<Local> fetchByIdWithLibro();
 	
-	public List<Local> fetchByIdWithEmpresa(Long id);
+	public List<Local> findOnlyById(Long id);
+	
+	public List<Local> fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado) throws Exception;
 
 }

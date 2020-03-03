@@ -29,6 +29,7 @@ public class Libro implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	// TE QUEDASTE AQUÍ - 01/03/2020 - 4:16:00 AM
 	// LIBRO(*):LOCAL(*)
 	//@JsonIgnore
 	@ManyToMany(mappedBy = "libros")
@@ -138,6 +139,22 @@ public class Libro implements Serializable {
 
 	public void setEstado(Boolean estado) {
 		this.estado = estado;
+	}
+
+	public Set<Local> getLocales() {
+		return locales;
+	}
+
+	public void setLocales(Set<Local> locales) {
+		this.locales = locales;
+	}
+
+	public List<Prestamo> getPrestamos() {
+		return prestamos;
+	}
+
+	public void setPrestamos(List<Prestamo> prestamos) {
+		this.prestamos = prestamos;
 	}
 
 	public Libro(Set<Local> locales, @NotEmpty @Size(min = 1, max = 100) String titulo,

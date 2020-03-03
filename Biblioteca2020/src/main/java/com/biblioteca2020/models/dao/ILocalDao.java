@@ -16,7 +16,11 @@ public interface ILocalDao extends CrudRepository<Local, Long> {
 	@Query("select l from Local l join fetch l.libros li")
 	public List<Local> fetchByIdWithLibro();
 	
-	@Query("select l from Local l join fetch l.empresa em where em.id=?1")
-	public List<Local> fetchByIdWithEmpresa(Long id);
+	@Query("select l from Local l where l.id like ?1")
+	public List<Local> findOnlyById(Long id);
+	
+	//ESTA QUERY MUESTRA LOS LOCALES ANEXOS A LA EMPRESA Y AL EMPLEADO QUE ESTÁ LOGUEADO EN ESE MOMENTO
+	@Query("select l from Local l join fetch l.empresa e join fetch e.empleados em where e.id=?1 and em.id=?2")
+	public List<Local> fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado);
 
 }

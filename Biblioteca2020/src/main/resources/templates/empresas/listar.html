@@ -38,18 +38,18 @@
 					<td><a
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"
 						class="btn btn-success btn-xs"
-						th:href="@{/empresas/editar/}+${empresa.id}" th:text="'Editar'"></a></td>
-					<td><a
-						sec:authorize="isAuthenticated() && hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')"
-						class="btn btn-dark btn-xs"
-						th:href="@{/locales/listar/}+${empresa.id}"
-						th:text="'Ver Locales'"></a></td>
+						th:href="@{/empresas/editar/}+${empresa.id}" th:text="'Editar'"></a></td>					
 					<td><a
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"
 						class="btn btn-warning btn-xs"
 						th:href="@{/empresas/deshabilitar/}+${empresa.id}"
 						th:text="'Deshabilitar'"
 						onclick="return confirm('Seguro de querer deshabilitar la empresa?');"></a></td>
+					<td><a
+						sec:authorize="isAuthenticated() && hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')"
+						class="btn btn-dark btn-xs"
+						th:href="@{/locales/listar/}+${empresa.id}"
+						th:text="'Ver Locales'"></a></td>
 					<th:block
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')">
 						<!-- td><a class="btn btn-danger btn-xs"

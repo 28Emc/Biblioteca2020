@@ -92,6 +92,22 @@ public class Empresa implements Serializable {
 		this.estado = estado;
 	}
 
+	public List<Local> getLocales() {
+		return locales;
+	}
+
+	public void setLocales(List<Local> locales) {
+		this.locales = locales;
+	}
+
+	public List<Empleado> getEmpleados() {
+		return empleados;
+	}
+
+	public void setEmpleados(List<Empleado> empleados) {
+		this.empleados = empleados;
+	}
+
 	public Empresa(String razonSocial, String ruc, String direccion, Boolean estado) {
 		super();
 		this.razonSocial = razonSocial;

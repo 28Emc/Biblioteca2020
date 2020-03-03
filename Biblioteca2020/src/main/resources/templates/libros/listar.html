@@ -9,40 +9,41 @@
 	<header th:replace="layout/layout :: header"></header>
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<h1 hidden th:text="${id}"></h1>
 		<p>
-			<a class="btn btn-primary btn-xs" th:href="@{/libros/crear}">Registrar
+			<a class="btn btn-primary btn-xs" th:href="@{/libros/crear/}+${id}">Registrar
 				Libro</a>
 		</p>
 		<table class="table table-responsive">
 			<thead>
 				<tr>
 					<th>Id</th>
-					<th>Nombre</th>
+					<th>Titulo</th>
 					<th>Autor</th>
 					<th>Descripción</th>
 					<th>Categoría</th>
-					<th>Total Páginas</th>
-					<th>Versión</th>
-					<th>Fecha Edición</th>
+					<th>Fecha Publicación</th>
 					<th>Fecha Registro</th>
-					<th>Local</th>
+					<!-- th>Local</th -->
+					<th>Estado</th>
 					<th colspan="2">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr th:each="libro: ${libros}">
 					<td th:text="${libro.id}"></td>
-					<td th:text="${libro.nombre}"></td>
+					<td th:text="${libro.titulo}"></td>
 					<td th:text="${libro.autor}"></td>
 					<td th:text="${libro.descripcion}"></td>
-					<td th:text="${libro.categoria.nombre}"></td>
-					<td th:text="${libro.totalPaginas}"></td>
-					<td th:text="${libro.version}"></td>
-					<td th:text="${libro.fechaEdicion}"></td>
+					<td th:text="${libro.categoria}"></td>
+					<td th:text="${libro.fecha_publicacion}"></td>
 					<td th:text="${libro.fechaRegistro}"></td>
-					<td th:text="${libro.local.nombre} + '-' + ${libro.local.direccion}"></td>
-					<td><a class="btn btn-success btn-xs"
-						th:href="@{/libros/crear/}+${libro.id}" th:text="'Editar'"></a></td>
+					<!-- td th:text="${libro.locales}"></td -->
+					<td th:text="${libro.estado}"></td>
+					<td><a
+						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						class="btn btn-success btn-xs"
+						th:href="@{/libros/editar/}+${libro.id}" th:text="'Editar'"></a></td>
 					<td><a sec:authorize="hasRole('ROLE_ADMIN')"
 						class="btn btn-warning btn-xs"
 						th:href="@{/libros/deshabilitar/}+${libro.id}"

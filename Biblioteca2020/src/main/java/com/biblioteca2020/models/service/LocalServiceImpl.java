@@ -80,8 +80,16 @@ public class LocalServiceImpl implements ILocalService {
 
 	@Override
 	@Transactional
-	public List<Local> fetchByIdWithEmpresa(Long id) {
-		return localDao.fetchByIdWithEmpresa(id);
+	public List<Local> fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado) throws Exception {
+		if (localDao.fetchByIdWithEmpresaWithEmpleado(idEmpresa, idEmpleado).isEmpty()) {
+			throw new Exception("No tienes acceso a otros locales.");
+		}
+		return localDao.fetchByIdWithEmpresaWithEmpleado(idEmpresa, idEmpleado);
+	}
+
+	@Override
+	public List<Local> findOnlyById(Long id) {
+		return localDao.findOnlyById(id);
 	}
 
 }

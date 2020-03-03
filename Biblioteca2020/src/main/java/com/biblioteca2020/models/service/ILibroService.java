@@ -19,6 +19,10 @@ public interface ILibroService {
 	
 	public List<Libro> findByTituloLikeIgnoreCase(String term);
 	
-	public List<Libro> fetchByIdWithLocal();
+	public List<Libro> fetchByIdWithLocales(Long id);
+	
+	public List<Libro> fetchByIdWithLocalWithEmpresaWithEmpleado(Long idLocal, Long idEmpleado) throws Exception;
+
+	public void update(Libro libro);
 
 }
