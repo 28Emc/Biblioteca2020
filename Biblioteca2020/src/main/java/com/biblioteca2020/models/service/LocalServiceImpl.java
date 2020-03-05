@@ -58,11 +58,11 @@ public class LocalServiceImpl implements ILocalService {
 		return localDao.findByDireccionLikeIgnoreCase("%" + term + "%");
 	}
 
-	@Override
+	/*@Override
 	@Transactional(readOnly = true)
 	public List<Local> fetchByIdWithLibro() {
 		return localDao.fetchByIdWithLibro();
-	}
+	}*/
 
 	@Override
 	@Transactional(readOnly = true)

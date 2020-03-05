@@ -43,7 +43,7 @@
 						th:text="'Deshabilitar'"
 						onclick="return confirm('Seguro de querer deshabilitar el local?');"></a></td>
 					<td><a class="btn btn-dark btn-xs"
-						th:href="@{/libros/listar/}+${local.id}">Ver Libros</a></td>
+						th:href="${local.id}+@{/libros/listar}">Ver Libros</a></td>
 				</tr>
 			</tbody>
 		</table>

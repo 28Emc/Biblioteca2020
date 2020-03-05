@@ -9,8 +9,8 @@
 
 				source : function(request, response) {
 					$.ajax({
-						url : "/libros/cargarCategorias/" + request.term,
-						minLength : 2,
+						url : "/categoria/cargarCategorias/" + request.term,
+						minLength : 3,
 						dataType : "json",
 						data : {
 							term : request.term

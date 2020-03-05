@@ -11,15 +11,22 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
+import com.biblioteca2020.models.entity.Categoria;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "libros")
@@ -29,10 +36,12 @@ public class Libro implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// TE QUEDASTE AQUÍ - 01/03/2020 - 4:16:00 AM
 	// LIBRO(*):LOCAL(*)
+	// SIMILAR A USUARIO:ROLES
 	//@JsonIgnore
-	@ManyToMany(mappedBy = "libros")
+	@Size(min = 1)
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "locales_libros", joinColumns = @JoinColumn(name = "local_id"), inverseJoinColumns = @JoinColumn(name = "libro_id"))
 	private Set<Local> locales;
 
 	@NotEmpty
@@ -48,16 +57,16 @@ public class Libro implements Serializable {
 	@Column(length = 255, nullable = true)
 	@Size(min = 1, max = 255)
 	private String descripcion;
-
-	@NotEmpty
-	@Column(length = 50)
-	@Size(min = 1, max = 50)
-	private String categoria;
-
-	@NotEmpty
-	@Temporal(TemporalType.DATE)
-	@DateTimeFormat(pattern = "yyyy-mm-dd")
-	private Date fecha_publicacion;
+	
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "categoria_id")
+	private Categoria categoria;
+	
+	@NotBlank
+	// yyyy-mm-dd
+	@Pattern(regexp = "^[0-9]{4}-(((0[13578]|(10|12))-(0[1-9]|[1-2][0-9]|3[0-1]))|(02-(0[1-9]|[1-2][0-9]))|((0[469]|11)-(0[1-9]|[1-2][0-9]|30)))$")
+	private String fecha_publicacion;
 
 	@Column(name = "fecha_registro")
 	@Temporal(TemporalType.DATE)
@@ -109,19 +118,19 @@ public class Libro implements Serializable {
 		this.descripcion = descripcion;
 	}
 
-	public String getCategoria() {
+	public Categoria getCategoria() {
 		return categoria;
 	}
 
-	public void setCategoria(String categoria) {
+	public void setCategoria(Categoria categoria) {
 		this.categoria = categoria;
 	}
 
-	public Date getFecha_publicacion() {
+	public String getFecha_publicacion() {
 		return fecha_publicacion;
 	}
 
-	public void setFecha_publicacion(Date fecha_publicacion) {
+	public void setFecha_publicacion(String fecha_publicacion) {
 		this.fecha_publicacion = fecha_publicacion;
 	}
 
@@ -159,7 +168,7 @@ public class Libro implements Serializable {
 
 	public Libro(Set<Local> locales, @NotEmpty @Size(min = 1, max = 100) String titulo,
 			@NotEmpty @Size(min = 1, max = 100) String autor, @Size(min = 1, max = 255) String descripcion,
-			@NotEmpty @Size(min = 1, max = 50) String categoria, @NotEmpty Date fecha_publicacion, Date fechaRegistro,
+			@NotEmpty @Size(min = 1, max = 50) Categoria categoria, @NotBlank String fecha_publicacion, Date fechaRegistro,
 			Boolean estado, List<Prestamo> prestamos) {
 		this.locales = locales;
 		this.titulo = titulo;

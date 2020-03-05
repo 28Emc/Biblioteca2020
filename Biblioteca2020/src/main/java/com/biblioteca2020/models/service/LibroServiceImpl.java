@@ -62,9 +62,10 @@ public class LibroServiceImpl implements ILibroService {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public List<Libro> fetchByIdWithLocalWithEmpresaWithEmpleado(Long idLocal, Long idEmpleado) throws Exception {
-		if (libroDao.fetchByIdWithLocalWithEmpresaWithEmpleado(idLocal, idEmpleado).isEmpty()) {
+		if (libroDao.fetchByIdWithLocalWithEmpresaWithEmpleado(idLocal, idEmpleado).isEmpty()
+				|| libroDao.fetchByIdWithLocalWithEmpresaWithEmpleado(idLocal, idEmpleado) == null) {
 			throw new Exception("No tienes acceso a estos libros ya que pertenecen a un local sin permiso de acceso.");
 		}
 		return libroDao.fetchByIdWithLocalWithEmpresaWithEmpleado(idLocal, idEmpleado);

@@ -21,7 +21,7 @@ public interface ILocalService {
 	
 	public Local findByDireccion(String direccion);
 	
-	public List<Local> fetchByIdWithLibro();
+	//public List<Local> fetchByIdWithLibro();
 	
 	public List<Local> findOnlyById(Long id);
 	

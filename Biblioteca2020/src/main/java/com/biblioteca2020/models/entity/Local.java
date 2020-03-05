@@ -1,7 +1,6 @@
 package com.biblioteca2020.models.entity;
 
 import java.io.Serializable;
-import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,15 +8,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import com.biblioteca2020.models.entity.Empresa;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "locales")
@@ -27,20 +23,12 @@ public class Local implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// LOGICA DE DETALLE-LOCAL (DESPUES DE VER-LOCALES)
-	// -EN EL FORM SELECCIONO EL NOMBRE DEL LIBRO (CAPTURO ID),
-	// EN EL CONTROLLER BUSCO EL LIBRO POR ESE ID,
-	// BUSCO EL LOCAL SEGUN EL ID DE ESE MISMO LOCAL,
-	// LOCAL.ADDLIBROS(['AQUI VA EL LIBRO ENCONTRADO AL INICIO'])
-	// GUARDO CON SAVE() EL LOCAL
-
 	// LOCAL(*):LIBRO(*)
-	@ManyToMany
-	//@JsonIgnore
-	@JoinTable(name = "locales_libros", joinColumns = @JoinColumn(name = "local_id"), inverseJoinColumns = @JoinColumn(name = "libro_id"))
-	private Set<Libro> libros;
-	
-	//@JsonIgnore
+	// @ManyToMany
+	// @JsonIgnore
+	// private Set<Libro> libros;
+
+	// @JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "empresa_id", nullable = false)
 	private Empresa empresa;
@@ -101,34 +89,35 @@ public class Local implements Serializable {
 		this.estado = estado;
 	}
 
-	public Set<Libro> getLibros() {
-		return libros;
-	}
-
-	public void setLibros(Set<Libro> libros) {
-		this.libros = libros;
-	}
+	/*
+	 * public Set<Libro> getLibros() { return libros; }
+	 * 
+	 * public void setLibros(Set<Libro> libros) { this.libros = libros; }
+	 */
 
 	public Local() {
 	}
 
-	public Local(Set<Libro> libros, Empresa empresa, @Size(min = 10, max = 100) String direccion,
+	public Local(
+			// Set<Libro> libros,
+			Empresa empresa, @Size(min = 10, max = 100) String direccion,
 			@Size(min = 1, max = 255) String observaciones, Boolean estado) {
 		super();
-		this.libros = libros;
+		// this.libros = libros;
 		this.empresa = empresa;
 		this.direccion = direccion;
 		this.observaciones = observaciones;
 		this.estado = estado;
 	}
 
+	// EN ESTA CLASE EL MÉTODO HASHCODE NO FUNCIONA Y CAUSA UN ERROR DE
+	// STACKOVERFLOW
+
 	@Override
 	public String toString() {
-		return "Local [id=" + id + ", libros=" + libros + ", empresa=" + empresa.getId() + ", direccion=" + direccion
-				+ ", observaciones=" + observaciones + ", estado=" + estado + "]";
+		return "Local [id=" + id + ", empresa=" + empresa + ", direccion=" + direccion + ", observaciones="
+				+ observaciones + ", estado=" + estado + "]";
 	}
-	
-	// EN ESTA CLASE EL MÉTODO HASHCODE NO FUNCIONA Y CAUSA UN ERROR DE STACKOVERFLOW
 
 	@Override
 	public boolean equals(Object obj) {
@@ -158,11 +147,6 @@ public class Local implements Serializable {
 			if (other.id != null)
 				return false;
 		} else if (!id.equals(other.id))
-			return false;
-		if (libros == null) {
-			if (other.libros != null)
-				return false;
-		} else if (!libros.equals(other.libros))
 			return false;
 		if (observaciones == null) {
 			if (other.observaciones != null)

@@ -9,9 +9,9 @@
 	<header th:replace="layout/layout :: header"></header>
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<h1 hidden th:text="${id}"></h1>
+		<h1 hidden th:text="${idLocal}"></h1>
 		<p>
-			<a class="btn btn-primary btn-xs" th:href="@{/libros/crear/}+${id}">Registrar
+			<a class="btn btn-primary btn-xs" th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/crear/'}">Registrar
 				Libro</a>
 		</p>
 		<table class="table table-responsive">
@@ -35,7 +35,7 @@
 					<td th:text="${libro.titulo}"></td>
 					<td th:text="${libro.autor}"></td>
 					<td th:text="${libro.descripcion}"></td>
-					<td th:text="${libro.categoria}"></td>
+					<td th:text="${libro.categoria.nombre}"></td>
 					<td th:text="${libro.fecha_publicacion}"></td>
 					<td th:text="${libro.fechaRegistro}"></td>
 					<!-- td th:text="${libro.locales}"></td -->
@@ -43,10 +43,10 @@
 					<td><a
 						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
 						class="btn btn-success btn-xs"
-						th:href="@{/libros/editar/}+${libro.id}" th:text="'Editar'"></a></td>
+						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/editar/'}+${libro.id}" th:text="'Editar'"></a></td>
 					<td><a sec:authorize="hasRole('ROLE_ADMIN')"
 						class="btn btn-warning btn-xs"
-						th:href="@{/libros/deshabilitar/}+${libro.id}"
+						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/deshabilitar/'}+${libro.id}"
 						th:text="'Deshabilitar'"
 						onclick="return confirm('Seguro de querer deshabilitar el libro?');"></a></td>
 				</tr>

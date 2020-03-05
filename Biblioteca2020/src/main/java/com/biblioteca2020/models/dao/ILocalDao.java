@@ -13,10 +13,10 @@ public interface ILocalDao extends CrudRepository<Local, Long> {
 	
 	public Local findByDireccion(String direccion);
 
-	@Query("select l from Local l join fetch l.libros li")
-	public List<Local> fetchByIdWithLibro();
+	/*@Query("select l from Local l join fetch l.libros li")
+	public List<Local> fetchByIdWithLibro();*/
 	
-	@Query("select l from Local l where l.id like ?1")
+	@Query("select l from Local l where l.id=?1")
 	public List<Local> findOnlyById(Long id);
 	
 	//ESTA QUERY MUESTRA LOS LOCALES ANEXOS A LA EMPRESA Y AL EMPLEADO QUE ESTÁ LOGUEADO EN ESE MOMENTO
