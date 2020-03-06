@@ -12,23 +12,33 @@ public class CategoriaServiceImpl implements ICategoriaService {
 
 	@Autowired
 	private ICategoriaDao categoriaDao;
-	
-	@Override	
+
+	@Override
 	@Transactional(readOnly = true)
 	public List<Categoria> findAll() {
 		return (List<Categoria>) categoriaDao.findAll();
 	}
 
+	public boolean verificarCategoria(Categoria categoria) throws Exception {
+		Categoria categoriaEncontrada = categoriaDao.findByNombre(categoria.getNombre());
+		if (categoriaEncontrada != null) {
+			throw new Exception("La categoría ya existe.");
+		}
+		return true;
+	}
+
 	@Override
 	@Transactional
-	public void save(Categoria categoria) {
-		categoriaDao.save(categoria);
+	public void save(Categoria categoria) throws Exception {
+		if (verificarCategoria(categoria)) {
+			categoriaDao.save(categoria);
+		}
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Categoria findOne(Long id) {
-		return categoriaDao.findById(id).orElse(null);
+	public Categoria findOne(Long id) throws Exception {
+		return categoriaDao.findById(id).orElseThrow(() -> new Exception("La categoría no exsiste."));
 	}
 
 	@Override
@@ -47,6 +57,16 @@ public class CategoriaServiceImpl implements ICategoriaService {
 	@Transactional(readOnly = true)
 	public List<Categoria> findByNombreLikeIgnoreCase(String term) {
 		return categoriaDao.findByNombreLikeIgnoreCase("%" + term + "%");
+	}
+
+	@Override
+	public void update(Categoria categoria) {
+		categoriaDao.save(categoria);
+	}
+
+	@Override
+	public Categoria findByNombre(String categoria) {
+		return categoriaDao.findByNombre(categoria);
 	}
 
 }

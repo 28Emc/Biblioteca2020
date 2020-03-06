@@ -63,7 +63,7 @@ public class LibroController {
 			return "/libros/listar";
 		} catch (Exception e) {
 			model.addAttribute("error", e.getMessage());
-			return "/home";
+			return "/libros/listar";
 		}
 	}
 
@@ -79,7 +79,7 @@ public class LibroController {
 			return "redirect:/locales/listar/" + idLocal + "/libros/listar";
 		} catch (Exception e) {
 			modelMap.addAttribute("error", e.getMessage());
-			return "/home";
+			return "/libros/listar";
 		}
 	}
 
@@ -119,7 +119,6 @@ public class LibroController {
 			return "/libros/crear";
 		}
 		try {
-			libro.setEstado(true);
 			libroService.save(libro);
 			flash.addFlashAttribute("success",
 					"El libro ha sido registrado en la base datos (Nombre '" + libro.getTitulo() + "').");
@@ -171,7 +170,6 @@ public class LibroController {
 			return "/libros/editar";
 		}
 		try {
-			libro.setEstado(true);
 			libroService.update(libro);
 			flash.addFlashAttribute("success",
 					"El libro con código " + libro.getTitulo() + " ha sido actualizado en la base de datos.");

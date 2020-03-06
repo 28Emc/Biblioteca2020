@@ -10,4 +10,6 @@ public interface ICategoriaDao extends CrudRepository<Categoria, Long> {
 
 	public List<Categoria> findByNombreLikeIgnoreCase(String string);
 	
+	public Categoria findByNombre(String categoria);
+	
 }

@@ -1,6 +1,7 @@
 package com.biblioteca2020.models.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import com.biblioteca2020.models.entity.Local;
@@ -15,6 +16,8 @@ public interface ILocalDao extends CrudRepository<Local, Long> {
 
 	/*@Query("select l from Local l join fetch l.libros li")
 	public List<Local> fetchByIdWithLibro();*/
+	
+	public Optional<Local> findById(Long id);
 	
 	@Query("select l from Local l where l.id=?1")
 	public List<Local> findOnlyById(Long id);

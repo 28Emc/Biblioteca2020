@@ -1,6 +1,7 @@
 package com.biblioteca2020.models.service;
 
 import java.util.List;
+
 import com.biblioteca2020.models.entity.Local;
 
 public interface ILocalService {
@@ -14,6 +15,8 @@ public interface ILocalService {
 	public Local findOne(Long id) throws Exception;
 
 	public void delete(Long id);
+	
+	public Local findById(Long id) throws Exception;
 	
 	public List<Local> findByEstado(Boolean estado);
 

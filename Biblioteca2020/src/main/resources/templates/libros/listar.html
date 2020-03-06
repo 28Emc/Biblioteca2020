@@ -11,10 +11,11 @@
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<h1 hidden th:text="${idLocal}"></h1>
 		<p>
-			<a class="btn btn-primary btn-xs" th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/crear/'}">Registrar
+			<a class="btn btn-primary btn-xs"
+				th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/crear/'}">Registrar
 				Libro</a>
 		</p>
-		<table class="table table-responsive">
+		<table class="table table-responsive" th:if="${libros}!=null">
 			<thead>
 				<tr>
 					<th>Id</th>
@@ -24,7 +25,6 @@
 					<th>Categoría</th>
 					<th>Fecha Publicación</th>
 					<th>Fecha Registro</th>
-					<!-- th>Local</th -->
 					<th>Estado</th>
 					<th colspan="2">Opciones</th>
 				</tr>
@@ -38,12 +38,12 @@
 					<td th:text="${libro.categoria.nombre}"></td>
 					<td th:text="${libro.fecha_publicacion}"></td>
 					<td th:text="${libro.fechaRegistro}"></td>
-					<!-- td th:text="${libro.locales}"></td -->
 					<td th:text="${libro.estado}"></td>
 					<td><a
 						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
 						class="btn btn-success btn-xs"
-						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/editar/'}+${libro.id}" th:text="'Editar'"></a></td>
+						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/editar/'}+${libro.id}"
+						th:text="'Editar'"></a></td>
 					<td><a sec:authorize="hasRole('ROLE_ADMIN')"
 						class="btn btn-warning btn-xs"
 						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/deshabilitar/'}+${libro.id}"
@@ -52,6 +52,7 @@
 				</tr>
 			</tbody>
 		</table>
+		<h1 th:if="${libros}==null">No hay libros en este local</h1>
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>

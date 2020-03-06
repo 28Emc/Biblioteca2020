@@ -28,7 +28,7 @@
 					<th>DNI</th>
 					<th>Celular</th>
 					<th>Fecha Registro</th>
-					<th>Username</th>
+					<th sec:authorize="hasRole('ROLE_ADMIN')">Username</th>
 					<th>Estado</th>
 					<th sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"
 						colspan="2">Opciones</th>
@@ -46,7 +46,7 @@
 					<td th:text="${empleado.nroDocumento}"></td>
 					<td th:text="${empleado.celular}"></td>
 					<td th:text="${empleado.fecha_registro}"></td>
-					<td th:text="${empleado.username}"></td>
+					<td th:text="${empleado.username}" sec:authorize="hasRole('ROLE_ADMIN')"></td>
 					<td th:text="${empleado.estado}"></td>
 					<td sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"><a
 						class="btn btn-success btn-xs"

@@ -24,8 +24,7 @@
 					<th>Dirección</th>
 					<th>Ruc</th>
 					<th>Estado</th>
-					<th sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')" colspan="3">Opciones</th>
-					<th sec:authorize="isAuthenticated() && hasRole('ROLE_SUPERVISOR')">Opciones</th>
+					<th colspan="3">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -50,13 +49,6 @@
 						class="btn btn-dark btn-xs"
 						th:href="@{/locales/listar/}+${empresa.id}"
 						th:text="'Ver Locales'"></a></td>
-					<th:block
-						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')">
-						<!-- td><a class="btn btn-danger btn-xs"
-						th:href="@{/empresas/eliminar/}+${empresa.id}"
-						th:text="'Eliminar'"
-						onclick="return confirm('Seguro de querer eliminar la empresa?');"></a></td -->
-					</th:block>
 				</tr>
 			</tbody>
 		</table>

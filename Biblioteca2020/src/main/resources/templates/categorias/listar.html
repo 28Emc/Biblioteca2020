@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container-fluid my-5">
+		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<p sec:authorize="hasRole('ROLE_ADMIN')">
+			<a class="btn btn-primary btn-xs" th:href="@{/categorias/crear}">Crear
+				Categoría</a>
+		</p>
+		<table class="table table-responsive">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Nombre</th>
+					<th>Estado</th>
+					<th:block sec:authorize="hasRole('ROLE_ADMIN')">
+						<th colspan="2">Opciones</th>
+					</th:block>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="categoria: ${categorias}">
+					<td th:text="${categoria.id}"></td>
+					<td th:text="${categoria.nombre}"></td>
+					<td th:text="${categoria.estado}"></td>
+					<td sec:authorize="hasRole('ROLE_ADMIN')"><a
+						class="btn btn-success btn-xs"
+						th:href="@{/categorias/crear/}+${categoria.id}" th:text="'Editar'"></a></td>
+					<td sec:authorize="hasRole('ROLE_ADMIN')"><a
+						class="btn btn-warning btn-xs"
+						th:href="@{/categorias/deshabilitar/}+${categoria.id}"
+						th:text="'Deshabilitar'"
+						onclick="return confirm('Seguro de querer deshabilitar la categoría?');"></a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+
+</body>
+</html>

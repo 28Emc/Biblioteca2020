@@ -22,14 +22,14 @@
 					<li class="nav-item"><a class="nav-link" th:href="@{/home}">Inicio
 					</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"
+						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
 						th:href="@{/empresas/listar}">Empresa</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
 						th:href="@{/empleados/listar}">Empleados</a></li>
-					<!-- li class="nav-item"><a class="nav-link"
+					<li class="nav-item"><a class="nav-link"
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
-						th:href="@{/locales/listar}">Locales</a></li -->
+						th:href="@{/categorias/listar}">Categorias</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO')"
 						th:href="@{/libros/listar}">Libros(?)</a></li>
@@ -95,7 +95,8 @@
 
 	<footer th:fragment="footer" class="container-fluid">
 		<span class="text-muted">Biblioteca ©2020 </span>
-		<p sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
+		<p
+			sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
 			Usuario: <span sec:authentication="name"></span> | Rol: <span
 				sec:authentication="principal.authorities"></span>
 		</p>

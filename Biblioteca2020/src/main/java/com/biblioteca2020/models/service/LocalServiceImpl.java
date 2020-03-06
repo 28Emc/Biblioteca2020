@@ -58,11 +58,12 @@ public class LocalServiceImpl implements ILocalService {
 		return localDao.findByDireccionLikeIgnoreCase("%" + term + "%");
 	}
 
-	/*@Override
-	@Transactional(readOnly = true)
-	public List<Local> fetchByIdWithLibro() {
-		return localDao.fetchByIdWithLibro();
-	}*/
+	/*
+	 * @Override
+	 * 
+	 * @Transactional(readOnly = true) public List<Local> fetchByIdWithLibro() {
+	 * return localDao.fetchByIdWithLibro(); }
+	 */
 
 	@Override
 	@Transactional(readOnly = true)
@@ -88,8 +89,15 @@ public class LocalServiceImpl implements ILocalService {
 	}
 
 	@Override
+	@Transactional
 	public List<Local> findOnlyById(Long id) {
 		return localDao.findOnlyById(id);
+	}
+
+	@Override
+	@Transactional
+	public Local findById(Long id) throws Exception {
+		return localDao.findById(id).orElseThrow(() -> new Exception("El local no existe."));
 	}
 
 }

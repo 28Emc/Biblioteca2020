@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
@@ -35,6 +36,11 @@ public class Categoria implements Serializable {
 			cascade = CascadeType.ALL, 
 			fetch = FetchType.LAZY)
 	private List<Libro> libros;
+	
+	@PrePersist
+	public void prePersist() {
+		estado = true;
+	}
 
 	public Long getId() {
 		return id;

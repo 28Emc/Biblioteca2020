@@ -54,9 +54,17 @@ public class LocalController {
 	public String listarLocalesPorEmpresa(@PathVariable(value = "id") Long id, Model model, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		List<Local> locales;
+		// VALIDO QUE EL LOCAL EXISTE
+		try {
+			localService.findOne(id);
+		} catch (Exception e1) {
+			model.addAttribute("error", e1.getMessage());
+			return "/home";
+		}
+		// VALIDO QUE TENGA ACCESO AL LOCAL
 		try {
 			locales = localService.fetchByIdWithEmpresaWithEmpleado(id, empleado.getId());
-			model.addAttribute("titulo", "Listado de Locales de '"  + empleado.getEmpresa().getRazonSocial() + "'");
+			model.addAttribute("titulo", "Listado de Locales de '" + empleado.getEmpresa().getRazonSocial() + "'");
 			model.addAttribute("locales", locales);
 			return "/locales/listar";
 		} catch (Exception e) {
@@ -116,7 +124,6 @@ public class LocalController {
 			return "/locales/crear";
 		}
 		try {
-			local.setEstado(true);
 			localService.save(local);
 			flash.addFlashAttribute("success",
 					"El local ha sido registrado en la base datos (Código " + local.getId() + ").");
