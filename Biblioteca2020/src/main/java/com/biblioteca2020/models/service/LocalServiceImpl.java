@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.biblioteca2020.models.dao.ILocalDao;
+import com.biblioteca2020.models.entity.Empresa;
 import com.biblioteca2020.models.entity.Local;
 
 @Service
@@ -98,6 +99,11 @@ public class LocalServiceImpl implements ILocalService {
 	@Transactional
 	public Local findById(Long id) throws Exception {
 		return localDao.findById(id).orElseThrow(() -> new Exception("El local no existe."));
+	}
+
+	@Override
+	public Local findFirstByEmpresa(Empresa empresa) {
+		return localDao.findFirstByEmpresa(empresa);
 	}
 
 }

@@ -44,8 +44,8 @@ public class Empresa implements Serializable {
 	private List<Local> locales;
 	
 	// EMPRESA(1):EMPLEADO(*)
-	@OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<Empleado> empleados;
+	/*@OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Empleado> empleados;*/
 
 	@PrePersist
 	public void prePersist() {
@@ -100,13 +100,13 @@ public class Empresa implements Serializable {
 		this.locales = locales;
 	}
 
-	public List<Empleado> getEmpleados() {
+	/*public List<Empleado> getEmpleados() {
 		return empleados;
 	}
 
 	public void setEmpleados(List<Empleado> empleados) {
 		this.empleados = empleados;
-	}
+	}*/
 
 	public Empresa(String razonSocial, String ruc, String direccion, Boolean estado) {
 		super();

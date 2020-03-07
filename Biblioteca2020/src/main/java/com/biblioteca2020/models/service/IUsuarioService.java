@@ -10,8 +10,6 @@ public interface IUsuarioService {
 	public Usuario findById(Long id) throws Exception;
 
 	public Usuario findByUsername(String username);
-
-	public Usuario findByUsernameAndEstado(String username, boolean estado);
 	
 	public Usuario findByNroDocumento(String nroDocumento);
 		

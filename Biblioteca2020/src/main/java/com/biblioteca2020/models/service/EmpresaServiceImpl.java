@@ -73,9 +73,9 @@ public class EmpresaServiceImpl implements IEmpresaService {
 		empresaDao.save(empresa);
 	}
 
-	@Override
-	public Empresa fetchByIdWithEmpleado(Long id) {
-		return empresaDao.fetchByIdWithEmpleado(id);
-	}
+	/*@Override
+	public Empresa fetchByIdWithLocalWithEmpleado(Long id) {
+		return empresaDao.fetchByIdWithLocalWithEmpleado(id);
+	}*/
 
 }

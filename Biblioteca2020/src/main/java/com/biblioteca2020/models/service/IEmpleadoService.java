@@ -10,7 +10,7 @@ public interface IEmpleadoService {
 
 	public List<Empleado> findAll();
 	
-	public List<Empleado> fetchByIdWithEmpresa(Long id);
+	public List<Empleado> fetchByIdWithLocalWithEmpresa(Long id);
 	
 	public List<Empleado> fetchByIdWithRoles();
 	

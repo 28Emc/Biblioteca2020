@@ -2,6 +2,7 @@ package com.biblioteca2020.models.service;
 
 import java.util.List;
 
+import com.biblioteca2020.models.entity.Empresa;
 import com.biblioteca2020.models.entity.Local;
 
 public interface ILocalService {
@@ -27,6 +28,8 @@ public interface ILocalService {
 	//public List<Local> fetchByIdWithLibro();
 	
 	public List<Local> findOnlyById(Long id);
+	
+	public Local findFirstByEmpresa(Empresa empresa);
 	
 	public List<Local> fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado) throws Exception;
 

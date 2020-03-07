@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -27,12 +28,18 @@ public class JpaUserDetailsService implements UserDetailsService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+	public UserDetails loadUserByUsername(String username)
+			throws UsernameNotFoundException, DisabledException {
 		Usuario usuario = usuarioDao.findByUsername(username);
 
 		if (usuario == null) {
 			logger.error("No existe el usuario '" + username + "'");
-			throw new UsernameNotFoundException("Username " + username + " no existe en el sistema.");
+			throw new UsernameNotFoundException("El usuario '" + username + "' no existe en el sistema.");
+		}
+		// LLAMO A LA EXCEPCIÓN DE USUARIO DESHABILITADO (DisabledException) PARA MANDAR UN ERROR A LA VISTA DEL LOGIN
+		if (usuario.getEstado() == false) {
+			logger.error("Error: Lo sentimos, '" + username + "', su cuenta ha sido deshabilitada.");
+			throw new DisabledException("Lo sentimos, '" + username + "', su cuenta ha sido deshabilitada.");
 		}
 
 		List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
@@ -50,5 +57,5 @@ public class JpaUserDetailsService implements UserDetailsService {
 		return new User(usuario.getUsername(), usuario.getPassword(), usuario.getEstado(), true, true, true,
 				authorities);
 	}
-	
+
 }

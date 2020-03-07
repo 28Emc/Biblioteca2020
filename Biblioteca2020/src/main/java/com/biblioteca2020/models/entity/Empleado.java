@@ -47,6 +47,12 @@ public class Empleado implements Serializable {
 	// @JsonIgnore
 	@OneToMany(mappedBy = "empleado", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Prestamo> prestamos;
+	
+	/*@ManyToOne(fetch = FetchType.LAZY)
+	private Empresa empresa;*/
+	
+	@ManyToOne()
+	private Local local;
 
 	@Column(length = 30)
 	@NotBlank
@@ -93,9 +99,6 @@ public class Empleado implements Serializable {
 	private String passwordConfirmacion;
 
 	private Boolean estado;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Empresa empresa;
 
 	@PrePersist
 	public void prePersist() {
@@ -215,12 +218,12 @@ public class Empleado implements Serializable {
 		this.estado = estado;
 	}
 
-	public Empresa getEmpresa() {
-		return empresa;
+	public Local getLocal() {
+		return local;
 	}
 
-	public void setEmpresa(Empresa empresa) {
-		this.empresa = empresa;
+	public void setLocal(Local local) {
+		this.local = local;
 	}
 
 	public Empleado() {
@@ -230,8 +233,9 @@ public class Empleado implements Serializable {
 			@NotBlank @Size(min = 3, max = 30) String nombres, @NotBlank @Size(min = 4, max = 60) String apellidos,
 			@NotBlank @Pattern(regexp = "^\\d{8}$") String nroDocumento, @Size(max = 200) String direccion,
 			@Size(max = 30) @Email String email, @Size(max = 9) String celular, Date fecha_registro,
-			@NotBlank String username, @NotBlank String password, String passwordConfirmacion, Boolean estado,
-			Empresa empresa) {
+			@NotBlank String username, @NotBlank String password, String passwordConfirmacion, Boolean estado
+			, Local local
+			) {
 		this.roles = roles;
 		this.prestamos = prestamos;
 		this.nombres = nombres;
@@ -245,7 +249,7 @@ public class Empleado implements Serializable {
 		this.password = password;
 		this.passwordConfirmacion = passwordConfirmacion;
 		this.estado = estado;
-		this.empresa = empresa;
+		this.local = local;
 	}
 
 	/**

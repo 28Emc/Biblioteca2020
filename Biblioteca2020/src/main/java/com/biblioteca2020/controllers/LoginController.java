@@ -10,20 +10,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LoginController {
 
-	// ESTE METODO SOLO SIRVE PARA VALIDAR EL LOGIN, NO EFECTUA LA PETICION POST DEL LOGUEO
+	// ESTE METODO SOLO SIRVE PARA VALIDAR EL LOGIN, NO EFECTUA LA PETICION POST DEL
+	// LOGUEO
 	@GetMapping({ "/login" })
 	public String login(@RequestParam(value = "error", required = false) String error,
 			@RequestParam(value = "logout", required = false) String logout, Model model, Principal principal,
 			RedirectAttributes flash) {
+
 		if (principal != null) {
 			// SOLAMENTE VALIDO QUE YA INICIÉ SESIÓN
 			flash.addFlashAttribute("info", "Ya has iniciado sesión, " + principal.getName());
 			return "redirect:/home";
-		}
-
-		// VALIDO QUE INGRESO LOS DATOS CORRECTOS
-		if (error != null) {
-			model.addAttribute("error", "Nombre de usuario o contraseña incorrectos. Vuelve a intentarlo.");
 		}
 
 		// MENSAJE DE LOGOUT

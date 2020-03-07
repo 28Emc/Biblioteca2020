@@ -69,17 +69,17 @@
 				</div>
 			</div>
 			
-			<div class="form-group" hidden>
-				<label class="col-sm-2 col-form-label">Empresa</label>
+			<div class="form-group">
+				<label class="col-sm-2 col-form-label">Local</label>
 				<div class="col-sm-6">
 					<select class="form-control"
-						th:field="${empleado.empresa}"
+						th:field="${empleado.local}"
 						th:errorclass="'form-control alert-danger'">
-						<option th:each="emp :${empresaList}" th:value="${emp.id}"
-							th:text="${emp.razonSocial}"></option>
+						<option th:each="local :${localesList}" th:value="${local.id}"
+							th:text="${local.direccion}"></option>
 					</select> <small class="form-text text-danger"
-						th:if="${#fields.hasErrors('empresa')}"
-						th:errors="${emp.id}"></small>
+						th:if="${#fields.hasErrors('local')}"
+						th:errors="${local.id}"></small>
 				</div>
 			</div>
 

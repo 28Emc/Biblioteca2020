@@ -1,6 +1,9 @@
 package com.biblioteca2020.models.entity;
 
 import java.io.Serializable;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
@@ -32,6 +36,10 @@ public class Local implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "empresa_id", nullable = false)
 	private Empresa empresa;
+	
+	// LOCAL(1):EMPLEADO(*)
+	@OneToMany(mappedBy = "local", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Empleado> empleados;
 
 	@NotBlank
 	@Column(length = 100, unique = true)

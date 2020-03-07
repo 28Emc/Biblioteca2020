@@ -16,7 +16,7 @@ public interface IEmpresaDao extends CrudRepository<Empresa, Long> {
 	@Query("select e from Empresa e where e.ruc like %?1% and e.estado=?2")
 	public List<Empresa> findByRucAndEstado(String ruc, boolean estado);
 
-	@Query("select e from Empresa e join fetch e.empleados em where em.id=?1")
-	public Empresa fetchByIdWithEmpleado(Long id);
+	/*@Query("select e from Empresa e join fetch e.locales lo join fetch lo.empleados em where em.id=?1")
+	public Empresa fetchByIdWithLocalWithEmpleado(Long id);*/
 
 }

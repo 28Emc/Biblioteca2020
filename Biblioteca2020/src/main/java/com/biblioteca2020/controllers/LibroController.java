@@ -51,20 +51,33 @@ public class LibroController {
 		// BUSCA EL EMPLEADO LOGUEADO
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		List<Libro> libros;
+		
 		try {
-			// BUSCO LOS LIBROS POR SU LOCAL_ID (DESDE LA PANTALLA ANTERIOR)
-			libros = libroService.fetchByIdWithLocalWithEmpresaWithEmpleado(idLocal, empleado.getId());
-			// BUSCA EL LOCAL POR SU LOCAL_ID (DESDE LA PANTALLA ANTERIOR) PARA PODER ARMAR DE VUELTA LA RUTA DE ESE LOCAL
+			// libros = libroService.fetchByIdWithLocalWithEmpresaWithEmpleado(idLocal,
+			// empleado.getId());
+			// BUSCA EL LOCAL POR SU LOCAL_ID (DESDE LA PANTALLA ANTERIOR) PARA PODER ARMAR
+			// DE VUELTA LA RUTA DE ESE LOCAL
 			Local local = localService.findOne(idLocal);
-			model.addAttribute("libros", libros);
 			// MANDO A LA VISTA EL ID PARA FUTUROS USOS
 			model.addAttribute("idLocal", idLocal);
 			model.addAttribute("titulo", "Listado de Libros de '" + local.getDireccion() + "'");
-			return "/libros/listar";
+			//return "/libros/listar";
 		} catch (Exception e) {
 			model.addAttribute("error", e.getMessage());
-			return "/libros/listar";
+			return "/home";
 		}
+		
+		try {
+			// BUSCO LOS LIBROS POR SU LOCAL_ID Y POR EL ID_EMPLEADO (DESDE LA PANTALLA ANTERIOR)
+			libros = libroService.fetchByIdWithLocalesWithEmpleado(idLocal, empleado.getId());
+			model.addAttribute("libros", libros);
+			//return "/libros/listar";
+		} catch (Exception e1) {
+			model.addAttribute("error", e1.getMessage());
+			return "/home";
+		}		
+		
+		return "/libros/listar";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
@@ -72,7 +85,10 @@ public class LibroController {
 	public String cancelar(@PathVariable(value = "idLocal") Long idLocal, ModelMap modelMap, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		try {
-			List<Libro> libros = libroService.fetchByIdWithLocalWithEmpresaWithEmpleado(idLocal, empleado.getId());
+			// List<Libro> libros =
+			// libroService.fetchByIdWithLocalWithEmpresaWithEmpleado(idLocal,
+			// empleado.getId());
+			List<Libro> libros = libroService.fetchByIdWithLocalesWithEmpleado(idLocal, empleado.getId());
 			modelMap.put("libros", libros);
 			// RECUPERO EL ID_LOCAL DESDE EL LISTADO PARA REGRESAR
 			modelMap.put("idLocal", idLocal);
@@ -107,9 +123,10 @@ public class LibroController {
 	public String crearLibro(@PathVariable(value = "idLocal") Long idLocal, @Valid Libro libro, BindingResult result,
 			Model model, SessionStatus status, RedirectAttributes flash, Principal principal) {
 		model.addAttribute("idLocal", idLocal);
-		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		Empresa empresaLocales = empresaService.fetchByIdWithEmpleado(empleado.getId());
-		model.addAttribute("empresaLocales", empresaLocales);
+		// Empleado empleado = empleadoService.findByUsername(principal.getName());
+		// Empresa empresaLocales =
+		// empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
+		// model.addAttribute("empresaLocales", empresaLocales);
 		if (result.hasErrors()) {
 			List<Local> locales = localService.findOnlyById(idLocal);
 			model.addAttribute("titulo", "Registro de Libro");

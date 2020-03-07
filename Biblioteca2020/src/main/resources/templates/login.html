@@ -10,19 +10,17 @@
 			<span aria-hidden="true">&times;</span>
 		</button>
 	</div>
-	<div class="alert alert-danger alert-dismissible fade show"
-		role="alert" th:if="${error!=null}" th:text="${error}">
-		<button type="button" class="close" data-dismiss="alert"
-			aria-label="Close">
-			<span aria-hidden="true">&times;</span>
-		</button>
-	</div>
 	<div class="alert alert-info alert-dismissible fade show" role="alert"
 		th:if="${info!=null}" th:text="${info}">
 		<button type="button" class="close" data-dismiss="alert"
 			aria-label="Close">
 			<span aria-hidden="true">&times;</span>
 		</button>
+	</div>
+
+	<div class="alert alert-danger alert-dismissible fade show"
+		th:if="${param.error}"
+		th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}">
 	</div>
 
 	<div class="container py-4">

@@ -64,7 +64,7 @@ public class LocalController {
 		// VALIDO QUE TENGA ACCESO AL LOCAL
 		try {
 			locales = localService.fetchByIdWithEmpresaWithEmpleado(id, empleado.getId());
-			model.addAttribute("titulo", "Listado de Locales de '" + empleado.getEmpresa().getRazonSocial() + "'");
+			model.addAttribute("titulo", "Listado de Locales de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
 			model.addAttribute("locales", locales);
 			return "/locales/listar";
 		} catch (Exception e) {
@@ -93,7 +93,8 @@ public class LocalController {
 	@GetMapping("/cancelar")
 	public String cancelar(ModelMap modelMap, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		Empresa empresaLocales = empresaService.fetchByIdWithEmpleado(empleado.getId());
+		Empresa empresaLocales = empleado.getLocal().getEmpresa();
+		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		modelMap.put("empresaLocales", empresaLocales);
 		return "redirect:/locales/listar/" + empresaLocales.getId();
 	}
@@ -105,7 +106,8 @@ public class LocalController {
 		model.put("local", new Local());
 		// AQUÍ TENGO QUE LLAMAR A LOS DATOS DE LA EMPRESA DE ESE LOCAL
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		Empresa empresaLocales = empresaService.fetchByIdWithEmpleado(empleado.getId());
+		Empresa empresaLocales = empleado.getLocal().getEmpresa();
+		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		model.put("empresaLocales", empresaLocales);
 		return "/locales/crear";
 	}
@@ -115,7 +117,8 @@ public class LocalController {
 	public String crearLocal(@Valid Local local, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		Empresa empresaLocales = empresaService.fetchByIdWithEmpleado(empleado.getId());
+		Empresa empresaLocales = empleado.getLocal().getEmpresa();
+		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		model.addAttribute("empresaLocales", empresaLocales);
 		if (result.hasErrors()) {
 			model.addAttribute("titulo", "Formulario de Local");
@@ -146,7 +149,8 @@ public class LocalController {
 		modelMap.put("editable", true);
 		modelMap.put("titulo", "Modificar Local");
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		Empresa empresaLocales = empresaService.fetchByIdWithEmpleado(empleado.getId());
+		Empresa empresaLocales = empleado.getLocal().getEmpresa();
+		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		modelMap.put("empresaLocales", empresaLocales);
 		try {
 			local = localService.findOne(id);
@@ -163,7 +167,8 @@ public class LocalController {
 	public String guardarLocal(@Valid Local local, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Map<String, Object> modelMap, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		Empresa empresaLocales = empresaService.fetchByIdWithEmpleado(empleado.getId());
+		Empresa empresaLocales = empleado.getLocal().getEmpresa();
+		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		modelMap.put("empresaLocales", empresaLocales);
 		if (result.hasErrors()) {
 			model.addAttribute("local", local);
@@ -201,7 +206,8 @@ public class LocalController {
 			Principal principal) {
 		Local local = null;
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		Empresa empresaLocales = empresaService.fetchByIdWithEmpleado(empleado.getId());
+		Empresa empresaLocales = empleado.getLocal().getEmpresa();
+		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		try {
 			local = localService.findOne(id);
 			local.setEstado(false);

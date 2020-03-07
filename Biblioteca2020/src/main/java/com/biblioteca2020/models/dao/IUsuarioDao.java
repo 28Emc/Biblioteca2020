@@ -14,8 +14,6 @@ public interface IUsuarioDao extends CrudRepository<Usuario, Long> {
 
 	public Usuario findByNroDocumento(String nroDocumento);
 
-	public Usuario findByUsernameAndEstado(String username, boolean estado);
-
 	@Query("select u from Usuario u where u.username not in ?1")
 	public List<Usuario> findByAnotherUsername(String username);
 

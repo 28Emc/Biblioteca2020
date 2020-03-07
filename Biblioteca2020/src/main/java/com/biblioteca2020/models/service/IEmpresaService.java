@@ -11,7 +11,7 @@ public interface IEmpresaService {
 
 	public List<Empresa> findByRucAndEstado(String ruc, boolean estado);
 	
-	public Empresa fetchByIdWithEmpleado(Long id);
+	//public Empresa fetchByIdWithLocalWithEmpleado(Long id);
 	
 	public Empresa findOne(Long id) throws Exception;
 

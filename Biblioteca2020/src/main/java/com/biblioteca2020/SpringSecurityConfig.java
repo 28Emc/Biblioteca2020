@@ -34,6 +34,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private JpaUserDetailsService userDetailsService;
 	
+	// INSTANCIA DE CONFIGURACIÓN DE EMPLEADOS Y ROLES CON ENTIDADES CONTROLADAS CON
+	// JPA
 	@Autowired
 	private JpaEmpleadoDetailsService empleadoDetailsService;
 

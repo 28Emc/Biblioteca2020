@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.IEmpresaService;
+import com.biblioteca2020.models.service.ILocalService;
 import com.biblioteca2020.models.service.IRoleService;
 
 @Controller
@@ -33,6 +34,9 @@ public class EmpleadoController {
 	private IEmpresaService empresaService;
 	
 	@Autowired
+	private ILocalService localService;
+	
+	@Autowired
 	private IRoleService roleService;
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
@@ -41,7 +45,7 @@ public class EmpleadoController {
 		model.addAttribute("empleado", new Empleado());
 		// AQUI TENGO QUE MOSTAR EL LISTADO DE EMPLEADOS DE ESA EMPRESA
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		model.addAttribute("empleados", empleadoService.fetchByIdWithEmpresa(empleado.getEmpresa().getId()));
+		model.addAttribute("empleados", empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getEmpresa().getId()));
 		model.addAttribute("titulo", "Listado de Empleados");
 		return "empleados/listar";
 	}
@@ -57,7 +61,9 @@ public class EmpleadoController {
 	public String crearFormEmpleado(Map<String, Object> modelMap, Principal principal, RedirectAttributes flash) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		try {
-			modelMap.put("empresaList", empresaService.findOne(empleado.getEmpresa().getId()));
+			System.out.println(localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
+			modelMap.put("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
+			//modelMap.put("empresaList", empresaService.findOne(empleado.getLocal().getEmpresa().getId()));
 			modelMap.put("empleado", new Empleado());
 			modelMap.put("roles", roleService.findEmpleadoAndSupervisor());
 			modelMap.put("titulo", "Registro de Empleado");
@@ -76,7 +82,7 @@ public class EmpleadoController {
 		if (result.hasErrors()) {
 			model.addAttribute("empleado", empleado);
 			try {
-				modelMap.put("empresaList", empresaService.findOne(empleadoLogueado.getEmpresa().getId()));
+				modelMap.put("empresaList", empresaService.findOne(empleadoLogueado.getLocal().getEmpresa().getId()));
 			} catch (Exception e) {
 				flash.addFlashAttribute("error", e.getMessage());
 				return "/empleados/crear";
@@ -93,7 +99,7 @@ public class EmpleadoController {
 			return "redirect:/empleados/listar";
 		} catch (Exception e) {
 			try {
-				modelMap.put("empresaList", empresaService.findOne(empleadoLogueado.getEmpresa().getId()));
+				modelMap.put("empresaList", empresaService.findOne(empleadoLogueado.getLocal().getEmpresa().getId()));
 			} catch (Exception e2) {
 				flash.addFlashAttribute("error", e2.getMessage());
 				return "/empleados/crear";
@@ -110,9 +116,9 @@ public class EmpleadoController {
 	@GetMapping("/editar/{id}")
 	public String editarFormEmpleado(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
 			Principal principal, RedirectAttributes flash) {
-		Empleado empleadoLogueado = empleadoService.findByUsername(principal.getName());
+		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		try {
-			modelMap.put("empresaList", empresaService.findOne(empleadoLogueado.getEmpresa().getId()));
+			modelMap.put("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "/empleados/crear";
@@ -140,7 +146,7 @@ public class EmpleadoController {
 		Empleado empleadoLogueado = empleadoService.findByUsername(principal.getName());
 		if (result.hasErrors()) {
 			try {
-				modelMap.put("empresaList", empresaService.findOne(empleadoLogueado.getEmpresa().getId()));
+				modelMap.put("localesList", localService.findFirstByEmpresa(empleadoLogueado.getLocal().getEmpresa()));
 			} catch (Exception e) {
 				flash.addFlashAttribute("error", e.getMessage());
 				return "/empleados/crear";
@@ -159,7 +165,7 @@ public class EmpleadoController {
 			return "redirect:/empleados/listar";
 		} catch (Exception e) {
 			try {
-				modelMap.put("empresaList", empresaService.findOne(empleadoLogueado.getEmpresa().getId()));
+				modelMap.put("localesList", localService.findFirstByEmpresa(empleadoLogueado.getLocal().getEmpresa()));
 			} catch (Exception e2) {
 				flash.addFlashAttribute("error", e2.getMessage());
 				return "/empleados/crear";

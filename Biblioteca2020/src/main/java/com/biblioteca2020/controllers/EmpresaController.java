@@ -44,15 +44,16 @@ public class EmpresaController {
 	 * "empresas/listar"; }
 	 */
 	
-	// AQUI BUSCO EL ID DEL EMPLEADO PARA FILTRAR LA TABLA SEGUN SU EMPRESA DONDE
+	// AQUI BUSCO EL ID DEL EMPLEADO PARA FILTRAR LA TABLA SEGUN SU LOCAL Y EMPRESA DONDE
 	// PERTENECE
 	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@GetMapping(value = "/listar")
 	public String listarEmpresaPorEmpleado(Model model, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		Empresa empresa = empresaService.fetchByIdWithEmpleado(empleado.getId());
-		model.addAttribute("titulo", "Datos de '" + empleado.getEmpresa().getRazonSocial() + "' (RUC "
-				+ empleado.getEmpresa().getRuc() + ")");
+		Empresa empresa = empleado.getLocal().getEmpresa();
+		//Empresa empresa = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
+		model.addAttribute("titulo", "Datos de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "' (RUC "
+				+ empleado.getLocal().getEmpresa().getRuc() + ")");
 		model.addAttribute("empresas", empresa);
 		return "/empresas/listar";
 	}

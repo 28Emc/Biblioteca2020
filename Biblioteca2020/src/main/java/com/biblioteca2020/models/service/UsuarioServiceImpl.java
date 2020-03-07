@@ -19,15 +19,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	private BCryptPasswordEncoder passwordEncoder;
 
 	/*
-	 * MÉTODO PARA BUSCAR TODOS LOS USUARIOS POR SU NOMBRE Y ESTADO.
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public Usuario findByUsernameAndEstado(String username, boolean estado) {
-		return usuarioDao.findByUsernameAndEstado(username, estado);
-	}
-
-	/*
 	 * MÉTODO PARA BUSCAR TODOS LOS USUARIOS.
 	 */
 	@Override
