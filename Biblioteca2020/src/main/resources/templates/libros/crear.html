@@ -8,13 +8,13 @@
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<h1 hidden th:text="${idLocal}"></h1>
-		<form
-			th:action="${editable} ?@{'/locales/listar/'}+${idLocal}+@{/libros/editar} :@{'/locales/listar/'}+${idLocal}+@{/libros/crear/}"
+		<form sec:authorize="hasRole('ROLE_SUPERVISOR')"
+			th:action="${editable} ? @{'/locales/listar/'}+${idLocal}+@{/libros/editar} : @{'/locales/listar/'}+${idLocal}+@{/libros/crear/}"
 			th:object="${libro}" method="post">
-			<h3 class="mb-4">Nombre</h3>
+			<h3 class="mb-4">Título</h3>
 			<div class="form-group">
 				<div class="col-sm-6">
-					<input class="form-control" type="text" name="titulo"
+					<input class="form-control" type="text" name="titulo" placeholder="Título..."
 						th:field="*{titulo}" /> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></small>
 				</div>
@@ -23,7 +23,7 @@
 			<h3 class="mb-4">Autor</h3>
 			<div class="form-group">
 				<div class="col-sm-6">
-					<input class="form-control" type="text" name="autor"
+					<input class="form-control" type="text" name="autor" placeholder="Autor..."
 						th:field="*{autor}" /> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('autor')}" th:errors="*{autor}"></small>
 				</div>
@@ -32,7 +32,7 @@
 			<h3 class="mb-4">Descripción</h3>
 			<div class="form-group">
 				<div class="col-sm-6">
-					<textarea class="form-control" rows="3" name="descripcion"
+					<textarea class="form-control" rows="3" name="descripcion" placeholder="Descripción..."
 						th:field="*{descripcion}" /></textarea>
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('descripcion')}"
@@ -49,7 +49,7 @@
 						th:field="*{categoria.nombre}" />
 
 				</div>
-				<div class="col-sm-2">
+				<div class="col-sm-2" hidden>
 					<input type="text" name="id_categoria" id="id_categoria"
 						placeholder="Id Categoria" class="form-control"
 						th:field="*{categoria}" readonly /> <small
@@ -59,15 +59,14 @@
 				</div>
 			</div>
 
-			<h3 class="mb-4">Local</h3>
-			<div class="form-group">
+			<h3 class="mb-4" hidden>Local</h3>
+			<div class="form-group" hidden>
 				<div class="col-sm-6">
 					<select class="form-control" th:field="*{locales}"
 						th:errorclass="'form-control alert-danger'">
 						<option th:each="local :${locales}" th:value="${local.id}"
 							th:text="${local.direccion}"></option>
-					</select> 
-					<small class="form-text text-danger"
+					</select> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('locales')}" th:errors="*{locales}"></small>
 				</div>
 			</div>
@@ -87,6 +86,93 @@
 				<div class="col-sm-6">
 					<a class="btn btn-light btn-block"
 						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/cancelar/'}">Cancelar</a>
+				</div>
+				<div class="col-sm-6">
+					<input class="btn btn-dark btn-block" type="submit"
+						th:value="${editable}?'Guardar Libro':'Registrar Libro'" />
+				</div>
+			</div>
+
+		</form>
+
+		<form sec:authorize="hasRole('ROLE_ADMIN')"
+			th:action="${editable} ? @{/libros/editar} : @{/libros/crear/}"
+			th:object="${libro}" method="post">
+			<h3 class="mb-4">Título</h3>
+			<div class="form-group">
+				<div class="col-sm-6">
+					<input class="form-control" type="text" name="titulo" placeholder="Título..."
+						th:field="*{titulo}" /> <small class="form-text text-danger"
+						th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></small>
+				</div>
+			</div>
+
+			<h3 class="mb-4">Autor</h3>
+			<div class="form-group">
+				<div class="col-sm-6">
+					<input class="form-control" type="text" name="autor" placeholder="Autor..."
+						th:field="*{autor}" /> <small class="form-text text-danger"
+						th:if="${#fields.hasErrors('autor')}" th:errors="*{autor}"></small>
+				</div>
+			</div>
+
+			<h3 class="mb-4">Descripción</h3>
+			<div class="form-group">
+				<div class="col-sm-6">
+					<textarea class="form-control" rows="3" name="descripcion" placeholder="Descripción..."
+						th:field="*{descripcion}" /></textarea>
+					<small class="form-text text-danger"
+						th:if="${#fields.hasErrors('descripcion')}"
+						th:errors="*{descripcion}"></small>
+				</div>
+			</div>
+
+
+			<h3 class="mb-4">Categoría</h3>
+			<div class="form-group">
+				<div class="col-sm-6">
+					<input type="text" name="buscar_categoria" id="buscar_categoria"
+						class="form-control" placeholder="Buscar categoría..."
+						th:field="*{categoria.nombre}" required />
+
+				</div>
+				<div class="col-sm-2" hidden>
+					<input type="text" name="id_categoria" id="id_categoria"
+						placeholder="Id Categoria" class="form-control"
+						th:field="*{categoria}" readonly /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('categoria')}"
+						th:errors="*{categoria.nombre}"></small>
+				</div>
+			</div>
+
+			<h3 class="mb-4">Local</h3>
+			<div class="form-group">
+				<div class="col-sm-6">
+					<select class="form-control" th:field="*{locales}"
+						multiple="multiple" size="3">
+						<option th:each="local :${locales}" th:value="${local.id}"
+							th:text="${local.direccion}"></option>
+					</select> <small class="form-text text-danger"
+						th:if="${#fields.hasErrors('locales')}" th:errors="*{locales}"></small>
+				</div>
+			</div>
+
+			<h3 class="mb-4">Fecha Publicación</h3>
+			<div class="form-group">
+				<div class="col-sm-6">
+					<input class="form-control" type="text" name="fecha_publicacion"
+						placeholder="yyyy-mm-dd" th:field="*{fecha_publicacion}" /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('fecha_publicacion')}"
+						th:errors="*{fecha_publicacion}"></small>
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<a class="btn btn-light btn-block" th:href="@{'/libros/cancelar/'}"><i
+						class="fas fa-user-shield"></i> Cancelar</a>
 				</div>
 				<div class="col-sm-6">
 					<input class="btn btn-dark btn-block" type="submit"

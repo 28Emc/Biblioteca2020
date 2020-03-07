@@ -18,7 +18,6 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.service.IEmpleadoService;
-import com.biblioteca2020.models.service.IEmpresaService;
 import com.biblioteca2020.models.service.ILocalService;
 import com.biblioteca2020.models.service.IRoleService;
 
@@ -29,13 +28,10 @@ public class EmpleadoController {
 
 	@Autowired
 	private IEmpleadoService empleadoService;
-	
-	@Autowired
-	private IEmpresaService empresaService;
-	
+
 	@Autowired
 	private ILocalService localService;
-	
+
 	@Autowired
 	private IRoleService roleService;
 
@@ -45,7 +41,15 @@ public class EmpleadoController {
 		model.addAttribute("empleado", new Empleado());
 		// AQUI TENGO QUE MOSTAR EL LISTADO DE EMPLEADOS DE ESA EMPRESA
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		model.addAttribute("empleados", empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getEmpresa().getId()));
+		// SI SOY ADMIN, VEO MI REGISTRO, SI NO, LO OCULTO
+		// MÉTODO TEMPORAL, YA QUE EL ADMIN NO VA A PERTENECER A LOS 'EMPLEADOS'
+		if (empleado.getRoles().toString().contains("ROLE_ADMIN")) {
+			model.addAttribute("empleados",
+					empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getEmpresa().getId()));
+		} else {
+			model.addAttribute("empleados",
+					empleadoService.fetchByIdWithLocalWithEmpresaNotAdmin(empleado.getLocal().getEmpresa().getId()));
+		}
 		model.addAttribute("titulo", "Listado de Empleados");
 		return "empleados/listar";
 	}
@@ -63,7 +67,6 @@ public class EmpleadoController {
 		try {
 			System.out.println(localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
 			modelMap.put("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
-			//modelMap.put("empresaList", empresaService.findOne(empleado.getLocal().getEmpresa().getId()));
 			modelMap.put("empleado", new Empleado());
 			modelMap.put("roles", roleService.findEmpleadoAndSupervisor());
 			modelMap.put("titulo", "Registro de Empleado");
@@ -74,15 +77,14 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@PostMapping(value = "/crear")
-	public String crearEmpleado(@Valid Empleado empleado, BindingResult result, Model model, Map<String, Object> modelMap,
-			SessionStatus status, RedirectAttributes flash, Principal principal) {
-		Empleado empleadoLogueado = empleadoService.findByUsername(principal.getName());
+	public String crearEmpleado(@Valid Empleado empleado, BindingResult result, Model model,
+			Map<String, Object> modelMap, SessionStatus status, RedirectAttributes flash, Principal principal) {
 		if (result.hasErrors()) {
 			model.addAttribute("empleado", empleado);
 			try {
-				modelMap.put("empresaList", empresaService.findOne(empleadoLogueado.getLocal().getEmpresa().getId()));
+				modelMap.put("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
 			} catch (Exception e) {
 				flash.addFlashAttribute("error", e.getMessage());
 				return "/empleados/crear";
@@ -91,7 +93,7 @@ public class EmpleadoController {
 			model.addAttribute("titulo", "Registro de Empleado");
 			return "/empleados/crear";
 		}
-		try {			
+		try {
 			empleadoService.save(empleado);
 			flash.addFlashAttribute("success",
 					"El empleado ha sido registrado en la base de datos (Código " + empleado.getId() + ")");
@@ -99,11 +101,11 @@ public class EmpleadoController {
 			return "redirect:/empleados/listar";
 		} catch (Exception e) {
 			try {
-				modelMap.put("empresaList", empresaService.findOne(empleadoLogueado.getLocal().getEmpresa().getId()));
+				modelMap.put("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
 			} catch (Exception e2) {
 				flash.addFlashAttribute("error", e2.getMessage());
 				return "/empleados/crear";
-			}			
+			}
 			model.addAttribute("empleado", empleado);
 			model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
 			model.addAttribute("titulo", "Registro de Empleado");
@@ -117,18 +119,33 @@ public class EmpleadoController {
 	public String editarFormEmpleado(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
 			Principal principal, RedirectAttributes flash) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
+		// AQUI VALIDO SI EL USUARIO LOGUEADO ES ADMIN Y PUEDE EDITAR SU MISMO REGISTRO
+		// EL ADMIN DEBE SER CAMBIADO DE TABLA 'EMPLEADO' A 'USUARIO'
+		try {
+			Empleado empleadoAdmin = empleadoService.findById(id);
+			if (empleadoAdmin.getRoles().toString().contains("ROLE_ADMIN") == true
+					&& empleado.getRoles().toString().contains("ROLE_ADMIN") == false) {
+				flash.addFlashAttribute("error", "Solamente un administrador puede modificar sus propios datos");
+				return "redirect:/empleados/listar";
+			}
+		} catch (Exception e1) {
+			flash.addFlashAttribute("error", e1.getMessage());
+			return "redirect:/empleados/listar";
+		}
+		// FIN VALIDACION ADMIN
+
 		try {
 			modelMap.put("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "/empleados/crear";
 		}
-		
+
 		Empleado empleadoEditable = null;
 		modelMap.put("editable", true);
 		modelMap.put("roles", roleService.findEmpleadoAndSupervisor());
 		modelMap.put("titulo", "Modificar Empleado");
-		
+
 		try {
 			empleadoEditable = empleadoService.findById(id);
 			modelMap.put("empleado", empleadoEditable);
@@ -139,10 +156,10 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@PostMapping(value = "/editar")
 	public String guardarEmpleado(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Map<String, Object> modelMap, Principal principal) {		
+			RedirectAttributes flash, Map<String, Object> modelMap, Principal principal) {
 		Empleado empleadoLogueado = empleadoService.findByUsername(principal.getName());
 		if (result.hasErrors()) {
 			try {
@@ -150,7 +167,7 @@ public class EmpleadoController {
 			} catch (Exception e) {
 				flash.addFlashAttribute("error", e.getMessage());
 				return "/empleados/crear";
-			}			
+			}
 			model.addAttribute("empleado", empleado);
 			model.addAttribute("editable", true);
 			model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
@@ -169,7 +186,7 @@ public class EmpleadoController {
 			} catch (Exception e2) {
 				flash.addFlashAttribute("error", e2.getMessage());
 				return "/empleados/crear";
-			}			
+			}
 			model.addAttribute("empleado", empleado);
 			model.addAttribute("editable", true);
 			model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
@@ -179,7 +196,7 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarEmpleado(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Empleado empleado = null;
@@ -187,7 +204,8 @@ public class EmpleadoController {
 			empleado = empleadoService.findById(id);
 			empleado.setEstado(false);
 			empleadoService.update(empleado);
-			flash.addFlashAttribute("warning", "El empleado con código " + empleado.getId() + " ha sido deshabilitado.");
+			flash.addFlashAttribute("warning",
+					"El empleado con código " + empleado.getId() + " ha sido deshabilitado.");
 			return "redirect:/empleados/listar";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
@@ -196,21 +214,16 @@ public class EmpleadoController {
 	}
 
 	/*
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	@RequestMapping(value = "/eliminar/{id}")
-	public String eliminarEmpleado(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
-		Empleado empleado= null;
-		try {
-			empleado = empleadoService.findById(id);
-			flash.addFlashAttribute("error",
-					"El empleado con código " + empleado.getId() + " ha sido eliminado de la base de datos.");
-			empleadoService.borrarEmpleado(id);
-			return "redirect:/empleados/listar";
-		} catch (Exception e) {
-			flash.addFlashAttribute("error", e.getMessage());
-			System.out.println(e.getMessage());
-			return "redirect:/empleados/listar";
-		}
-	}
-	*/
+	 * @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	 * 
+	 * @RequestMapping(value = "/eliminar/{id}") public String
+	 * eliminarEmpleado(@PathVariable(value = "id") Long id, RedirectAttributes
+	 * flash) { Empleado empleado= null; try { empleado =
+	 * empleadoService.findById(id); flash.addFlashAttribute("error",
+	 * "El empleado con código " + empleado.getId() +
+	 * " ha sido eliminado de la base de datos.");
+	 * empleadoService.borrarEmpleado(id); return "redirect:/empleados/listar"; }
+	 * catch (Exception e) { flash.addFlashAttribute("error", e.getMessage());
+	 * System.out.println(e.getMessage()); return "redirect:/empleados/listar"; } }
+	 */
 }

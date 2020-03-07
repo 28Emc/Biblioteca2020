@@ -12,6 +12,8 @@ public interface IEmpleadoService {
 	
 	public List<Empleado> fetchByIdWithLocalWithEmpresa(Long id);
 	
+	public List<Empleado> fetchByIdWithLocalWithEmpresaNotAdmin(Long id);
+	
 	public List<Empleado> fetchByIdWithRoles();
 	
 	public List<Empleado> fetchByIdWithRolesSupervisor();

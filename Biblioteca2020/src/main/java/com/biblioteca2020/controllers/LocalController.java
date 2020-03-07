@@ -21,7 +21,6 @@ import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Empresa;
 import com.biblioteca2020.models.entity.Local;
 import com.biblioteca2020.models.service.IEmpleadoService;
-import com.biblioteca2020.models.service.IEmpresaService;
 import com.biblioteca2020.models.service.ILocalService;
 
 @Controller
@@ -34,9 +33,6 @@ public class LocalController {
 
 	@Autowired
 	private IEmpleadoService empleadoService;
-
-	@Autowired
-	private IEmpresaService empresaService;
 
 	/*
 	 * @PreAuthorize("hasAnyRole('ROLE_ADMIN')")

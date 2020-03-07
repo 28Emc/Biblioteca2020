@@ -25,15 +25,11 @@
 					<th>Email</th>
 					<th>Celular</th>
 					<th>Fecha Registro</th>
-					<th
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">Username</th>
+					<th sec:authorize="hasRole('ROLE_ADMIN')">Username</th>
 					<th
 						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">Estado</th>
 					<th:block sec:authorize="hasRole('ROLE_ADMIN')">
 						<th colspan="2">Opciones</th>
-					</th:block>
-					<th:block sec:authorize="hasRole('ROLE_SUPERVISOR')">
-						<th colspan="1">Opciones</th>
 					</th:block>
 				</tr>
 			</thead>
@@ -47,15 +43,13 @@
 					<td th:text="${usuario.email}"></td>
 					<td th:text="${usuario.celular}"></td>
 					<td th:text="${usuario.fecha_registro}"></td>
-					<td
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+					<td sec:authorize="hasRole('ROLE_ADMIN')"
 						th:text="${usuario.username}"></td>
 					<td
 						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
 						th:text="${usuario.estado}"></td>
-					<td
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
-						<a class="btn btn-success btn-xs"
+					<td sec:authorize="hasRole('ROLE_ADMIN')"><a
+						class="btn btn-success btn-xs"
 						th:href="@{/usuarios/editar/}+${usuario.id}" th:text="'Editar'"></a>
 					</td>
 					<td sec:authorize="hasRole('ROLE_ADMIN')"><a

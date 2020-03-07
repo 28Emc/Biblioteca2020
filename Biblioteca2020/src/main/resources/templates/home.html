@@ -4,8 +4,18 @@
 <body>
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container py-4">
-		<h1>INICIO DE BIBLIOTECA</h1>
+	<div class="p-3">
+		<h1 class="pb-5">INICIO DE BIBLIOTECA</h1>
+		<div sec:authorize="isAuthenticated()">
+			<h2>
+				Usuario: <span class="text-primary" sec:authentication="name"></span>
+			</h2>
+			<br>
+			<h2>
+				Rol: <span class="text-primary"
+					sec:authentication="principal.authorities"></span>
+			</h2>			
+		</div>
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>

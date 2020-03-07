@@ -79,7 +79,7 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/editar/{id}")
 	public String editarFormUsuario(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
 			RedirectAttributes flash) {
@@ -97,7 +97,7 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Map<String, Object> modelMap) {

@@ -18,6 +18,9 @@ public interface IEmpleadoDao extends CrudRepository<Empleado, Long> {
 	
 	@Query("select e from Empleado e join fetch e.local l join fetch l.empresa em where em.id=?1")
 	public List<Empleado> fetchByIdWithLocalWithEmpresa(Long id);
+	
+	@Query("select e from Empleado e join fetch e.roles r join fetch e.local l join fetch l.empresa em where em.id=?1 and r.authority not like 'ROLE_ADMIN'")
+	public List<Empleado> fetchByIdWithLocalWithEmpresaNotAdmin(Long id);
 
 	@Query("select e from Empleado e join fetch e.roles r where r.authority='ROLE_EMPLEADO'")
 	public List<Empleado> fetchByIdWithRoles();

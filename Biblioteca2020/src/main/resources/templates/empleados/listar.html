@@ -10,7 +10,7 @@
 
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<th:block sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')">
+		<th:block sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
 			<p>
 				<a class="btn btn-primary btn-xs" th:href="@{/empleados/crear}">Crear
 					Empleado</a>
@@ -30,9 +30,7 @@
 					<th>Fecha Registro</th>
 					<th sec:authorize="hasRole('ROLE_ADMIN')">Username</th>
 					<th>Estado</th>
-					<th sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"
-						colspan="2">Opciones</th>
-					<th sec:authorize="isAuthenticated() && hasRole('ROLE_SUPERVISOR')">Opciones</th>
+					<th colspan="3">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -48,11 +46,11 @@
 					<td th:text="${empleado.fecha_registro}"></td>
 					<td th:text="${empleado.username}" sec:authorize="hasRole('ROLE_ADMIN')"></td>
 					<td th:text="${empleado.estado}"></td>
-					<td sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"><a
+					<td sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"><a
 						class="btn btn-success btn-xs"
 						th:href="@{/empleados/editar/}+${empleado.id}" th:text="'Editar'"></a></td>
 					<td
-						sec:authorize="isAuthenticated() && hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
+						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')">
 						<a class="btn btn-warning btn-xs"
 						th:href="@{/empleados/deshabilitar/}+${empleado.id}"
 						th:text="'Deshabilitar'"

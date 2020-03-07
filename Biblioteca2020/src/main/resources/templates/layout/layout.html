@@ -6,6 +6,7 @@
 <title th:text="'Biblioteca | ' + ${titulo}"></title>
 <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
 <link rel="stylesheet" th:href="@{/css/jquery-ui.min.css}" />
+<script src="https://kit.fontawesome.com/8e76a0ff4f.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -31,8 +32,8 @@
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
 						th:href="@{/categorias/listar}">Categorias</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO')"
-						th:href="@{/libros/listar}">Libros(?)</a></li>
+						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"
+						th:href="@{/libros/listar}"><i class="fas fa-user-shield"></i> Libros</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO')"
 						th:href="@{/usuarios/listar}">Usuarios</a></li>
@@ -91,15 +92,9 @@
 
 	</header>
 
-	<div class="container"></div>
 
 	<footer th:fragment="footer" class="container-fluid">
 		<span class="text-muted">Biblioteca ©2020 </span>
-		<p
-			sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
-			Usuario: <span sec:authentication="name"></span> | Rol: <span
-				sec:authentication="principal.authorities"></span>
-		</p>
 		<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
 		<script th:src="@{/js/popper.min.js}"></script>
 		<script th:src="@{/js/bootstrap.min.js}"></script>

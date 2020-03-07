@@ -41,7 +41,7 @@ public class Libro implements Serializable {
 	//@JsonIgnore
 	@Size(min = 1)
 	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "locales_libros", joinColumns = @JoinColumn(name = "local_id"), inverseJoinColumns = @JoinColumn(name = "libro_id"))
+	@JoinTable(name = "locales_libros", joinColumns = @JoinColumn(name = "libro_id"), inverseJoinColumns = @JoinColumn(name = "local_id"))
 	private Set<Local> locales;
 
 	@NotEmpty

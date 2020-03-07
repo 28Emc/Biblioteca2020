@@ -28,15 +28,15 @@ public class JpaUserDetailsService implements UserDetailsService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public UserDetails loadUserByUsername(String username)
-			throws UsernameNotFoundException, DisabledException {
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DisabledException {
 		Usuario usuario = usuarioDao.findByUsername(username);
 
 		if (usuario == null) {
 			logger.error("No existe el usuario '" + username + "'");
 			throw new UsernameNotFoundException("El usuario '" + username + "' no existe en el sistema.");
 		}
-		// LLAMO A LA EXCEPCIÓN DE USUARIO DESHABILITADO (DisabledException) PARA MANDAR UN ERROR A LA VISTA DEL LOGIN
+		// LLAMO A LA EXCEPCIÓN DE USUARIO DESHABILITADO (DisabledException) PARA MANDAR
+		// UN ERROR A LA VISTA DEL LOGIN
 		if (usuario.getEstado() == false) {
 			logger.error("Error: Lo sentimos, '" + username + "', su cuenta ha sido deshabilitada.");
 			throw new DisabledException("Lo sentimos, '" + username + "', su cuenta ha sido deshabilitada.");
