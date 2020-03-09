@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,9 +27,11 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.biblioteca2020.models.entity.Role;
+import lombok.Data;
 
 @Entity
 @Table(name = "empleados")
+@Data
 public class Empleado implements Serializable {
 
 	@Id
@@ -47,10 +48,7 @@ public class Empleado implements Serializable {
 	// @JsonIgnore
 	@OneToMany(mappedBy = "empleado", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Prestamo> prestamos;
-	
-	/*@ManyToOne(fetch = FetchType.LAZY)
-	private Empresa empresa;*/
-	
+
 	@ManyToOne()
 	private Local local;
 
@@ -98,6 +96,7 @@ public class Empleado implements Serializable {
 	@Transient
 	private String passwordConfirmacion;
 
+	@Column(nullable = false)
 	private Boolean estado;
 
 	@PrePersist
@@ -106,155 +105,5 @@ public class Empleado implements Serializable {
 		estado = true;
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Set<Role> getRoles() {
-		return roles;
-	}
-
-	public void setRoles(Set<Role> roles) {
-		this.roles = roles;
-	}
-
-	public List<Prestamo> getPrestamos() {
-		return prestamos;
-	}
-
-	public void setPrestamos(List<Prestamo> prestamos) {
-		this.prestamos = prestamos;
-	}
-
-	public String getNombres() {
-		return nombres;
-	}
-
-	public void setNombres(String nombres) {
-		this.nombres = nombres;
-	}
-
-	public String getApellidos() {
-		return apellidos;
-	}
-
-	public void setApellidos(String apellidos) {
-		this.apellidos = apellidos;
-	}
-
-	public String getNroDocumento() {
-		return nroDocumento;
-	}
-
-	public void setNroDocumento(String nroDocumento) {
-		this.nroDocumento = nroDocumento;
-	}
-
-	public String getDireccion() {
-		return direccion;
-	}
-
-	public void setDireccion(String direccion) {
-		this.direccion = direccion;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getCelular() {
-		return celular;
-	}
-
-	public void setCelular(String celular) {
-		this.celular = celular;
-	}
-
-	public Date getFecha_registro() {
-		return fecha_registro;
-	}
-
-	public void setFecha_registro(Date fecha_registro) {
-		this.fecha_registro = fecha_registro;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getPasswordConfirmacion() {
-		return passwordConfirmacion;
-	}
-
-	public void setPasswordConfirmacion(String passwordConfirmacion) {
-		this.passwordConfirmacion = passwordConfirmacion;
-	}
-
-	public Boolean getEstado() {
-		return estado;
-	}
-
-	public void setEstado(Boolean estado) {
-		this.estado = estado;
-	}
-
-	public Local getLocal() {
-		return local;
-	}
-
-	public void setLocal(Local local) {
-		this.local = local;
-	}
-
-	public Empleado() {
-	}
-
-	public Empleado(@Size(min = 1) Set<Role> roles, List<Prestamo> prestamos,
-			@NotBlank @Size(min = 3, max = 30) String nombres, @NotBlank @Size(min = 4, max = 60) String apellidos,
-			@NotBlank @Pattern(regexp = "^\\d{8}$") String nroDocumento, @Size(max = 200) String direccion,
-			@Size(max = 30) @Email String email, @Size(max = 9) String celular, Date fecha_registro,
-			@NotBlank String username, @NotBlank String password, String passwordConfirmacion, Boolean estado
-			, Local local
-			) {
-		this.roles = roles;
-		this.prestamos = prestamos;
-		this.nombres = nombres;
-		this.apellidos = apellidos;
-		this.nroDocumento = nroDocumento;
-		this.direccion = direccion;
-		this.email = email;
-		this.celular = celular;
-		this.fecha_registro = fecha_registro;
-		this.username = username;
-		this.password = password;
-		this.passwordConfirmacion = passwordConfirmacion;
-		this.estado = estado;
-		this.local = local;
-	}
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-
 }

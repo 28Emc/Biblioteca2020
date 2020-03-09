@@ -7,51 +7,21 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotBlank;
+import lombok.Data;
 
 @Entity
 @Table(name = "authorities")
+@Data
 public class Role implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotEmpty
-	@Column(length = 30)
+	@NotBlank
+	@Column(length = 30, nullable = false)
 	private String authority;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getAuthority() {
-		return authority;
-	}
-
-	public void setAuthority(String authority) {
-		this.authority = authority;
-	}
-
-	public Role(@NotEmpty String authority) {
-		this.authority = authority;
-	}
-
-	public Role() {
-	}
-
-	@Override
-	public String toString() {
-		return "Role [id=" + id + ", authority=" + authority + "]";
-	}
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-
 }

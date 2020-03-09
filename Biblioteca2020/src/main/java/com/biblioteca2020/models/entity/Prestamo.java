@@ -17,9 +17,15 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "prestamos")
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class Prestamo implements Serializable {
 
 	@Id
@@ -46,11 +52,13 @@ public class Prestamo implements Serializable {
 	@NotNull
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-mm-dd")
+	@Column(nullable = false)
 	private Date fecha_despacho;
 
+	@Column(nullable = false)
 	private Boolean devolucion;
 
-	@Column(length = 255, nullable = true)
+	@Column(length = 255)
 	@Size(min = 1, max = 255)
 	private String observaciones;
 
@@ -60,70 +68,5 @@ public class Prestamo implements Serializable {
 		devolucion = false;
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Usuario getUsuario() {
-		return usuario;
-	}
-
-	public void setUsuario(Usuario usuario) {
-		this.usuario = usuario;
-	}
-
-	public Libro getLibro() {
-		return libro;
-	}
-
-	public void setLibro(Libro libro) {
-		this.libro = libro;
-	}
-
-	public Date getFecha_despacho() {
-		return fecha_despacho;
-	}
-
-	public void setFecha_despacho(Date fecha_despacho) {
-		this.fecha_despacho = fecha_despacho;
-	}
-
-	public Boolean getDevolucion() {
-		return devolucion;
-	}
-
-	public void setDevolucion(Boolean devolucion) {
-		this.devolucion = devolucion;
-	}
-
-	public String getObservaciones() {
-		return observaciones;
-	}
-
-	public void setObservaciones(String observaciones) {
-		this.observaciones = observaciones;
-	}
-
-	public Prestamo() {
-	}
-
-	public Prestamo(Usuario usuario, Empleado empleado, Libro libro, @NotNull Date fecha_despacho, Boolean devolucion,
-			@Size(min = 1, max = 255) String observaciones) {
-		this.usuario = usuario;
-		this.empleado = empleado;
-		this.libro = libro;
-		this.fecha_despacho = fecha_despacho;
-		this.devolucion = devolucion;
-		this.observaciones = observaciones;
-	}
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-
 }

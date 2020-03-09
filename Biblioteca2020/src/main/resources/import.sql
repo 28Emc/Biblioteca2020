@@ -36,7 +36,6 @@ INSERT INTO empresas (direccion, estado, razon_social, ruc) VALUES ('Av. Lima 45
 /* LOCALES */
 INSERT INTO locales (direccion, estado, observaciones, empresa_id) VALUES ('Direccion Local 1.1', 1, 'Observaciones Local 1.1', 1);
 INSERT INTO locales (direccion, estado, observaciones, empresa_id) VALUES ('Direccion Local 1.2', 1, 'Observaciones Local 1.2', 1);
-/*INSERT INTO locales (direccion, estado, observaciones, empresa_id) VALUES ('Direccion Local 2.1', 1, 'Observaciones Local 2.1', 2);*/
 /* EMPLEADOS */
 INSERT INTO empleados (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username, local_id) VALUES ('apellidoAdmin', 98989898, 'No disponible', 'admin@gmail.com', 1, '2019-08-19', 'nombreAdmin', 11111111, '$2a$10$DCDKy8zxMgnhv7BoTopltOq2qlT1icvmk/JMzT51BWmdWcKGOFFjS', 'admin', 1);
 INSERT INTO empleados (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username, local_id) VALUES ('apellidoSupervisor', 87878787, 'Av. Lima 123', 'supervisor@gmail.com', 1, '2019-08-19', 'nombreSupervisor', 22222222, '$2a$10$7JtXWUaIkParaGFFYZI5xeZgf4lA365rrG0Hgi3.4qymiQfy.B85O', 'supervisor', 1);
@@ -46,13 +45,8 @@ INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (1,1);
 INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (2,2);
 INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (3,3);
 /* LIBROS */
-INSERT INTO libros (autor, descripcion, estado, fecha_registro, fecha_publicacion, titulo, categoria_id) VALUES ('Autor Libro 1', 'Descripcion Libro 1', 1, '2012-04-11', '2019-05-23', 'El camino de los reyes', 2);
-INSERT INTO libros (autor, descripcion, estado, fecha_registro, fecha_publicacion, titulo, categoria_id) VALUES ('Autor Libro 2', 'Descripcion Libro 2', 1, '2014-04-11', '2019-06-13', 'Las noches blancas', 3);
-/* LOCALES-LIBROS */
-INSERT INTO locales_libros (local_id, libro_id) VALUES (1, 1);
-INSERT INTO locales_libros (local_id, libro_id) VALUES (1, 2);
-INSERT INTO locales_libros (local_id, libro_id) VALUES (2, 1);
-INSERT INTO locales_libros (local_id, libro_id) VALUES (2, 2);
+INSERT INTO libros (autor, descripcion, estado, fecha_registro, fecha_publicacion, stock, titulo, categoria_id, local_id) VALUES ('Autor Libro 1', 'Descripcion Libro 1', 1, '2012-04-11', '2019-05-23', 100, 'El camino de los reyes', 2, 1);
+INSERT INTO libros (autor, descripcion, estado, fecha_registro, fecha_publicacion, stock, titulo, categoria_id, local_id) VALUES ('Autor Libro 2', 'Descripcion Libro 2', 1, '2014-04-11', '2019-06-13', 100, 'Las noches blancas', 3, 1);
 /* PRESTAMOS */
 INSERT INTO prestamos (devolucion, fecha_despacho, observaciones, empleado_id, libro_id, usuario_id) VALUES (0, '2019-08-19', 'Observaciones prèstamo 1', 1, 1, 1);
-INSERT INTO prestamos (devolucion, fecha_despacho, observaciones, empleado_id, libro_id, usuario_id) VALUES (0, '2019-07-16', 'Observaciones prèstamo 1', 2, 2, 2);
+INSERT INTO prestamos (devolucion, fecha_despacho, observaciones, empleado_id, libro_id, usuario_id) VALUES (0, '2019-07-16', 'Observaciones prèstamo 2', 2, 2, 2);
