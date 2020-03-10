@@ -37,9 +37,9 @@ public class LibroController {
 	@Autowired
 	private IEmpleadoService empleadoService;
 
-	/* ************************ SECCIÓN DE ADMIN ************************ */
+	/* ************************ SECCIÓN DE SYSADMIN ************************ */
 	// LISTADO DE TODOS LOS LIBROS
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@GetMapping("/libros/listar")
 	public String listarLibrosAdmin(Model model) {
 		List<Libro> libros = libroService.findAll();
@@ -48,7 +48,7 @@ public class LibroController {
 		return "/libros/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@GetMapping("/libros/cancelar")
 	public String cancelarAdmin(Model model) {
 		List<Libro> libros = libroService.findAll();
@@ -57,7 +57,7 @@ public class LibroController {
 		return "redirect:/libros/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@GetMapping("/libros/crear")
 	public String crearLibroAdmin(Map<String, Object> model) {
 		List<Local> locales = localService.findAll();
@@ -67,7 +67,7 @@ public class LibroController {
 		return "/libros/crear";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@PostMapping("/libros/crear")
 	public String crearLibroAdmin(@Valid Libro libro, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash) {
@@ -93,7 +93,7 @@ public class LibroController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@GetMapping("/libros/editar/{id}")
 	public String editarLibroAdmin(@PathVariable(value = "id") Long idlibro, Map<String, Object> modelMap,
 			RedirectAttributes flash) {
@@ -112,7 +112,7 @@ public class LibroController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@PostMapping("/libros/editar")
 	public String guardarLibroAdmin(@Valid Libro libro, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash) {
@@ -139,9 +139,7 @@ public class LibroController {
 		}
 	}
 
-	//EL DESHABILITAR NECESITA EL LOCAL ID PARA DESHABILITAR SOLO ESE LIBRO EN ESPECIFICO
-	// SI LO DEJO ASI NOMAS, DESHABILITA TODOS LOS LIBROS
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@RequestMapping("/libros/deshabilitar/{id}")
 	public String deshabilitarLibroAdmin(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Libro libro = null;
@@ -161,7 +159,7 @@ public class LibroController {
 	 * ************************ SECCIÓN DE OTROS USUARIOS ************************
 	 */
 	// LISTADO DE LIBROS POR LOCAL Y USUARIO LOGUEADO
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@GetMapping("/locales/listar/{idLocal}/libros/listar")
 	public String listarLibrosPorLocal(@PathVariable(value = "idLocal") Long idLocal, Model model,
 			Principal principal) {
@@ -172,7 +170,7 @@ public class LibroController {
 		try {
 			// BUSCA EL LOCAL POR SU LOCAL_ID (DESDE LA PANTALLA ANTERIOR) PARA PODER ARMAR
 			// DE VUELTA LA RUTA DE ESE LOCAL
-			Local local = localService.findOne(idLocal);
+			Local local = localService.findById(idLocal);
 			// MANDO A LA VISTA EL ID PARA FUTUROS USOS
 			model.addAttribute("idLocal", idLocal);
 			model.addAttribute("titulo", "Listado de Libros de '" + local.getDireccion() + "'");
@@ -190,11 +188,10 @@ public class LibroController {
 			model.addAttribute("error", e1.getMessage());
 			return "/home";
 		}
-
 		return "/libros/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@GetMapping("/locales/listar/{idLocal}/libros/cancelar")
 	public String cancelar(@PathVariable(value = "idLocal") Long idLocal, ModelMap modelMap, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
@@ -210,7 +207,7 @@ public class LibroController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@GetMapping("/locales/listar/{idLocal}/libros/crear")
 	public String crearLibro(@PathVariable(value = "idLocal") Long idLocal, Map<String, Object> model) {
 		// RECUPERO EL ID_LOCAL DESDE EL LISTADO PARA REGRESAR
@@ -218,8 +215,8 @@ public class LibroController {
 		model.put("libro", new Libro());
 		try {
 			model.put("titulo", "Registro de Libro");
-			List<Local> locales = localService.findOnlyById(idLocal);
-			model.put("locales", locales);
+			Local local = localService.findById(idLocal);
+			model.put("local", local);
 			return "/libros/crear";
 		} catch (Exception e) {
 			model.put("error", e.getMessage());
@@ -227,19 +224,26 @@ public class LibroController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@PostMapping("/locales/listar/{idLocal}/libros/crear")
 	public String crearLibro(@PathVariable(value = "idLocal") Long idLocal, @Valid Libro libro, BindingResult result,
 			Model model, SessionStatus status, RedirectAttributes flash) {
 		model.addAttribute("idLocal", idLocal);
 		if (result.hasErrors()) {
-			List<Local> locales = localService.findOnlyById(idLocal);
-			model.addAttribute("titulo", "Registro de Libro");
-			model.addAttribute("libro", libro);
-			model.addAttribute("locales", locales);
-			model.addAttribute("idLocal", idLocal);
-			return "/libros/crear";
+			Local local;
+			try {
+				local = localService.findById(idLocal);
+				model.addAttribute("titulo", "Registro de Libro");
+				model.addAttribute("libro", libro);
+				model.addAttribute("local", local);
+				model.addAttribute("idLocal", idLocal);
+				return "/libros/crear";
+			} catch (Exception e) {
+				model.addAttribute("error", e.getMessage());
+				return "redirect:/locales/listar/" + idLocal + "/libros/listar";
+			}
 		}
+		
 		try {
 			libroService.save(libro);
 			flash.addFlashAttribute("success",
@@ -247,25 +251,38 @@ public class LibroController {
 			status.setComplete();
 			return "redirect:/locales/listar/" + idLocal + "/libros/listar";
 		} catch (Exception e) {
-			List<Local> locales = localService.findAll();
-			model.addAttribute("titulo", "Registro de Libro");
-			model.addAttribute("libro", libro);
-			model.addAttribute("locales", locales);
-			model.addAttribute("idLocal", idLocal);
-			return "/libros/crear";
+			Local local;
+			try {
+				local = localService.findById(idLocal);
+				model.addAttribute("titulo", "Registro de Libro");
+				model.addAttribute("libro", libro);
+				model.addAttribute("local", local);
+				model.addAttribute("idLocal", idLocal);
+				return "/libros/crear";
+			} catch (Exception e1) {
+				model.addAttribute("error", e1.getMessage());
+				return "redirect:/locales/listar/" + idLocal + "/libros/listar";
+			}
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@GetMapping("/locales/listar/{idLocal}/libros/editar/{id}")
 	public String editarLibro(@PathVariable(value = "id") Long idlibro, @PathVariable(value = "idLocal") Long idLocal,
 			Map<String, Object> modelMap, RedirectAttributes flash) {
 		Libro libro = null;
-		List<Local> locales = localService.findOnlyById(idLocal);
-		modelMap.put("editable", true);
-		modelMap.put("titulo", "Modificar Libro");
-		modelMap.put("locales", locales);
-		modelMap.put("idLocal", idLocal);
+		Local local;
+		try {
+			local = localService.findById(idLocal);
+			modelMap.put("editable", true);
+			modelMap.put("titulo", "Modificar Libro");
+			modelMap.put("local", local);
+			modelMap.put("idLocal", idLocal);
+		} catch (Exception e1) {
+			modelMap.put("error", e1.getMessage());
+			return "redirect:/locales/listar/" + idLocal + "/libros/listar";
+		}
+
 		try {
 			libro = libroService.findOne(idlibro);
 			modelMap.put("libro", libro);
@@ -277,20 +294,27 @@ public class LibroController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@PostMapping("/locales/listar/{idLocal}/libros/editar")
 	public String guardarLibro(@PathVariable(value = "idLocal") Long idLocal, @Valid Libro libro, BindingResult result,
 			Model model, SessionStatus status, RedirectAttributes flash) {
 		model.addAttribute("empresaLocales", idLocal);
 		model.addAttribute("idLocal", idLocal);
 		if (result.hasErrors()) {
-			List<Local> locales = localService.findOnlyById(idLocal);
-			model.addAttribute("titulo", "Registro de Libro");
-			model.addAttribute("libro", libro);
-			model.addAttribute("locales", locales);
-			model.addAttribute("idLocal", idLocal);
-			return "/libros/editar";
+			Local local;
+			try {
+				local = localService.findById(idLocal);
+				model.addAttribute("titulo", "Registro de Libro");
+				model.addAttribute("libro", libro);
+				model.addAttribute("local", local);
+				model.addAttribute("idLocal", idLocal);
+				return "/libros/editar";
+			} catch (Exception e) {
+				model.addAttribute("error", e.getMessage());
+				return "redirect:/locales/listar/" + idLocal + "/libros/listar";
+			}
 		}
+
 		try {
 			libroService.update(libro);
 			flash.addFlashAttribute("success",
@@ -298,18 +322,22 @@ public class LibroController {
 			status.setComplete();
 			return "redirect:/locales/listar/" + idLocal + "/libros/listar";
 		} catch (Exception e) {
-			List<Local> locales = localService.findOnlyById(idLocal);
-			model.addAttribute("titulo", "Registro de Libro");
-			model.addAttribute("libro", libro);
-			model.addAttribute("locales", locales);
-			model.addAttribute("idLocal", idLocal);
-			return "/libros/crear";
+			Local local;
+			try {
+				local = localService.findById(idLocal);
+				model.addAttribute("titulo", "Registro de Libro");
+				model.addAttribute("libro", libro);
+				model.addAttribute("local", local);
+				model.addAttribute("idLocal", idLocal);
+				return "/libros/crear";
+			} catch (Exception e1) {
+				model.addAttribute("error", e1.getMessage());
+				return "redirect:/locales/listar/" + idLocal + "/libros/listar";
+			}
 		}
 	}
 
-	// EL ADMIN NO PUEDE DESHABILITAR EL LIBRO YA QUE NECESITA SER DE UN LOCAL EN
-	// ESPECIFICO
-	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@RequestMapping("/locales/listar/{idLocal}/libros/deshabilitar/{id}")
 	public String deshabilitarLibro(@PathVariable(value = "idLocal") Long idLocal, @PathVariable(value = "id") Long id,
 			RedirectAttributes flash) {

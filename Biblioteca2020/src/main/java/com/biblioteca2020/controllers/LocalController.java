@@ -1,7 +1,6 @@
 package com.biblioteca2020.controllers;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,25 +42,26 @@ public class LocalController {
 	 * "/locales/listar"; }
 	 */
 
-	// LOS SUPERVISORES Y ADMIN DE ESA EMPRESA PUEDEN VER LOS LOCALES ANEXOS A ESA
-	// EMPRESA, EN CASO CONTRARIO NO TENGO ACCESO.
+	// LOS SUPERVISORES PUEDEN VER EL LOCAL ANEXO A SU
+	// EMPRESA, EN CASO CONTRARIO NO TENGO ACCESO
 	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@GetMapping(value = "/listar/{id}")
 	public String listarLocalesPorEmpresa(@PathVariable(value = "id") Long id, Model model, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		List<Local> locales;
+		Local local;
 		// VALIDO QUE EL LOCAL EXISTE
 		try {
-			localService.findOne(id);
+			localService.findById(id);
 		} catch (Exception e1) {
 			model.addAttribute("error", e1.getMessage());
 			return "/home";
 		}
 		// VALIDO QUE TENGA ACCESO AL LOCAL
 		try {
-			locales = localService.fetchByIdWithEmpresaWithEmpleado(id, empleado.getId());
-			model.addAttribute("titulo", "Listado de Locales de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
-			model.addAttribute("locales", locales);
+			local = localService.fetchByIdWithEmpresaWithEmpleado(id, empleado.getId());
+			model.addAttribute("titulo",
+					"Listado de Locales de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
+			model.addAttribute("locales", local);
 			return "/locales/listar";
 		} catch (Exception e) {
 			model.addAttribute("error", e.getMessage());
@@ -70,27 +70,11 @@ public class LocalController {
 
 	}
 
-	// AQUÍ TENDRÍA QUE AGREGAR UN MÈTODO PARA AGREGAR LIBROS A UNO O MAS LOCALES
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	@GetMapping(value = "/agregarLibro/{id}")
-	public String agregarLibroALocal(@PathVariable(value = "id") Long id, Model model, Principal principal) {
-		try {
-			Local local = localService.findOne(id);
-			System.out.println(local);
-			model.addAttribute("titulo", "Agregar Libro al Local " + local.getDireccion());
-			model.addAttribute("local", local);
-		} catch (Exception e) {
-			model.addAttribute("error", e.getMessage());
-		}
-		return "/locales/agregarLibro";
-	}
-
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@GetMapping("/cancelar")
 	public String cancelar(ModelMap modelMap, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
-		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		modelMap.put("empresaLocales", empresaLocales);
 		return "redirect:/locales/listar/" + empresaLocales.getId();
 	}
@@ -103,7 +87,6 @@ public class LocalController {
 		// AQUÍ TENGO QUE LLAMAR A LOS DATOS DE LA EMPRESA DE ESE LOCAL
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
-		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		model.put("empresaLocales", empresaLocales);
 		return "/locales/crear";
 	}
@@ -114,7 +97,6 @@ public class LocalController {
 			RedirectAttributes flash, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
-		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		model.addAttribute("empresaLocales", empresaLocales);
 		if (result.hasErrors()) {
 			model.addAttribute("titulo", "Formulario de Local");
@@ -146,10 +128,9 @@ public class LocalController {
 		modelMap.put("titulo", "Modificar Local");
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
-		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		modelMap.put("empresaLocales", empresaLocales);
 		try {
-			local = localService.findOne(id);
+			local = localService.findById(id);
 			modelMap.put("local", local);
 			return "/locales/crear";
 		} catch (Exception e) {
@@ -164,7 +145,6 @@ public class LocalController {
 			RedirectAttributes flash, Map<String, Object> modelMap, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
-		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		modelMap.put("empresaLocales", empresaLocales);
 		if (result.hasErrors()) {
 			model.addAttribute("local", local);
@@ -174,8 +154,8 @@ public class LocalController {
 		}
 		try {
 			localService.update(local);
-			flash.addFlashAttribute("info",
-					"El local con código " + local.getId() + " ha sido actualizado en la base de datos.");
+			flash.addFlashAttribute("info", "El local con dirección '" + local.getDireccion() + "'(código "
+					+ local.getId() + ") ha sido actualizado en la base de datos.");
 			status.setComplete();
 			return "redirect:/locales/listar/" + empresaLocales.getId();
 		} catch (Exception e) {
@@ -187,32 +167,23 @@ public class LocalController {
 		}
 	}
 
-	/*
-	 * @RequestMapping(value = "/locales/eliminar/{id}") public String
-	 * eliminarLocal(@PathVariable(value = "id") Long id, RedirectAttributes flash)
-	 * { if (id > 0) { Local local = localService.findOne(id);
-	 * flash.addFlashAttribute("error", "El local con código " + local.getId() +
-	 * " ha sido eliminado de la base de datos."); localService.delete(id); } return
-	 * "redirect:/locales/listar"; }
-	 */
-
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	/*@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarLocal(@PathVariable(value = "id") Long id, RedirectAttributes flash,
 			Principal principal) {
 		Local local = null;
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
-		//Empresa empresaLocales = empresaService.fetchByIdWithLocalWithEmpleado(empleado.getId());
 		try {
-			local = localService.findOne(id);
+			local = localService.findById(id);
 			local.setEstado(false);
 			localService.update(local);
-			flash.addFlashAttribute("warning", "El local con código " + local.getId() + " ha sido deshabilitado.");
+			flash.addFlashAttribute("warning", "El local con dirección '" + local.getDireccion() + "'(código "
+					+ local.getId() + ") ha sido deshabilitado.");
 			return "redirect:/locales/listar/" + empresaLocales.getId();
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "redirect:/locales/listar/" + empresaLocales.getId();
 		}
-	}
+	}*/
 }

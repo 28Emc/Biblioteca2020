@@ -24,13 +24,14 @@ INSERT INTO categorias (estado, nombre) VALUES (1, 'Otros Temas/Varios');
 INSERT INTO usuarios (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username) VALUES ('apellidoUsuario', 65656565, 'Av. Lima 789', 'usuario@gmail.com', 1, '2019-08-19', 'nombreUsuario', 44444444, '$2a$10$VKuMvd4UAx7ZJbsZLOQ8/u1z44jmL/MxZzhtMKL8xubi4iqKpIRyO', 'usuario');
 INSERT INTO usuarios (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username) VALUES ('apellidoUsuaria', 54545454, 'Av. Lima 101', 'usuaria@gmail.com', 1, '2019-08-19', 'nombreUsuaria', 55555555, '$2a$10$RgVfaCIlKua4ogo4rsBfJeE5hqGT5aoEjZMyOPop4u61/KVSZeFWK', 'usuaria');
 /* ROLES/AUTHORITIES */
+INSERT INTO authorities (authority) VALUES ('ROLE_SYSADMIN');
 INSERT INTO authorities (authority) VALUES ('ROLE_ADMIN');
 INSERT INTO authorities (authority) VALUES ('ROLE_SUPERVISOR');
 INSERT INTO authorities (authority) VALUES ('ROLE_EMPLEADO');
 INSERT INTO authorities (authority) VALUES ('ROLE_USER');
 /* USUARIOS-ROLES */
-INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (1, 4);
-INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (2, 4);
+INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (1, 5);
+INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (2, 5);
 /* EMPRESAS */
 INSERT INTO empresas (direccion, estado, razon_social, ruc) VALUES ('Av. Lima 456', 1, 'Empresa Ejemplo 1', 11111111111);
 /* LOCALES */
@@ -41,9 +42,9 @@ INSERT INTO empleados (apellidos, celular, direccion, email, estado, fecha_regis
 INSERT INTO empleados (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username, local_id) VALUES ('apellidoSupervisor', 87878787, 'Av. Lima 123', 'supervisor@gmail.com', 1, '2019-08-19', 'nombreSupervisor', 22222222, '$2a$10$7JtXWUaIkParaGFFYZI5xeZgf4lA365rrG0Hgi3.4qymiQfy.B85O', 'supervisor', 1);
 INSERT INTO empleados (apellidos, celular, direccion, email, estado, fecha_registro, nombres, nro_documento, password, username, local_id) VALUES ('apellidoEmpleada', 76767676, 'Av. Lima 456', 'empleada@gmail.com', 1, '2019-08-19', 'nombreEmpleada', 33333333, '$2a$10$rE9nFn/v1kcabjkQW/QABeuKGHirYoLWjcG.WHDVSfth7bhZM7JWi', 'empleada', 2);
 /* EMPLEADOS-ROLES */
-INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (1,1);
-INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (2,2);
-INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (3,3);
+INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (1,2);
+INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (2,3);
+INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (3,4);
 /* LIBROS */
 INSERT INTO libros (autor, descripcion, estado, fecha_registro, fecha_publicacion, stock, titulo, categoria_id, local_id) VALUES ('Autor Libro 1', 'Descripcion Libro 1', 1, '2012-04-11', '2019-05-23', 100, 'El camino de los reyes', 2, 1);
 INSERT INTO libros (autor, descripcion, estado, fecha_registro, fecha_publicacion, stock, titulo, categoria_id, local_id) VALUES ('Autor Libro 2', 'Descripcion Libro 2', 1, '2014-04-11', '2019-06-13', 100, 'Las noches blancas', 3, 1);

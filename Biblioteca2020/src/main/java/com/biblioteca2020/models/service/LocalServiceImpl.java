@@ -37,18 +37,6 @@ public class LocalServiceImpl implements ILocalService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Local findOne(Long id) throws Exception {
-		return localDao.findById(id).orElseThrow(() -> new Exception("El local no existe."));
-	}
-
-	@Override
-	@Transactional
-	public void delete(Long id) {
-		localDao.deleteById(id);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
 	public List<Local> findByEstado(Boolean estado) {
 		return localDao.findByEstado(estado);
 	}
@@ -58,13 +46,6 @@ public class LocalServiceImpl implements ILocalService {
 	public List<Local> findByDireccionLikeIgnoreCase(String term) {
 		return localDao.findByDireccionLikeIgnoreCase("%" + term + "%");
 	}
-
-	/*
-	 * @Override
-	 * 
-	 * @Transactional(readOnly = true) public List<Local> fetchByIdWithLibro() {
-	 * return localDao.fetchByIdWithLibro(); }
-	 */
 
 	@Override
 	@Transactional(readOnly = true)
@@ -81,27 +62,22 @@ public class LocalServiceImpl implements ILocalService {
 	}
 
 	@Override
-	@Transactional
-	public List<Local> fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado) throws Exception {
-		if (localDao.fetchByIdWithEmpresaWithEmpleado(idEmpresa, idEmpleado).isEmpty()) {
+	@Transactional(readOnly = true)
+	public Local fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado) throws Exception {
+		if (localDao.fetchByIdWithEmpresaWithEmpleado(idEmpresa, idEmpleado) == null) {
 			throw new Exception("No tienes acceso a otros locales.");
 		}
 		return localDao.fetchByIdWithEmpresaWithEmpleado(idEmpresa, idEmpleado);
 	}
 
 	@Override
-	@Transactional
-	public List<Local> findOnlyById(Long id) {
-		return localDao.findOnlyById(id);
-	}
-
-	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public Local findById(Long id) throws Exception {
 		return localDao.findById(id).orElseThrow(() -> new Exception("El local no existe."));
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public Local findFirstByEmpresa(Empresa empresa) {
 		return localDao.findFirstByEmpresa(empresa);
 	}

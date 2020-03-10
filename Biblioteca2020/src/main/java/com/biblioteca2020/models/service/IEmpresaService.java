@@ -7,18 +7,15 @@ public interface IEmpresaService {
 
 	public List<Empresa> findAll();
 
-	public List<Empresa> findByEstado(Boolean estado);
+	public Empresa findByEstado(Boolean estado);
 
-	public List<Empresa> findByRucAndEstado(String ruc, boolean estado);
-	
-	//public Empresa fetchByIdWithLocalWithEmpleado(Long id);
-	
+	public Empresa findByRucAndEstado(String ruc, boolean estado);
+
 	public Empresa findOne(Long id) throws Exception;
 
-	public void save(Empresa empresa) throws Exception;
+	//public void save(Empresa empresa) throws Exception;
 
 	public void update(Empresa empresa) throws Exception;
 
-	public void delete(Long id);
-
+	//public void delete(Long id);
 }

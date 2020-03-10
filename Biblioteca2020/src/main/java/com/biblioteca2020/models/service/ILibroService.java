@@ -11,7 +11,7 @@ public interface ILibroService {
 
 	public Libro findOne(Long id);
 
-	public void delete(Long id);
+	//public void delete(Long id);
 
 	public List<Libro> findByEstado(Boolean estado);
 
@@ -21,8 +21,6 @@ public interface ILibroService {
 	
 	public List<Libro> fetchByIdWithLocalesWithEmpleado(Long id, Long idEmpleado) throws Exception;
 	
-	//public List<Libro> fetchByIdWithLocalWithEmpresaWithEmpleado(Long idLocal, Long idEmpleado) throws Exception;
-
 	public void update(Libro libro);
 
 }

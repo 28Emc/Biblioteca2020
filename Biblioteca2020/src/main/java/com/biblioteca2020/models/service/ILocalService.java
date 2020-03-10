@@ -13,9 +13,7 @@ public interface ILocalService {
 	
 	public void update(Local local) throws Exception;
 
-	public Local findOne(Long id) throws Exception;
-
-	public void delete(Long id);
+	//public void delete(Long id);
 	
 	public Local findById(Long id) throws Exception;
 	
@@ -24,13 +22,9 @@ public interface ILocalService {
 	public List<Local> findByDireccionLikeIgnoreCase(String term);
 	
 	public Local findByDireccion(String direccion);
-	
-	//public List<Local> fetchByIdWithLibro();
-	
-	public List<Local> findOnlyById(Long id);
-	
+			
 	public Local findFirstByEmpresa(Empresa empresa);
 	
-	public List<Local> fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado) throws Exception;
+	public Local fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado) throws Exception;
 
 }

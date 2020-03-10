@@ -8,7 +8,7 @@
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<h1 hidden th:text="${idLocal}"></h1>
-		<form sec:authorize="hasRole('ROLE_SUPERVISOR')"
+		<form sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')"
 			th:action="${editable} ? @{'/locales/listar/'}+${idLocal}+@{/libros/editar} : @{'/locales/listar/'}+${idLocal}+@{/libros/crear/}"
 			th:object="${libro}" method="post">
 			<h3 class="mb-4">Título</h3>
@@ -52,33 +52,40 @@
 				<div class="col-sm-2" hidden>
 					<input type="text" name="id_categoria" id="id_categoria"
 						placeholder="Id Categoria" class="form-control"
-						th:field="*{categoria}" readonly /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('categoria')}"
-						th:errors="*{categoria.nombre}"></small>
+						th:field="*{categoria.id}" readonly />
 				</div>
 			</div>
 
 			<h3 class="mb-4" hidden>Local</h3>
 			<div class="form-group" hidden>
 				<div class="col-sm-6">
-					<select class="form-control" th:field="*{locales}"
+					<select class="form-control" th:field="*{local}"
 						th:errorclass="'form-control alert-danger'">
-						<option th:each="local :${locales}" th:value="${local.id}"
+						<option th:each="local :${local}" th:value="${local.id}"
 							th:text="${local.direccion}"></option>
 					</select> <small class="form-text text-danger"
-						th:if="${#fields.hasErrors('locales')}" th:errors="*{locales}"></small>
+						th:if="${#fields.hasErrors('local')}" th:errors="*{local}"></small>
 				</div>
 			</div>
 
 			<h3 class="mb-4">Fecha Publicación</h3>
 			<div class="form-group">
 				<div class="col-sm-6">
-					<input class="form-control" type="text" name="fecha_publicacion"
-						placeholder="yyyy-mm-dd" th:field="*{fecha_publicacion}" /> <small
+					<input class="form-control" type="text" name="fechaPublicacion"
+						placeholder="yyyy-mm-dd" th:field="*{fechaPublicacion}" /> <small
 						class="form-text text-danger"
-						th:if="${#fields.hasErrors('fecha_publicacion')}"
-						th:errors="*{fecha_publicacion}"></small>
+						th:if="${#fields.hasErrors('fechaPublicacion')}"
+						th:errors="*{fechaPublicacion}"></small>
+				</div>
+			</div>
+			
+			<h3 class="mb-4">Stock</h3>
+			<div class="form-group">
+				<div class="col-sm-6">
+					<input class="form-control" type="text" name="stock" th:field="*{stock}" placeholder="0" /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('stock')}"
+						th:errors="*{stock}"></small>
 				</div>
 			</div>
 
@@ -95,7 +102,7 @@
 
 		</form>
 
-		<form sec:authorize="hasRole('ROLE_ADMIN')"
+		<form sec:authorize="hasRole('ROLE_SYSADMIN')"
 			th:action="${editable} ? @{/libros/editar} : @{/libros/crear/}"
 			th:object="${libro}" method="post">
 			<h3 class="mb-4">Título</h3>
@@ -139,10 +146,7 @@
 				<div class="col-sm-2" hidden>
 					<input type="text" name="id_categoria" id="id_categoria"
 						placeholder="Id Categoria" class="form-control"
-						th:field="*{categoria}" readonly /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('categoria')}"
-						th:errors="*{categoria.nombre}"></small>
+						th:field="*{categoria.id}" readonly />
 				</div>
 			</div>
 

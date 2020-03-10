@@ -17,14 +17,17 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.biblioteca2020.models.entity.Categoria;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
 
+import lombok.Data;
 
 @Entity
 @Table(name = "libros")
@@ -37,7 +40,7 @@ public class Libro implements Serializable {
 
 	// LIBRO(*):LOCAL(1)
 	// @JsonIgnore
-	//@Size(min = 1)
+	// @Size(min = 1)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "local_id")
 	private Local local;
@@ -45,6 +48,12 @@ public class Libro implements Serializable {
 	// LIBRO(1):PRESTAMO(*)
 	@OneToMany(mappedBy = "libro", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Prestamo> prestamos;
+	
+	// LIBRO(*):CATEGORIA(1)
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "categoria_id")
+	private Categoria categoria;
 
 	@NotBlank
 	@Column(length = 100, nullable = false)
@@ -57,14 +66,8 @@ public class Libro implements Serializable {
 	private String autor;
 
 	@Column(length = 255)
-	@Size(min = 1, max = 255)
+	@Size(max = 255)
 	private String descripcion;
-
-	// LIBRO(*):CATEGORIA(1)
-	@JsonIgnore
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "categoria_id")
-	private Categoria categoria;
 
 	// yyyy-mm-dd
 	@Column(name = "fecha_publicacion", nullable = false)
@@ -78,8 +81,12 @@ public class Libro implements Serializable {
 
 	@Column(nullable = false)
 	private Boolean estado;
-	
-	private int stock;
+
+	@Column(length = 4)
+	@Min(value = 1)
+	@Max(value = 9999)
+	@NotNull
+	private Integer stock;
 
 	@PrePersist
 	public void prePersist() {

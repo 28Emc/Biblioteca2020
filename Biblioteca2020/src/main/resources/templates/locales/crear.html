@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="layout/layout :: head"></head>
 
@@ -15,38 +16,43 @@
 				<label class="col-sm-2 col-form-label">Dirección</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="text" th:field="*{direccion}"
-						th:errorclass="'form-control alert-danger'" placeholder="Ejm. Av. Lima 123" /> <small
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Ejm. Av. Lima 123" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></small>
 				</div>
 			</div>
-			
+
 			<div class="form-group" sec:authorize="hasRole('ROLE_ADMIN')" hidden>
 				<label class="col-sm-2 col-form-label">Empresa</label>
 				<div class="col-sm-6">
 					<select class="form-control" th:field="${local.empresa}"
 						th:errorclass="'form-control alert-danger'">
-						<option th:each="empresa :${empresaLocales}" th:value="${empresa.id}"
-							th:text="${empresa.razonSocial}">
-						</option>					
+						<option th:each="empresa :${empresaLocales}"
+							th:value="${empresa.id}" th:text="${empresa.razonSocial}">
+						</option>
 					</select> <small class="form-text text-danger"
-						th:if="${#fields.hasErrors('empresa')}" th:errors="${local.empresa}"></small>
+						th:if="${#fields.hasErrors('empresa')}"
+						th:errors="${local.empresa}"></small>
 				</div>
 			</div>
-			
+
 			<div class="form-group">
 				<label class="col-sm-2 col-form-label">Observaciones</label>
 				<div class="col-sm-6">
-					<textarea class="form-control" cols="3" type="text" th:field="*{observaciones}"
-						th:errorclass="'form-control alert-danger'" placeholder="Ejm. 'Este local contiene solo libros de habla hispana.'" ></textarea> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('observaciones')}" th:errors="*{observaciones}"></small>
+					<textarea class="form-control" cols="3" type="text"
+						th:field="*{observaciones}"
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Ejm. 'Este local contiene solo libros de habla hispana.'"></textarea>
+					<small class="form-text text-danger"
+						th:if="${#fields.hasErrors('observaciones')}"
+						th:errors="*{observaciones}"></small>
 				</div>
 			</div>
 			<div class="form-group row">
 				<div class="col-sm-6">
-					<a class="btn btn-light btn-block"
-						th:href="@{'/locales/cancelar'}">Cancelar</a>
+					<a class="btn btn-light btn-block" th:href="@{'/locales/cancelar'}"><i
+						class="fas fa-shield-alt"></i> Cancelar</a>
 				</div>
 				<div class="col-sm-6">
 					<input class="btn btn-outline-dark btn-block" type="submit"

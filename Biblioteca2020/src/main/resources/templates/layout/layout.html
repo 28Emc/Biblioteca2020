@@ -6,7 +6,6 @@
 <title th:text="'Biblioteca | ' + ${titulo}"></title>
 <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
 <link rel="stylesheet" th:href="@{/css/jquery-ui.min.css}" />
-<script src="https://kit.fontawesome.com/8e76a0ff4f.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -20,26 +19,37 @@
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
 				<ul class="navbar-nav">
-					<li class="nav-item"><a class="nav-link" th:href="@{/home}">Inicio
-					</a></li>
+					<li class="nav-item"><a class="nav-link" th:href="@{/home}"><i
+							class="fas fa-home"></i> Inicio </a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
-						th:href="@{/empresas/listar}">Empresa</a></li>
+						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						th:href="@{/empresas/listar}"><i class="fas fa-shield-alt"></i>
+							Empresa</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
-						th:href="@{/empleados/listar}">Empleados</a></li>
+						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						th:href="@{/empleados/listar}"><i class="fas fa-shield-alt"></i>
+							Empleados</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
-						th:href="@{/categorias/listar}">Categorias</a></li>
+						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						th:href="@{/categorias/listar}"><i class="fas fa-shield-alt"></i>
+							Categorias</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')"
-						th:href="@{/libros/listar}"><i class="fas fa-user-shield"></i> Libros</a></li>
+						sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/libros/listar}"><i
+							class="fas fa-shield-alt"></i> Libros</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO')"
-						th:href="@{/usuarios/listar}">Usuarios</a></li>
+						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						th:href="@{/usuarios/listar}"><i class="fas fa-shield-alt"></i>
+							Usuarios</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO')"
-						th:href="@{/prestamos/listar}">Préstamos(?)</a></li>
+						sec:authorize="hasRole('ROLE_EMPLEADO')"
+						th:href="@{/usuarios/listar}"><i class="fas fa-user"></i> Usuarios</a></li>
+					<li class="nav-item"><a class="nav-link"
+						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						th:href="@{/prestamos/listar}"><i class="fas fa-shield-alt"></i>
+							Préstamos(?)</a></li>
+					<li class="nav-item"><a class="nav-link"
+						sec:authorize="hasRole('ROLE_EMPLEADO')"
+						th:href="@{/prestamos/listar}"><i class="fas fa-clipboard-list"></i> Préstamos(?)</a></li>
 				</ul>
 
 				<ul class="navbar-nav">
@@ -99,6 +109,7 @@
 		<script th:src="@{/js/popper.min.js}"></script>
 		<script th:src="@{/js/bootstrap.min.js}"></script>
 		<script th:src="@{/js/jquery-ui.min.js}"></script>
+		<script th:src="@{/js/font-awesome.js}"></script>
 		<script type="text/javascript">
 			setTimeout(function() {
 				$(".alert").alert('close');

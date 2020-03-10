@@ -7,7 +7,7 @@
 
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container-fluid mt-3">
+	<div class="container-fluid my-5">
 		<form th:action="${editable} ?@{/empresas/editar} :@{/empresas/crear}"
 			th:object="${empresa}" method="post">
 			<div class="form-group">
@@ -53,7 +53,7 @@
 			<div class="form-group row">
 				<div class="col-sm-6">
 					<a class="btn btn-light btn-block"
-						th:href="@{'/empresas/cancelar'}">Cancelar</a>
+						th:href="@{'/empresas/cancelar'}"><i class="fas fa-shield-alt"></i> Cancelar</a>
 				</div>
 				<div class="col-sm-6">
 					<input class="btn btn-outline-dark btn-block" type="submit"
