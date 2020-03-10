@@ -12,7 +12,8 @@
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<th:block sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
 			<p>
-				<a class="btn btn-primary btn-xs" th:href="@{/empleados/crear}">Crear
+				<a class="btn btn-primary btn-xs" th:href="@{/empleados/crear}"><i
+								class="fas fa-shield-alt"></i> Crear
 					Empleado</a>
 			</p>
 		</th:block>
@@ -45,16 +46,26 @@
 					<td th:text="${empleado.celular}"></td>
 					<td th:text="${empleado.fecha_registro}"></td>
 					<td th:text="${empleado.username}" sec:authorize="hasRole('ROLE_ADMIN')"></td>
-					<td th:text="${empleado.estado}"></td>
+					
+					<th:block th:with="estado=${empleado.estado}">
+						<td th:if="${estado}">
+							<h5><span class="badge badge-success" th:text="'Activo'"></span></h5>
+						</td>
+						<td th:unless="${estado}">
+							<h5><span class="badge badge-danger" th:text="'Inactivo'"></span></h5>
+						</td>
+					</th:block>
+					
 					<td sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"><a
-						class="btn btn-success btn-xs"
-						th:href="@{/empleados/editar/}+${empleado.id}" th:text="'Editar'"></a></td>
+						class="btn btn-warning btn-xs"
+						th:href="@{/empleados/editar/}+${empleado.id}"><i
+								class="fas fa-shield-alt"></i> Editar</a></td>
 					<td
 						sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN')">
-						<a class="btn btn-warning btn-xs"
+						<a class="btn btn-info btn-xs"
 						th:href="@{/empleados/deshabilitar/}+${empleado.id}"
-						th:text="'Deshabilitar'"
-						onclick="return confirm('Seguro de querer deshabilitar el empleado?');"></a>
+						onclick="return confirm('Seguro de querer deshabilitar el empleado?');"><i
+								class="fas fa-shield-alt"></i> Deshabilitar</a>
 					</td>
 				</tr>
 			</tbody>

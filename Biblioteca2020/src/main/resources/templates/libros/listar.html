@@ -45,20 +45,29 @@
 					<td th:text="${libro.fechaPublicacion}"></td>
 					<td th:text="${libro.fechaRegistro}"></td>
 					<td th:text="${libro.stock}"></td>
-					<td th:text="${libro.estado}"></td>
+					
+					<th:block th:with="estado=${libro.estado}">
+						<td th:if="${estado}">
+							<h5><span class="badge badge-success" th:text="'Activo'"></span></h5>
+						</td>
+						<td th:unless="${estado}">
+							<h5><span class="badge badge-danger" th:text="'Inactivo'"></span></h5>
+						</td>
+					</th:block>
+					
 					<td sec:authorize="hasRole('ROLE_SYSADMIN')">
-					<a class="btn btn-success btn-xs"
+					<a class="btn btn-warning btn-xs"
 						th:href="@{'/libros/editar/'}+${libro.id}"><i class="fas fa-shield-alt"></i> Editar</a></td>
 					<td sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
-					<a class="btn btn-success btn-xs"
+					<a class="btn btn-warning btn-xs"
 						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/editar/'}+${libro.id}">
 						<i class="fas fa-shield-alt"></i> Editar</a></td>
 					<td sec:authorize="hasRole('ROLE_SYSADMIN')">
-					<a class="btn btn-warning btn-xs"
+					<a class="btn btn-info btn-xs"
 						th:href="@{'/libros/deshabilitar/'}+${libro.id}"
 						onclick="return confirm('Seguro de querer deshabilitar el libro?');"><i class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 					<td sec:authorize="hasRole('ROLE_ADMIN')">
-					<a class="btn btn-warning btn-xs"
+					<a class="btn btn-info btn-xs"
 						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/deshabilitar/'}+${libro.id}"
 						onclick="return confirm('Seguro de querer deshabilitar el libro?');"><i class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 				</tr>

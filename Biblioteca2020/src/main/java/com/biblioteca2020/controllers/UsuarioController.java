@@ -110,7 +110,7 @@ public class UsuarioController {
 		}
 		try {
 			usuarioService.update(usuario);
-			flash.addFlashAttribute("info",
+			flash.addFlashAttribute("warning",
 					"El usuario con código " + usuario.getId() + " ha sido actualizado en la base de datos.");
 			status.setComplete();
 			return "redirect:/usuarios/listar";
@@ -132,7 +132,7 @@ public class UsuarioController {
 			usuario = usuarioService.findById(id);
 			usuario.setEstado(false);
 			usuarioService.update(usuario);
-			flash.addFlashAttribute("warning", "El usuario con código " + usuario.getId() + " ha sido deshabilitado.");
+			flash.addFlashAttribute("info", "El usuario con código " + usuario.getId() + " ha sido deshabilitado.");
 			return "redirect:/usuarios/listar";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
@@ -140,7 +140,7 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	/*@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@RequestMapping(value = "/eliminar/{id}")
 	public String eliminarUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Usuario usuario = null;
@@ -155,5 +155,5 @@ public class UsuarioController {
 			System.out.println(e.getMessage());
 			return "redirect:/usuarios/listar";
 		}
-	}
+	}*/
 }

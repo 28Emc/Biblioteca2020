@@ -107,7 +107,7 @@ public class CategoriaController {
 			return "categorias/crear";
 		}
 		categoriaService.update(categoria);
-		flash.addFlashAttribute("info", "La categoría '" + categoria.getNombre() + " (" + categoria.getId()
+		flash.addFlashAttribute("warning", "La categoría '" + categoria.getNombre() + " (" + categoria.getId()
 				+ ")' ha sido actualizada en la base de datos.");
 		status.setComplete();
 		return "redirect:/categorias/listar";
@@ -134,7 +134,7 @@ public class CategoriaController {
 			categoria = categoriaService.findOne(id);
 			categoria.setEstado(false);
 			categoriaService.update(categoria);
-			flash.addFlashAttribute("warning",
+			flash.addFlashAttribute("info",
 					"La categoría con el código " + categoria.getId() + " ha sido deshabilitada.");
 			return "redirect:/categorias/listar";
 		} catch (Exception e) {

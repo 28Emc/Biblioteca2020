@@ -15,7 +15,7 @@
 				<label class="col-sm-2 col-form-label">Nombre</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="text" th:field="*{nombre}"
-						th:errorclass="'form-control alert-danger'" /> <small
+						th:errorclass="'form-control alert-danger'" placeholder="Nombre de la categoría..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
 				</div>
@@ -24,7 +24,8 @@
 			<div class="form-group row">
 				<div class="col-sm-6">
 					<a class="btn btn-light btn-block"
-						th:href="@{'/categorias/cancelar'}">Cancelar</a>
+						th:href="@{'/categorias/cancelar'}"><i
+								class="fas fa-shield-alt"></i> Cancelar</a>
 				</div>
 				<div class="col-sm-6">
 					<input class="btn btn-dark btn-block" type="submit"

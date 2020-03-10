@@ -125,7 +125,7 @@ public class LibroController {
 		}
 		try {
 			libroService.update(libro);
-			flash.addFlashAttribute("success",
+			flash.addFlashAttribute("warning",
 					"El libro con código " + libro.getTitulo() + " ha sido actualizado en la base de datos.");
 			status.setComplete();
 			return "redirect:/libros/listar";
@@ -147,7 +147,7 @@ public class LibroController {
 			libro = libroService.findOne(id);
 			libro.setEstado(false);
 			libroService.update(libro);
-			flash.addFlashAttribute("warning", "El libro '" + libro.getTitulo() + "' ha sido deshabilitado.");
+			flash.addFlashAttribute("info", "El libro '" + libro.getTitulo() + "' ha sido deshabilitado.");
 			return "redirect:/libros/listar";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
@@ -317,7 +317,7 @@ public class LibroController {
 
 		try {
 			libroService.update(libro);
-			flash.addFlashAttribute("success",
+			flash.addFlashAttribute("warning",
 					"El libro con código " + libro.getTitulo() + " ha sido actualizado en la base de datos.");
 			status.setComplete();
 			return "redirect:/locales/listar/" + idLocal + "/libros/listar";
@@ -346,7 +346,7 @@ public class LibroController {
 			libro = libroService.findOne(id);
 			libro.setEstado(false);
 			libroService.update(libro);
-			flash.addFlashAttribute("warning", "El libro '" + libro.getTitulo() + "' ha sido deshabilitado.");
+			flash.addFlashAttribute("info", "El libro '" + libro.getTitulo() + "' ha sido deshabilitado.");
 			return "redirect:/locales/listar/" + idLocal + "/libros/listar";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());

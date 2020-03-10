@@ -117,7 +117,7 @@ public class EmpresaController {
 		}
 		try {
 			empresaService.update(empresa);
-			flash.addFlashAttribute("info", "La empresa '" + empresa.getRazonSocial() + "'(código " + empresa.getId()
+			flash.addFlashAttribute("warning", "La empresa '" + empresa.getRazonSocial() + "'(código " + empresa.getId()
 					+ ") ha sido actualizada en la base de datos.");
 			status.setComplete();
 			return "redirect:/empresas/listar";

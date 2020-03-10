@@ -154,7 +154,7 @@ public class LocalController {
 		}
 		try {
 			localService.update(local);
-			flash.addFlashAttribute("info", "El local con dirección '" + local.getDireccion() + "'(código "
+			flash.addFlashAttribute("warning", "El local con dirección '" + local.getDireccion() + "'(código "
 					+ local.getId() + ") ha sido actualizado en la base de datos.");
 			status.setComplete();
 			return "redirect:/locales/listar/" + empresaLocales.getId();

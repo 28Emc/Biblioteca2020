@@ -33,20 +33,28 @@
 					<td th:text="${empresa.razonSocial}"></td>
 					<td th:text="${empresa.direccion}"></td>
 					<td th:text="${empresa.ruc}"></td>
-					<td th:text="${empresa.estado}"></td>
+					
+					<th:block th:with="estado=${empresa.estado}">
+						<td th:if="${estado}">
+							<h5><span class="badge badge-success" th:text="'Activo'"></span></h5>
+						</td>
+						<td th:unless="${estado}">
+							<h5><span class="badge badge-danger" th:text="'Inactivo'"></span></h5>
+						</td>
+					</th:block>
 
 					<th:block sec:authorize="hasRole('ROLE_ADMIN')">
 						<td sec:authorize="hasRole('ROLE_ADMIN')"><a
-							class="btn btn-success btn-xs"
+							class="btn btn-warning btn-xs"
 							th:href="@{/empresas/editar/}+${empresa.id}"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
 					</th:block>
 
 					<th:block sec:authorize="hasRole('ROLE_SYSADMIN')">
-						<td><a class="btn btn-success btn-xs"
+						<td><a class="btn btn-warning btn-xs"
 							th:href="@{/empresas/editarSysAdmin/}+${empresa.id}"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td><a class="btn btn-warning btn-xs"
+						<td><a class="btn btn-info btn-xs"
 							th:href="@{/empresas/deshabilitarSysAdmin/}+${empresa.id}"
 							onclick="return confirm('Seguro de querer deshabilitar la empresa?');"><i
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>

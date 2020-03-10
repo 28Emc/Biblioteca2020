@@ -125,7 +125,7 @@ public class EmpleadoController {
 			Empleado empleadoAdmin = empleadoService.findById(id);
 			if (empleadoAdmin.getRoles().toString().contains("ROLE_ADMIN") == true
 					&& empleado.getRoles().toString().contains("ROLE_ADMIN") == false) {
-				flash.addFlashAttribute("error", "Solamente un administrador puede modificar sus propios datos");
+				flash.addFlashAttribute("error", "No tienes permiso para acceder a este recurso.");
 				return "redirect:/empleados/listar";
 			}
 		} catch (Exception e1) {
@@ -176,7 +176,7 @@ public class EmpleadoController {
 		}
 		try {
 			empleadoService.update(empleado);
-			flash.addFlashAttribute("info",
+			flash.addFlashAttribute("warning",
 					"El empleado con código " + empleado.getId() + " ha sido actualizado en la base de datos.");
 			status.setComplete();
 			return "redirect:/empleados/listar";
@@ -204,7 +204,7 @@ public class EmpleadoController {
 			empleado = empleadoService.findById(id);
 			empleado.setEstado(false);
 			empleadoService.update(empleado);
-			flash.addFlashAttribute("warning",
+			flash.addFlashAttribute("info",
 					"El empleado con código " + empleado.getId() + " ha sido deshabilitado.");
 			return "redirect:/empleados/listar";
 		} catch (Exception e) {
