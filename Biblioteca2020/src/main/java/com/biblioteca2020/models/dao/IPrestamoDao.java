@@ -9,7 +9,7 @@ public interface IPrestamoDao extends CrudRepository<Prestamo, Long> {
 
 	public List<Prestamo> findByDevolucion(String devolucion);
 
-	@Query("select p from Prestamo p join fetch p.usuario pe join fetch p.libro l")
-	public List<Prestamo> fetchByIdWithLibroWithUsuario();
+	@Query("select p from Prestamo p join fetch p.usuario pe join fetch p.libro li join fetch p.empleado em")
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado();
 
 }

@@ -27,6 +27,8 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.biblioteca2020.models.entity.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 
 @Entity
@@ -45,11 +47,12 @@ public class Empleado implements Serializable {
 	private Set<Role> roles;
 
 	// EMPLEADO(1):PRESTAMOS(*)
-	// @JsonIgnore
+	@JsonIgnore
 	@OneToMany(mappedBy = "empleado", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Prestamo> prestamos;
-
-	@ManyToOne()
+	
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Local local;
 
 	@Column(length = 30)
@@ -94,6 +97,7 @@ public class Empleado implements Serializable {
 	private String password;
 
 	@Transient
+	@Column(nullable = true)
 	private String passwordConfirmacion;
 
 	@Column(nullable = false)

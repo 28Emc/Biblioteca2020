@@ -11,11 +11,15 @@ public interface IUsuarioService {
 
 	public Usuario findByUsername(String username);
 	
+	public Usuario findByUsernameAndEstado(String username, boolean estado);
+	
 	public Usuario findByNroDocumento(String nroDocumento);
+	
+	public List<Usuario> findAllByNroDocumento(String term);	
 		
 	public void save(Usuario usuario) throws Exception;
 	
 	public void update(Usuario usuario) throws Exception;
 	
-	public void borrarUsuario(Long id) throws Exception;	
+	public void borrarUsuario(Long id) throws Exception;
 }

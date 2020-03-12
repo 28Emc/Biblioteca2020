@@ -4,10 +4,12 @@
 <body>
 	<script type="text/javascript" th:fragment="javascript">
 		$(document).ready(function() {
-			$("#buscar_suscriptor").autocomplete({
+			
+			$("#buscar_usuario").autocomplete({
+				
 				source : function(request, response) {
 					$.ajax({
-						url : "/tickets/cargarSuscriptores/" + request.term,
+						url : "/prestamos/cargarUsuarios/" + request.term,
 						minLength : 2,
 						dataType : "json",
 						data : {
@@ -17,9 +19,9 @@
 							response($.map(data, function(item) {
 								return {
 									value : item.id,
-									label : item.nombre,
-									documento : item.nro_documento,
-									full : item.nombre + ", " + item.apellidos,
+									label : item.nombres,
+									documento : item.nroDocumento,
+									full : item.nombres + ", " + item.apellidos,
 									error : item.error
 								};
 							}));
@@ -30,9 +32,9 @@
 					event.preventDefault();
 				},
 				select : function(event, ui) {
-					$("#buscar_suscriptor").val(ui.item.documento);
-					$("#id_suscriptor").val(ui.item.value);
-					$("#nombre_suscriptor").val(ui.item.full);
+					$("#buscar_usuario").val(ui.item.documento);
+					$("#id_usuario").val(ui.item.value);
+					$("#nombre_usuario").val(ui.item.full);
 					return false;
 				}
 			});

@@ -25,6 +25,8 @@ public interface IEmpleadoService {
 	public Empleado findByUsernameAndEstado(String username, boolean estado);
 	
 	public Empleado findByNroDocumento(String nroDocumento);
+	
+	public List<Empleado> findAllByNroDocumento(String term);
 		
 	public void save(Empleado empleado) throws Exception;
 	

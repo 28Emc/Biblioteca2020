@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+
+<body>
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container-fluid my-5">
+		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<th:block
+			sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
+			<p>
+				<a class="btn btn-primary btn-xs" th:href="@{/prestamos/crear}"><i
+					class="fas fa-shield-alt"></i> Crear Préstamo</a>
+			</p>
+		</th:block>
+		<table class="table table-responsive">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Libro</th>
+					<th>Nombre Empleado</th>
+					<th>Local Empleado</th>
+					<th>Nombre Suscriptor</th>
+					<th>Fecha Despacho</th>
+					<th>Fecha Devolución</th>
+					<th>Observaciones</th>
+					<th>Estado</th>
+					<th colspan="3">Opciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="prestamo: ${prestamos}">
+					<td th:text="${prestamo.id}"></td>
+					<td th:text="${prestamo.libro.titulo}+', '+${prestamo.libro.autor}"></td>
+					<td
+						th:text="${prestamo.empleado.nombres}+', '+${prestamo.empleado.apellidos}"></td>
+					<td th:text="${prestamo.empleado.local.direccion}"></td>
+					<td
+						th:text="${prestamo.usuario.nombres}+', '+${prestamo.usuario.apellidos}"></td>
+					<td th:text="${prestamo.fecha_despacho}"></td>
+					<td th:text="${prestamo.fecha_devolucion}"></td>
+					<td data-toggle="tooltip" data-placement="top"
+						th:title="${prestamo.observaciones}" class="text-center"><i
+						class="fas fa-search fa-2x"></i></td>
+
+					<th:block th:with="estado=${prestamo.devolucion}">
+						<td th:if="${estado}">
+							<h5>
+								<span class="badge badge-success" th:text="'Préstamo Terminado'"></span>
+							</h5>
+						</td>
+						<td th:if="${estado}"><a
+							class="disabled btn btn-secondary btn-xs" href="#"> <i
+								class="fas fa-shield-alt"></i> Devolver Libro
+						</a></td>
+						<td th:if="${estado}"><a
+							class="disabled btn btn-secondary btn-xs" href="#"><i
+								class="fas fa-shield-alt"></i> Anular Préstamo</a></td>
+						<td th:unless="${estado}">
+							<h5>
+								<span class="badge badge-danger text-light"
+									th:text="'Libro Sin devolver'"></span>
+							</h5>
+						</td>
+						<td th:unless="${estado}"><a class="btn btn-info btn-xs"
+							th:href="@{/prestamos/devolverLibro/}+${prestamo.id}"
+							onclick="return confirm('¿Seguro de querer validar la devolución del libro?');"><i
+								class="fas fa-shield-alt"></i> Devolver Libro</a></td>
+						<td th:unless="${estado}"><a class="btn btn-warning btn-xs"
+							th:href="@{/prestamos/anularPrestamo/}+${prestamo.id}"
+							onclick="return confirm('Seguro de querer anular el préstamo?');"><i
+								class="fas fa-shield-alt"></i> Anular Préstamo</a></td>
+					</th:block>
+				</tr>
+			</tbody>
+		</table>
+		<h1 th:if="${prestamos}==null">No hay préstamos</h1>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+<body>
+	<header th:replace="layout/layout :: header"></header>
+	<div class="container-fluid my-5">
+		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<form th:action="@{/prestamos/crear}" th:object="${prestamo}"
+			method="post">
+
+			<h3 class="mb-4">Libro</h3>
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<input type="text" name="buscar_libro" id="buscar_libro"
+						class="form-control" placeholder="Buscar libro por su nombre..." />
+				</div>
+				<div class="col-sm-2" id="col_id_libro">
+					<input type="text" name="id_libro" id="id_libro"
+						placeholder="Id Libro" class="form-control" readonly />
+				</div>
+				<div class="col-sm-3" id="col_autor_libro">
+					<input type="text" name="autor_libro" id="autor_libro"
+						class="form-control" placeholder="Autor Libro" disabled />
+				</div>
+			</div>
+
+			<h3 class="mb-4">Usuario</h3>
+			<div class="form-group row">
+				<div class="col-sm-3">
+					<input type="number" name="buscar_usuario" id="buscar_usuario"
+						class="form-control" placeholder="Escribir DNI" />
+				</div>
+				<div class="col-sm-2" id="col_id_usuario">
+					<input type="text" name="id_usuario" id="id_usuario"
+						class="form-control" placeholder="Id Usuario" />
+
+				</div>
+				<div class="col-sm-3" id="col_nombre_usuario">
+					<input type="text" name="nombre_usuario" id="nombre_usuario"
+						class="form-control" placeholder="Nombres del Usuario" disabled />
+				</div>
+			</div>
+
+			<!-- h3 class="mb-4">Empleado</h3>
+			<div class="form-group row">
+				<div class="col-sm-3">
+					<input type="number" name="buscar_empleado" id="buscar_empleado"
+						class="form-control" placeholder="Escribir DNI del Empleado"
+						 />
+				</div>
+				<div class="col-sm-2" id="col_id_empleado">
+					<input type="text" name="id_empleado" id="id_empleado"
+						class="form-control" placeholder="Id Empleado"
+						th:field="*{empleado.id}" readonly /><small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('empleado')}"
+						th:errors="*{empleado.id}"></small>
+
+				</div>
+				<div class="col-sm-3" id="col_nombre_empleado">
+					<input type="text" name="nombre_empleado" id="nombre_empleado"
+						class="form-control" placeholder="Nombres del Empleado" disabled />
+				</div>
+			</div -->
+
+			<h3 class="mb-4">Fecha Devolución</h3>
+			<div class="form-group row">
+				<div class="col-sm-6">
+					<input class="form-control" type="date" name="fecha_devolucion" />
+				</div>
+			</div>
+
+			<div class="form-group row mt-5">
+				<div class="col-sm-6">
+					<a class="btn btn-light btn-block"
+						th:href="@{'/prestamos/cancelar'}"><i
+						class="fas fa-shield-alt"></i> Cancelar</a>
+				</div>
+				<div class="col-sm-6">
+					<input class="btn btn-outline-dark btn-block" type="submit"
+						th:value="'Registrar Préstamo'" />
+				</div>
+			</div>
+
+		</form>
+	</div>
+	<footer th:replace="layout/layout :: footer"></footer>
+	<script th:replace="layout/autocomplete-libros :: javascript"></script>
+	<script th:replace="layout/autocomplete-usuarios :: javascript"></script>
+	<script th:replace="layout/autocomplete-empleados :: javascript"></script>
+</body>
+</html>

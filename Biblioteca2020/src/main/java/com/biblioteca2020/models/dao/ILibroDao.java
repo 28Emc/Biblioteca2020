@@ -10,7 +10,7 @@ public interface ILibroDao extends CrudRepository<Libro, Long> {
 	public List<Libro> findByEstado(Boolean estado);
 
 	// MÈTODO PARA CARGAR LIBROS CON AUTOCOMPLETADO
-	@Query("select l from Libro l where l.titulo like %?1%")
+	@Query("select l from Libro l where l.titulo like ?1")
 	public List<Libro> findByTitulo(String term);
 	
 	public List<Libro> findByTituloLikeIgnoreCase(String term);

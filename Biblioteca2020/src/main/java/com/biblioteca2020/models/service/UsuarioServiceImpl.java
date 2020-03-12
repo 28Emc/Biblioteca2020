@@ -138,4 +138,16 @@ public class UsuarioServiceImpl implements IUsuarioService {
 		}
 		return true;
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Usuario findByUsernameAndEstado(String username, boolean estado) {
+		return usuarioDao.findByUsernameAndEstado(username, estado);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Usuario> findAllByNroDocumento(String term) {
+		return usuarioDao.findAllByNroDocumento("%" + term + "%");
+	}
 }

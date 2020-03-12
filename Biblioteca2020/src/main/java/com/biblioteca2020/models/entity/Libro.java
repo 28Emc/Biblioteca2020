@@ -39,13 +39,14 @@ public class Libro implements Serializable {
 	private Long id;
 
 	// LIBRO(*):LOCAL(1)
-	// @JsonIgnore
 	// @Size(min = 1)
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "local_id")
 	private Local local;
 
 	// LIBRO(1):PRESTAMO(*)
+	@JsonIgnore
 	@OneToMany(mappedBy = "libro", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Prestamo> prestamos;
 	

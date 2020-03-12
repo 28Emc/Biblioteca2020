@@ -11,8 +11,11 @@ public interface IEmpleadoDao extends CrudRepository<Empleado, Long> {
 	public Optional<Empleado> findById(Long id);
 
 	public Empleado findByUsername(String username);
-
+	
 	public Empleado findByNroDocumento(String nroDocumento);
+
+	@Query("select e from Empleado e where e.nroDocumento like ?1")
+	public List<Empleado> findAllByNroDocumento(String term);
 
 	public Empleado findByUsernameAndEstado(String username, boolean estado);
 	

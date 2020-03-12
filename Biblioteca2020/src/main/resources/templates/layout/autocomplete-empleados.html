@@ -4,12 +4,12 @@
 <body>
 	<script type="text/javascript" th:fragment="javascript">
 		$(document).ready(function() {
-
-			$("#buscar_libro").autocomplete({
-
+			
+			$("#buscar_empleado").autocomplete({
+				
 				source : function(request, response) {
 					$.ajax({
-						url : "/prestamos/cargarLibros/" + request.term,
+						url : "/prestamos/cargarEmpleados/" + request.term,
 						minLength : 2,
 						dataType : "json",
 						data : {
@@ -19,8 +19,10 @@
 							response($.map(data, function(item) {
 								return {
 									value : item.id,
-									label : item.titulo,
-									autor : item.autor
+									label : item.nombres,
+									documento : item.nroDocumento,
+									full : item.nombres + ", " + item.apellidos,
+									error : item.error
 								};
 							}));
 						}
@@ -30,9 +32,9 @@
 					event.preventDefault();
 				},
 				select : function(event, ui) {
-					$("#buscar_libro").val(ui.item.label);
-					$("#id_libro").val(ui.item.value);
-					$("#autor_libro").val(ui.item.autor);
+					$("#buscar_empleado").val(ui.item.documento);
+					$("#id_empleado").val(ui.item.value);
+					$("#nombre_empleado").val(ui.item.full);
 					return false;
 				}
 			});

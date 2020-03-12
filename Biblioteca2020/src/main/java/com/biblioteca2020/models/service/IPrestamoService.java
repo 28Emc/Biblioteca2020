@@ -6,16 +6,19 @@ import com.biblioteca2020.models.entity.Prestamo;
 
 public interface IPrestamoService {
 	
-	public List<Prestamo> findAll();
-
-	public void save(Prestamo prestamo);
-
 	public Prestamo findById(Long id);
+	
+	public List<Prestamo> findAll();
+	
+	public List<Libro> findByTitulo(String term);
 	
 	public List<Prestamo> findByDevolucion(String devolucion);
 	
-	public List<Prestamo> fetchPrestamoByIdWithLibroWithUsuario();
-	
-	public List<Libro> findByTitulo(String term);
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado();
 
+	public void save(Prestamo prestamo);
+	
+	public void update(Prestamo prestamo);
+
+	public String mostrarFechaAmigable();	
 }

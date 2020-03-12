@@ -50,8 +50,8 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Empleado findByNroDocumento(String nroDocumento) {
-		return empleadoDao.findByNroDocumento(nroDocumento);
+	public List<Empleado> findAllByNroDocumento(String term) {
+		return empleadoDao.findAllByNroDocumento("%" + term + "%");
 	}
 
 	@Override
@@ -79,12 +79,14 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Empleado> fetchByIdWithRoles() {
 		return empleadoDao.fetchByIdWithRoles();
 	}
 	
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Empleado> fetchByIdWithRolesSupervisor() {
 		return empleadoDao.fetchByIdWithRolesSupervisor();
 	}
@@ -149,13 +151,20 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Empleado> fetchByIdWithLocalWithEmpresaNotAdmin(Long id) {
 		return empleadoDao.fetchByIdWithLocalWithEmpresaNotAdmin(id);
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Empleado> fetchByIdWithLocalWithEmpresa(Long id) {
 		return empleadoDao.fetchByIdWithLocalWithEmpresa(id);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public Empleado findByNroDocumento(String nroDocumento) {
+		return empleadoDao.findByNroDocumento(nroDocumento);
+	}
 }
