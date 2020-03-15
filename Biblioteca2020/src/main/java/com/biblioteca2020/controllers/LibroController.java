@@ -2,12 +2,18 @@ package com.biblioteca2020.controllers;
 
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +23,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Local;
@@ -69,8 +77,8 @@ public class LibroController {
 
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@PostMapping("/libros/crear")
-	public String crearLibroAdmin(@Valid Libro libro, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash) {
+	public String crearLibroAdmin(@Valid Libro libro, BindingResult result, Model model,
+			@RequestParam("foto_li") MultipartFile foto, SessionStatus status, RedirectAttributes flash) {
 		if (result.hasErrors()) {
 			model.addAttribute("titulo", "Registro de Libro");
 			model.addAttribute("libro", libro);
@@ -78,6 +86,22 @@ public class LibroController {
 			model.addAttribute("locales", locales);
 			return "/libros/crear";
 		}
+
+		if (!foto.isEmpty()) {
+			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+
+			try {
+				byte[] bytes = foto.getBytes();
+				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+				Files.write(rutaCompleta, bytes);
+				libro.setFoto_libro(foto.getOriginalFilename());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 		try {
 			libroService.save(libro);
 			flash.addFlashAttribute("success",
@@ -115,7 +139,7 @@ public class LibroController {
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@PostMapping("/libros/editar")
 	public String guardarLibroAdmin(@Valid Libro libro, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash) {
+			RedirectAttributes flash, @RequestParam("file") MultipartFile foto_libro) {
 		if (result.hasErrors()) {
 			List<Local> locales = localService.findAll();
 			model.addAttribute("locales", locales);
@@ -123,6 +147,22 @@ public class LibroController {
 			model.addAttribute("titulo", "Modificar Libro");
 			return "/libros/editar";
 		}
+
+		if (!foto_libro.isEmpty()) {
+			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			byte[] bytes;
+			try {
+				bytes = foto_libro.getBytes();
+				Path rutaCompleta = Paths.get(rootPath + "//" + foto_libro.getOriginalFilename());
+				Files.write(rutaCompleta, bytes);
+				libro.setFoto_libro(foto_libro.getOriginalFilename());
+			} catch (IOException e) {
+				model.addAttribute("error", e.getMessage());
+			}
+
+		}
+
 		try {
 			libroService.update(libro);
 			flash.addFlashAttribute("warning",
@@ -175,8 +215,8 @@ public class LibroController {
 			model.addAttribute("idLocal", idLocal);
 			model.addAttribute("titulo", "Listado de Libros de '" + local.getDireccion() + "'");
 		} catch (Exception e) {
-			model.addAttribute("error", e.getMessage());
-			return "/home";
+			// model.addAttribute("error", e.getMessage());
+			return "error_403";
 		}
 
 		try {
@@ -185,9 +225,10 @@ public class LibroController {
 			libros = libroService.fetchByIdWithLocalesWithEmpleado(idLocal, empleado.getId());
 			model.addAttribute("libros", libros);
 		} catch (Exception e1) {
-			model.addAttribute("error", e1.getMessage());
-			return "/home";
+			// model.addAttribute("error", e1.getMessage());
+			return "error_403";
 		}
+
 		return "/libros/listar";
 	}
 
@@ -219,15 +260,16 @@ public class LibroController {
 			model.put("local", local);
 			return "/libros/crear";
 		} catch (Exception e) {
-			model.put("error", e.getMessage());
-			return "/libros/crear";
+			// model.put("error", e.getMessage());
+			// return "/libros/crear";
+			return "error_403";
 		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@PostMapping("/locales/listar/{idLocal}/libros/crear")
 	public String crearLibro(@PathVariable(value = "idLocal") Long idLocal, @Valid Libro libro, BindingResult result,
-			Model model, SessionStatus status, RedirectAttributes flash) {
+			Model model, SessionStatus status, RedirectAttributes flash, @RequestParam("foto_li") MultipartFile foto) {
 		model.addAttribute("idLocal", idLocal);
 		if (result.hasErrors()) {
 			Local local;
@@ -244,6 +286,21 @@ public class LibroController {
 			}
 		}
 		
+		if (!foto.isEmpty()) {
+			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+
+			try {
+				byte[] bytes = foto.getBytes();
+				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+				Files.write(rutaCompleta, bytes);
+				libro.setFoto_libro(foto.getOriginalFilename());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 		try {
 			libroService.save(libro);
 			flash.addFlashAttribute("success",
@@ -272,6 +329,7 @@ public class LibroController {
 			Map<String, Object> modelMap, RedirectAttributes flash) {
 		Libro libro = null;
 		Local local;
+
 		try {
 			local = localService.findById(idLocal);
 			modelMap.put("editable", true);
@@ -297,7 +355,7 @@ public class LibroController {
 	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@PostMapping("/locales/listar/{idLocal}/libros/editar")
 	public String guardarLibro(@PathVariable(value = "idLocal") Long idLocal, @Valid Libro libro, BindingResult result,
-			Model model, SessionStatus status, RedirectAttributes flash) {
+			Model model, SessionStatus status, RedirectAttributes flash,  @RequestParam("foto_li") MultipartFile foto) {
 		model.addAttribute("empresaLocales", idLocal);
 		model.addAttribute("idLocal", idLocal);
 		if (result.hasErrors()) {
@@ -312,6 +370,21 @@ public class LibroController {
 			} catch (Exception e) {
 				model.addAttribute("error", e.getMessage());
 				return "redirect:/locales/listar/" + idLocal + "/libros/listar";
+			}
+		}	
+		
+		if (!foto.isEmpty()) {
+			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+
+			try {
+				byte[] bytes = foto.getBytes();
+				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+				Files.write(rutaCompleta, bytes);
+				libro.setFoto_libro(foto.getOriginalFilename());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 

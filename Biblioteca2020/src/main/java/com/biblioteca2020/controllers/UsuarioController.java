@@ -1,5 +1,6 @@
 package com.biblioteca2020.controllers;
 
+import java.security.Principal;
 import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.entity.Usuario;
+import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.IRoleService;
 import com.biblioteca2020.models.service.IUsuarioService;
 
@@ -29,6 +31,9 @@ public class UsuarioController {
 
 	@Autowired
 	private IRoleService roleService;
+	
+	@Autowired
+	private ILibroService libroService;
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping("/listar")
@@ -38,6 +43,16 @@ public class UsuarioController {
 		model.addAttribute("titulo", "Listado de Usuarios");
 		return "usuarios/listar";
 	}
+	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
+	@GetMapping(value = "/librosAllUser")
+	public String listarAllLibrosUser(Model model, Principal principal) {
+		model.addAttribute("titulo", "Catálogo de libros");
+		model.addAttribute("libros",
+				libroService.findAll());
+		return "/usuarios/librosAllUser";
+	}
+	
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping("/cancelar")

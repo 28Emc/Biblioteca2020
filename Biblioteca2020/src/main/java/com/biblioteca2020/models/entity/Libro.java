@@ -26,12 +26,16 @@ import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.biblioteca2020.models.entity.Categoria;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "libros")
-@Data
+//@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class Libro implements Serializable {
 
 	@Id
@@ -79,7 +83,7 @@ public class Libro implements Serializable {
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-mm-dd")
 	private Date fechaRegistro;
-
+	
 	@Column(nullable = false)
 	private Boolean estado;
 
@@ -88,6 +92,8 @@ public class Libro implements Serializable {
 	@Max(value = 9999)
 	@NotNull
 	private Integer stock;
+	
+	private String foto_libro;
 
 	@PrePersist
 	public void prePersist() {

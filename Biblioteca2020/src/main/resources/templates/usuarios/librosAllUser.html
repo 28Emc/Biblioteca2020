@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<meta charset="UTF-8" />
+<title th:text="'Biblioteca'"></title>
+<head th:replace="layout/layout :: head"></head>
+<body>
+	<header th:replace="layout/layout :: header"></header>
+
+
+	<div class="container p-4">
+
+		<div class="card-deck">
+
+			<div th:each="libro: ${libros}" class="card" style="width: 18rem;">
+				<div class="card-header text-white bg-dark"
+					th:text="${libro.titulo}">Card header</div>
+				<img class="card-img-top px-5" src="/images/el-camino-de-los-reyes.jpg" alt="Card image cap" height="350">
+				<div class="card-body">
+					<h4 class="card-title text-right" th:text="${libro.autor}">Card title</h4>
+					<h5 class="card-title text-right text-muted"
+						th:text="${libro.categoria.nombre}">Card title</h5>
+					<p class="card-text text-right" th:text="${libro.descripcion}">Some quick
+						example text to build on the card title and make up the bulk of
+						the card's content.</p>
+					<div class="card-footer p-0 py-2
+					 bg-white">
+						<small class="text-muted"
+							th:text="'Fecha de Publicación: ' + ${libro.fechaPublicacion}">Fecha
+							de Publicación</small><br />
+						<div class="badge badge-info mt-3 p-1"
+							th:text="'Stock: ' + ${libro.stock}">Stock</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+	</div>
+
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

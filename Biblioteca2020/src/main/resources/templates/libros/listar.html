@@ -12,13 +12,12 @@
 		<h1 hidden th:text="${idLocal}"></h1>
 		<p sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
 			<a class="btn btn-primary btn-xs"
-				th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/crear/'}"><i class="fas fa-shield-alt"></i> Registrar
-				Libro</a>
+				th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/crear/'}"><i
+				class="fas fa-shield-alt"></i> Registrar Libro</a>
 		</p>
 		<p sec:authorize="hasRole('ROLE_SYSADMIN')">
-			<a class="btn btn-primary btn-xs"
-				th:href="@{'/libros/crear/'}"><i class="fas fa-user-shield"></i> Registrar
-				Libro</a>
+			<a class="btn btn-primary btn-xs" th:href="@{'/libros/crear/'}"><i
+				class="fas fa-user-shield"></i> Registrar Libro</a>
 		</p>
 		<table class="table table-responsive" th:if="${libros}!=null">
 			<thead>
@@ -45,31 +44,62 @@
 					<td th:text="${libro.fechaPublicacion}"></td>
 					<td th:text="${libro.fechaRegistro}"></td>
 					<td th:text="${libro.stock}"></td>
-					
+
 					<th:block th:with="estado=${libro.estado}">
 						<td th:if="${estado}">
-							<h5><span class="badge badge-success" th:text="'Activo'"></span></h5>
+							<h5>
+								<span class="badge badge-success" th:text="'Activo'"></span>
+							</h5>
 						</td>
+						<td th:if="${estado}" sec:authorize="hasRole('ROLE_SYSADMIN')"><a
+							class="btn btn-warning btn-xs"
+							th:href="@{'/libros/editar/'}+${libro.id}"><i
+								class="fas fa-shield-alt"></i> Editar</a></td>
+						<td th:if="${estado}"
+							sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
+							<a class="btn btn-warning btn-xs"
+							th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/editar/'}+${libro.id}">
+								<i class="fas fa-shield-alt"></i> Editar
+						</a>
+						</td>
+						<td th:if="${estado}" sec:authorize="hasRole('ROLE_SYSADMIN')"><a
+							class="btn btn-info btn-xs"
+							th:href="@{'/libros/deshabilitar/'}+${libro.id}"
+							onclick="return confirm('Seguro de querer deshabilitar el libro?');"><i
+								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
+						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
+							class="btn btn-info btn-xs"
+							th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/deshabilitar/'}+${libro.id}"
+							onclick="return confirm('Seguro de querer deshabilitar el libro?');"><i
+								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
+
 						<td th:unless="${estado}">
-							<h5><span class="badge badge-danger" th:text="'Inactivo'"></span></h5>
+							<h5>
+								<span class="badge badge-danger" th:text="'Inactivo'"></span>
+							</h5>
 						</td>
+						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_SYSADMIN')"><a
+							class="disabled btn btn-secondary btn-xs"
+							th:href="@{'/libros/editar/'}+${libro.id}"><i
+								class="fas fa-shield-alt"></i> Editar</a></td>
+						<td th:unless="${estado}"
+							sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
+							<a class="disabled btn btn-secondary btn-xs"
+							th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/editar/'}+${libro.id}">
+								<i class="fas fa-shield-alt"></i> Editar
+						</a>
+						</td>
+						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_SYSADMIN')"><a
+							class="disabled btn btn-secondary btn-xs"
+							th:href="@{'/libros/deshabilitar/'}+${libro.id}"
+							onclick="return confirm('Seguro de querer deshabilitar el libro?');"><i
+								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
+						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
+							class="disabled btn btn-secondary btn-xs"
+							th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/deshabilitar/'}+${libro.id}"
+							onclick="return confirm('Seguro de querer deshabilitar el libro?');"><i
+								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 					</th:block>
-					
-					<td sec:authorize="hasRole('ROLE_SYSADMIN')">
-					<a class="btn btn-warning btn-xs"
-						th:href="@{'/libros/editar/'}+${libro.id}"><i class="fas fa-shield-alt"></i> Editar</a></td>
-					<td sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
-					<a class="btn btn-warning btn-xs"
-						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/editar/'}+${libro.id}">
-						<i class="fas fa-shield-alt"></i> Editar</a></td>
-					<td sec:authorize="hasRole('ROLE_SYSADMIN')">
-					<a class="btn btn-info btn-xs"
-						th:href="@{'/libros/deshabilitar/'}+${libro.id}"
-						onclick="return confirm('Seguro de querer deshabilitar el libro?');"><i class="fas fa-shield-alt"></i> Deshabilitar</a></td>
-					<td sec:authorize="hasRole('ROLE_ADMIN')">
-					<a class="btn btn-info btn-xs"
-						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/deshabilitar/'}+${libro.id}"
-						onclick="return confirm('Seguro de querer deshabilitar el libro?');"><i class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 				</tr>
 			</tbody>
 		</table>

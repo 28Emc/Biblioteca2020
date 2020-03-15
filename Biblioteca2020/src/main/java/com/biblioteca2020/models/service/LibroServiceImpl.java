@@ -27,8 +27,8 @@ public class LibroServiceImpl implements ILibroService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Libro findOne(Long id) {
-		return libroDao.findById(id).orElse(null);
+	public Libro findOne(Long id) throws Exception {
+		return libroDao.findById(id).orElseThrow(() -> new Exception("El libro no existe."));
 	}
 
 	/*@Override

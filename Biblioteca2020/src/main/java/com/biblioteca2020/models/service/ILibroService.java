@@ -9,7 +9,7 @@ public interface ILibroService {
 
 	public void save(Libro libro);
 
-	public Libro findOne(Long id);
+	public Libro findOne(Long id) throws Exception;
 
 	//public void delete(Long id);
 

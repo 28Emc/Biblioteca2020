@@ -88,4 +88,10 @@ public class PrestamoServiceImpl implements IPrestamoService {
 		String fechaFull = diaFinal + " " + diaNum + " de " + mesFinal + " " + anio;
 		return fechaFull;
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(Long id) {
+		return prestamoDao.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(id);
+	}
 }

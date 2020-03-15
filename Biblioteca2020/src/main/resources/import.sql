@@ -46,8 +46,8 @@ INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (1,2);
 INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (2,3);
 INSERT INTO empleados_roles (empleado_id, rol_id) VALUES (3,4);
 /* LIBROS */
-INSERT INTO libros (autor, descripcion, estado, fecha_registro, fecha_publicacion, stock, titulo, categoria_id, local_id) VALUES ('Autor Libro 1', 'Descripcion Libro 1', 1, '2012-04-11', '2019-05-23', 100, 'El camino de los reyes', 2, 1);
-INSERT INTO libros (autor, descripcion, estado, fecha_registro, fecha_publicacion, stock, titulo, categoria_id, local_id) VALUES ('Autor Libro 2', 'Descripcion Libro 2', 1, '2014-04-11', '2019-06-13', 100, 'Las noches blancas', 3, 1);
+INSERT INTO libros (autor, descripcion, estado, fecha_registro, fecha_publicacion, stock, foto_libro, titulo, categoria_id, local_id) VALUES ('Brandon Sanderson', 'Descripcion Libro 1', 1, '2012-04-11', '2019-05-23', 100, '', 'El camino de los reyes', 2, 1);
+INSERT INTO libros (autor, descripcion, estado, fecha_registro, fecha_publicacion, stock, foto_libro, titulo, categoria_id, local_id) VALUES ('Fiódor Dostoyevski', 'Descripcion Libro 2', 1, '2014-04-11', '2019-06-13', 100, '', 'Las noches blancas', 3, 1);
 /* PRESTAMOS */
 INSERT INTO prestamos (devolucion, fecha_despacho, fecha_devolucion, observaciones, empleado_id, libro_id, usuario_id) VALUES (0, '2019-08-19', '2020-03-10', 'Observaciones prèstamo 1', 1, 1, 1);
 INSERT INTO prestamos (devolucion, fecha_despacho, fecha_devolucion, observaciones, empleado_id, libro_id, usuario_id) VALUES (0, '2019-07-16', '2020-03-10', 'Observaciones prèstamo 2', 2, 2, 2);

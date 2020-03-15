@@ -15,6 +15,8 @@ public interface IPrestamoService {
 	public List<Prestamo> findByDevolucion(String devolucion);
 	
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado();
+	
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(Long id);
 
 	public void save(Prestamo prestamo);
 	

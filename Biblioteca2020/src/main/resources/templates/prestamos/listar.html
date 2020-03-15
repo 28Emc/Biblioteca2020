@@ -11,7 +11,7 @@
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<th:block
-			sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
+			sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
 			<p>
 				<a class="btn btn-primary btn-xs" th:href="@{/prestamos/crear}"><i
 					class="fas fa-shield-alt"></i> Crear Préstamo</a>
@@ -27,9 +27,9 @@
 					<th>Nombre Suscriptor</th>
 					<th>Fecha Despacho</th>
 					<th>Fecha Devolución</th>
-					<th>Observaciones</th>
+					<th sec:authorize="!hasRole('ROLE_USER')">Observaciones</th>
 					<th>Estado</th>
-					<th colspan="3">Opciones</th>
+					<th sec:authorize="!hasRole('ROLE_USER')" colspan="3">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -47,7 +47,7 @@
 						th:title="${prestamo.observaciones}" class="text-center"><i
 						class="fas fa-search fa-2x"></i></td>
 
-					<th:block th:with="estado=${prestamo.devolucion}">
+					<th:block th:with="estado=${prestamo.devolucion}" sec:authorize="!hasRole('ROLE_USER')">
 						<td th:if="${estado}">
 							<h5>
 								<span class="badge badge-success" th:text="'Préstamo Terminado'"></span>
