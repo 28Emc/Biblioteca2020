@@ -95,7 +95,7 @@
 			<h3 class="mb-4">Foto</h3>
 			<div class="form-group">
 				<div class="col-sm-6">
-					<img th:if="${#strings.length(libro.foto_libro) > 0}"
+					<img th:if="${libro.foto_libro!=null && #strings.length(libro.foto_libro) > 0}"
 						class="img-thumbnail rounded float-left" style="max-width: 25%;"
 						th:alt="${libro.foto_libro}"
 						th:src="@{'/uploads/'+${libro.foto_libro}}">
@@ -208,6 +208,12 @@
 
 			<h3 class="mb-4">Foto</h3>
 			<div class="form-group">
+				<div class="col-sm-6">
+					<img th:if="${libro.foto_libro!=null && #strings.length(libro.foto_libro) > 0}"
+						class="img-thumbnail rounded float-left" style="max-width: 25%;"
+						th:alt="${libro.foto_libro}"
+						th:src="@{'/uploads/'+${libro.foto_libro}}">
+				</div>
 				<div class="col-sm-6">
 					<input class="form-control" type="file" name="foto_li" /> <small
 						class="form-text text-danger"

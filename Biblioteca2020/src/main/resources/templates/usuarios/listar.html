@@ -55,10 +55,12 @@
 							</h5>
 						</td>
 						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
-							class="btn btn-warning btn-xs"><i class="fas fa-shield-alt"></i>
-								Editar</a></td>
+							class="btn btn-warning btn-xs"
+							th:href="@{/usuarios/editar/}+${usuario.id}"><i
+								class="fas fa-shield-alt"></i> Editar</a></td>
 						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
-							class="btn btn-info btn-xs text-white"><i
+							class="btn btn-info btn-xs text-white"
+							th:onclick="'javascript:confirmDeshabilitar(\''+ ${usuario.id} +'\');'"><i
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 						<td th:unless="${estado}">
 							<h5>
@@ -66,15 +68,13 @@
 							</h5>
 						</td>
 						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
-							class="disabled btn btn-secondary btn-xs"
-							th:href="@{/usuarios/editar/}+${usuario.id}"><i
+							class="disabled btn btn-secondary btn-xs"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
 						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
-							class="disabled btn btn-secondary btn-xs text-white"
-							th:onclick="'javascript:confirmDeshabilitar(\''+ ${usuario.id} +'\');'"><i
+							class="disabled btn btn-secondary btn-xs text-white"><i
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 					</th:block>
-					
+
 				</tr>
 			</tbody>
 		</table>

@@ -1,5 +1,9 @@
 package com.biblioteca2020.controllers;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.Map;
 import javax.validation.Valid;
@@ -13,8 +17,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.entity.Usuario;
 import com.biblioteca2020.models.service.ILibroService;
@@ -72,13 +78,29 @@ public class UsuarioController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
 	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
-			SessionStatus status, RedirectAttributes flash) {
+			SessionStatus status, RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Registro de Usuario");
 			return "/usuarios/crear";
 		}
+		
+		if (!foto.isEmpty()) {
+			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+
+			try {
+				byte[] bytes = foto.getBytes();
+				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+				Files.write(rutaCompleta, bytes);
+				usuario.setFoto_usuario(foto.getOriginalFilename());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		try {
 			usuarioService.save(usuario);
 			flash.addFlashAttribute("success",
@@ -115,7 +137,7 @@ public class UsuarioController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Map<String, Object> modelMap) {
+			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_usu") MultipartFile foto) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
@@ -123,6 +145,22 @@ public class UsuarioController {
 			model.addAttribute("titulo", "Modificar Usuario");
 			return "/usuarios/editar";
 		}
+		
+		if (!foto.isEmpty()) {
+			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+
+			try {
+				byte[] bytes = foto.getBytes();
+				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+				Files.write(rutaCompleta, bytes);
+				usuario.setFoto_usuario(foto.getOriginalFilename());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		try {
 			usuarioService.update(usuario);
 			flash.addFlashAttribute("warning",

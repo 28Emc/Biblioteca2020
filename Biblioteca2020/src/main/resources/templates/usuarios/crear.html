@@ -9,7 +9,7 @@
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<form class="form" role="form"
 			th:action="${editable} ?@{/usuarios/editar} :@{/usuarios/crear}"
-			th:object="${usuario}" method="post">
+			th:object="${usuario}" method="post" enctype="multipart/form-data">
 
 			<div th:switch="${editable}">
 				<div th:case="true">
@@ -20,7 +20,8 @@
 						<div class="col-sm-6">
 							<input readonly class="form-control" type="text"
 								th:field="${usuario.nombres}"
-								th:errorclass="'form-control alert-danger'" placeholder="Nombre Completo..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Nombre Completo..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('nombres')}"
 								th:errors="${usuario.nombres}"></small>
@@ -32,7 +33,8 @@
 						<div class="col-sm-6">
 							<input readonly class="form-control" type="text"
 								th:field="${usuario.apellidos}"
-								th:errorclass="'form-control alert-danger'" placeholder="Apellido Paterno y Materno..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Apellido Paterno y Materno..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('apellidos')}"
 								th:errors="${usuario.apellidos}"></small>
@@ -43,8 +45,8 @@
 						<div class="col-sm-6">
 							<input readonly class="form-control" type="number"
 								th:field="${usuario.nroDocumento}"
-								th:errorclass="'form-control alert-danger'" placeholder="00000000" /> <small
-								class="form-text text-danger"
+								th:errorclass="'form-control alert-danger'"
+								placeholder="00000000" /> <small class="form-text text-danger"
 								th:if="${#fields.hasErrors('nroDocumento')}"
 								th:errors="${usuario.nroDocumento}"></small>
 						</div>
@@ -55,7 +57,8 @@
 						<div class="col-sm-6">
 							<input readonly class="form-control" type="text"
 								th:field="${usuario.username}"
-								th:errorclass="'form-control alert-danger'" placeholder="Usuario..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Usuario..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('username')}"
 								th:errors="${usuario.username}"></small>
@@ -67,7 +70,8 @@
 						<div class="col-sm-6">
 							<input readonly class="form-control" type="password"
 								th:field="${usuario.password}"
-								th:errorclass="'form-control alert-danger'" placeholder="Contraseña..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Contraseña..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('password')}"
 								th:errors="${usuario.password}"></small>
@@ -80,7 +84,8 @@
 						<div class="col-sm-6">
 							<input readonly class="form-control" type="password"
 								th:field="${usuario.passwordConfirmacion}"
-								th:errorclass="'form-control alert-danger'" placeholder="Escribe nuevamente tu contraseña..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Escribe nuevamente tu contraseña..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('passwordConfirmacion')}"
 								th:errors="${usuario.passwordConfirmacion}"></small>
@@ -106,7 +111,8 @@
 						<div class="col-sm-6">
 							<input readonly class="form-control" type="text"
 								th:field="${usuario.direccion}"
-								th:errorclass="'form-control alert-danger'" placeholder="Av/Jr/Calle..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Av/Jr/Calle..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('direccion')}"
 								th:errors="${usuario.direccion}"></small>
@@ -117,7 +123,8 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="email"
 								th:field="${usuario.email}"
-								th:errorclass="'form-control alert-danger'" placeholder="test@email.com" /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="test@email.com" /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('email')}"
 								th:errors="${usuario.email}"></small>
@@ -128,10 +135,26 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="number"
 								th:field="${usuario.celular}"
-								th:errorclass="'form-control alert-danger'" placeholder="999999999" /> <small
-								class="form-text text-danger"
+								th:errorclass="'form-control alert-danger'"
+								placeholder="999999999" /> <small class="form-text text-danger"
 								th:if="${#fields.hasErrors('celular')}"
 								th:errors="${usuario.celular}"></small>
+						</div>
+					</div>
+
+					<h3 class="mb-4">Foto</h3>
+					<div class="form-group">
+						<div class="col-sm-6">
+							<img th:if="${usuario.foto_usuario!=null && #strings.length(usuario.foto_usuario) > 0}"
+								class="img-thumbnail rounded float-left" style="max-width: 25%;"
+								th:alt="${usuario.foto_usuario}"
+								th:src="@{'/uploads/'+${usuario.foto_usuario}}">
+						</div>
+						<div class="col-sm-6">
+							<input class="form-control" type="file" name="foto_usu" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('foto_usuario')}"
+								th:errors="*{foto_usuario}"></small>
 						</div>
 					</div>
 
@@ -145,7 +168,8 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="text"
 								th:field="${usuario.nombres}"
-								th:errorclass="'form-control alert-danger'" placeholder="Nombre Completo..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Nombre Completo..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('nombres')}"
 								th:errors="${usuario.nombres}"></small>
@@ -157,7 +181,8 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="text"
 								th:field="${usuario.apellidos}"
-								th:errorclass="'form-control alert-danger'" placeholder="Apellido Paterno y Materno..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Apellido Paterno y Materno..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('apellidos')}"
 								th:errors="${usuario.apellidos}"></small>
@@ -168,8 +193,8 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="number"
 								th:field="${usuario.nroDocumento}"
-								th:errorclass="'form-control alert-danger'" placeholder="00000000" /> <small
-								class="form-text text-danger"
+								th:errorclass="'form-control alert-danger'"
+								placeholder="00000000" /> <small class="form-text text-danger"
 								th:if="${#fields.hasErrors('nroDocumento')}"
 								th:errors="${usuario.nroDocumento}"></small>
 						</div>
@@ -180,7 +205,8 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="text"
 								th:field="${usuario.username}"
-								th:errorclass="'form-control alert-danger'" placeholder="Usuario..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Usuario..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('username')}"
 								th:errors="${usuario.username}"></small>
@@ -192,7 +218,8 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="password"
 								th:field="${usuario.password}"
-								th:errorclass="'form-control alert-danger'" placeholder="Contraseña..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Contraseña..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('password')}"
 								th:errors="${usuario.password}"></small>
@@ -205,7 +232,8 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="password"
 								th:field="${usuario.passwordConfirmacion}"
-								th:errorclass="'form-control alert-danger'" placeholder="Escribe nuevamente tu contraseña..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Escribe nuevamente tu contraseña..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('passwordConfirmacion')}"
 								th:errors="${usuario.passwordConfirmacion}"></small>
@@ -231,7 +259,8 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="text"
 								th:field="${usuario.direccion}"
-								th:errorclass="'form-control alert-danger'" placeholder="Av/Jr/Calle..." /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="Av/Jr/Calle..." /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('direccion')}"
 								th:errors="${usuario.direccion}"></small>
@@ -242,7 +271,8 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="email"
 								th:field="${usuario.email}"
-								th:errorclass="'form-control alert-danger'" placeholder="test@email.com" /> <small
+								th:errorclass="'form-control alert-danger'"
+								placeholder="test@email.com" /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('email')}"
 								th:errors="${usuario.email}"></small>
@@ -253,10 +283,26 @@
 						<div class="col-sm-6">
 							<input class="form-control" type="number"
 								th:field="${usuario.celular}"
-								th:errorclass="'form-control alert-danger'" placeholder="999999999"/> <small
-								class="form-text text-danger"
+								th:errorclass="'form-control alert-danger'"
+								placeholder="999999999" /> <small class="form-text text-danger"
 								th:if="${#fields.hasErrors('celular')}"
 								th:errors="${usuario.celular}"></small>
+						</div>
+					</div>
+
+					<h3 class="mb-4">Foto</h3>
+					<div class="form-group">
+						<div class="col-sm-6">
+							<img th:if="${usuario.foto_usuario!=null && #strings.length(usuario.foto_usuario) > 0}"
+								class="img-thumbnail rounded float-left" style="max-width: 25%;"
+								th:alt="${usuario.foto_usuario}"
+								th:src="@{'/uploads/'+${usuario.foto_usuario}}">
+						</div>
+						<div class="col-sm-6">
+							<input class="form-control" type="file" name="foto_usu" /> <small
+								class="form-text text-danger"
+								th:if="${#fields.hasErrors('foto_usuario')}"
+								th:errors="*{foto_usuario}"></small>
 						</div>
 					</div>
 
@@ -266,8 +312,8 @@
 			<div class="form-group row">
 				<div class="col-sm-6">
 					<a class="btn btn-light btn-block"
-						th:href="@{'/usuarios/cancelar'}"><i
-								class="fas fa-shield-alt"></i> Cancelar</a>
+						th:href="@{'/usuarios/cancelar'}"><i class="fas fa-shield-alt"></i>
+						Cancelar</a>
 				</div>
 				<div class="col-sm-6">
 					<input class="btn btn-dark btn-block" type="submit"

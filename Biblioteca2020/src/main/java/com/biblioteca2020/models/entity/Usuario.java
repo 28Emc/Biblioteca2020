@@ -97,6 +97,8 @@ public class Usuario implements Serializable {
 
 	@Column(nullable = false)
 	private Boolean estado;
+	
+	private String foto_usuario;
 
 	@PrePersist
 	public void prePersist() {
