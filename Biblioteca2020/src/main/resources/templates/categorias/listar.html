@@ -10,7 +10,7 @@
 
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<p sec:authorize="hasRole('ROLE_ADMIN')">
+		<p sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
 			<a class="btn btn-primary btn-xs" th:href="@{/categorias/crear}"><i
 				class="fas fa-shield-alt"></i> Crear Categoría</a>
 		</p>
@@ -20,9 +20,7 @@
 					<th>Id</th>
 					<th>Nombre</th>
 					<th>Estado</th>
-					<th:block sec:authorize="hasRole('ROLE_ADMIN')">
-						<th colspan="2">Opciones</th>
-					</th:block>
+					<th colspan="2">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -36,11 +34,13 @@
 								<span class="badge badge-success" th:text="'Activo'"></span>
 							</h5>
 						</td>
-						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
+						<td th:if="${estado}"
+							sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"><a
 							class="btn btn-warning btn-xs"
 							th:href="@{/categorias/crear/}+${categoria.id}"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
+						<td th:if="${estado}"
+							sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"><a
 							class="btn btn-info btn-xs"
 							th:href="@{/categorias/deshabilitar/}+${categoria.id}"
 							onclick="return confirm('Seguro de querer deshabilitar la categoría?');"><i
@@ -51,11 +51,13 @@
 								<span class="badge badge-danger" th:text="'Inactivo'"></span>
 							</h5>
 						</td>
-						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
+						<td th:unless="${estado}"
+							sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"><a
 							class="disabled btn btn-secondary btn-xs"
 							th:href="@{/categorias/crear/}+${categoria.id}"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
+						<td th:unless="${estado}"
+							sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"><a
 							class=" disabled btn btn-secondary btn-xs"
 							th:href="@{/categorias/deshabilitar/}+${categoria.id}"
 							onclick="return confirm('Seguro de querer deshabilitar la categoría?');"><i

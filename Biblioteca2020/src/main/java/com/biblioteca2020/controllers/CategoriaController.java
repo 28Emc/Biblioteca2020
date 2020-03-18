@@ -1,6 +1,5 @@
 package com.biblioteca2020.controllers;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
@@ -8,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,13 +43,13 @@ public class CategoriaController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@GetMapping("/cancelar")
-	public String cancelar(ModelMap modelMap) {
+	public String cancelar() {
 		return "redirect:/categorias/listar";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@RequestMapping(value = "/crear")
-	public String crearFormCategoria(Map<String, Object> modelMap, Principal principal, RedirectAttributes flash) {
+	public String crearFormCategoria(Map<String, Object> modelMap) {
 		Categoria categoria = new Categoria();
 		modelMap.put("titulo", "Registro de Categoría");
 		modelMap.put("categoria", categoria);
@@ -60,8 +58,8 @@ public class CategoriaController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@PostMapping(value = "/crear")
-	public String crearCategoria(@Valid Categoria categoria, BindingResult result, Model model,
-			Map<String, Object> modelMap, SessionStatus status, RedirectAttributes flash, Principal principal) {
+	public String crearCategoria(@Valid Categoria categoria, BindingResult result, Model model, 
+			SessionStatus status, RedirectAttributes flash) {
 		if (result.hasErrors()) {
 			model.addAttribute("titulo", "Registro de Categoría");
 			return "categorias/crear";
@@ -100,7 +98,7 @@ public class CategoriaController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@PostMapping(value = "/editar")
 	public String guardarCategoria(@Valid Categoria categoria, BindingResult result, Model model,
-			Map<String, Object> modelMap, SessionStatus status, RedirectAttributes flash, Principal principal) {
+			SessionStatus status, RedirectAttributes flash) {
 		if (result.hasErrors()) {
 			model.addAttribute("editable", true);
 			model.addAttribute("titulo", "Modificar Categoría");
@@ -113,20 +111,7 @@ public class CategoriaController {
 		return "redirect:/categorias/listar";
 	}
 
-	/*
-	 * @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	 * 
-	 * @RequestMapping(value = "/categorias/eliminar/{id}") public String
-	 * eliminarCategoria(@PathVariable(value = "id") Long id, RedirectAttributes
-	 * flash) { if (id > 0) { Categoria categoria = categoriaService.findOne(id);
-	 * flash.addFlashAttribute("success", "La categoría con código " +
-	 * categoria.getId() + " ha sido eliminada."); // EN REALIDAD TENGO QUE
-	 * DESHABILITAR EL REGISTRO EN LA TABLA CATEGORÍA // Y ELIMINAR EL REGISTRO EN
-	 * LA TABLA libros_locales (ELIMINO EL LIBRO CON ESA CATEGORIA)
-	 * categoriaService.delete(id); } return "redirect:/categorias/listar"; }
-	 */
-
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@RequestMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarCategoria(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Categoria categoria = null;

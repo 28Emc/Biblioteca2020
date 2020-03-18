@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,10 +36,11 @@ public class UsuarioController {
 
 	@Autowired
 	private IRoleService roleService;
-	
+
 	@Autowired
 	private ILibroService libroService;
 
+	// LISTADO DE USUARIOS
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping("/listar")
 	public String listarUsuarios(Model model) {
@@ -49,24 +49,23 @@ public class UsuarioController {
 		model.addAttribute("titulo", "Listado de Usuarios");
 		return "usuarios/listar";
 	}
-	
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
+
+	// CATÁLOGO DE LIBROS PARA EL USUARIO
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_SUPERVISOR', 'ROLE_USER')")
 	@GetMapping(value = "/librosAllUser")
 	public String listarAllLibrosUser(Model model, Principal principal) {
 		model.addAttribute("titulo", "Catálogo de libros");
-		model.addAttribute("libros",
-				libroService.findAll());
+		model.addAttribute("libros", libroService.findAll());
 		return "/usuarios/librosAllUser";
 	}
-	
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping("/cancelar")
-	public String cancelar(ModelMap modelMap) {
+	public String cancelar() {
 		return "redirect:/usuarios/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@GetMapping("/crear")
 	public String crearFormUsuario(Map<String, Object> modelMap) {
 		modelMap.put("usuario", new Usuario());
@@ -75,7 +74,7 @@ public class UsuarioController {
 		return "usuarios/crear";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@PostMapping(value = "/crear")
 	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
 			SessionStatus status, RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
@@ -85,7 +84,7 @@ public class UsuarioController {
 			model.addAttribute("titulo", "Registro de Usuario");
 			return "/usuarios/crear";
 		}
-		
+
 		if (!foto.isEmpty()) {
 			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 			String rootPath = directorioRecursos.toFile().getAbsolutePath();
@@ -96,11 +95,10 @@ public class UsuarioController {
 				Files.write(rutaCompleta, bytes);
 				usuario.setFoto_usuario(foto.getOriginalFilename());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
 			}
 		}
-		
+
 		try {
 			usuarioService.save(usuario);
 			flash.addFlashAttribute("success",
@@ -116,7 +114,7 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@GetMapping("/editar/{id}")
 	public String editarFormUsuario(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
 			RedirectAttributes flash) {
@@ -134,7 +132,7 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@PostMapping(value = "/editar")
 	public String guardarUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_usu") MultipartFile foto) {
@@ -145,7 +143,7 @@ public class UsuarioController {
 			model.addAttribute("titulo", "Modificar Usuario");
 			return "/usuarios/editar";
 		}
-		
+
 		if (!foto.isEmpty()) {
 			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 			String rootPath = directorioRecursos.toFile().getAbsolutePath();
@@ -156,11 +154,10 @@ public class UsuarioController {
 				Files.write(rutaCompleta, bytes);
 				usuario.setFoto_usuario(foto.getOriginalFilename());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
 			}
 		}
-		
+
 		try {
 			usuarioService.update(usuario);
 			flash.addFlashAttribute("warning",
@@ -177,7 +174,7 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@GetMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Usuario usuario = null;
@@ -192,21 +189,4 @@ public class UsuarioController {
 			return "redirect:/usuarios/listar";
 		}
 	}
-
-	/*@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	@RequestMapping(value = "/eliminar/{id}")
-	public String eliminarUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
-		Usuario usuario = null;
-		try {
-			usuario = usuarioService.findById(id);
-			flash.addFlashAttribute("error",
-					"El usuario con código " + usuario.getId() + " ha sido eliminado de la base de datos.");
-			usuarioService.borrarUsuario(id);
-			return "redirect:/usuarios/listar";
-		} catch (Exception e) {
-			flash.addFlashAttribute("error", e.getMessage());
-			System.out.println(e.getMessage());
-			return "redirect:/usuarios/listar";
-		}
-	}*/
 }

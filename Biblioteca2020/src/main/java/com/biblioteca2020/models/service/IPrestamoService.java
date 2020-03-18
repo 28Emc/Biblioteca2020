@@ -16,6 +16,8 @@ public interface IPrestamoService {
 	
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado();
 	
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(Long idEmpleado);
+	
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(Long id);
 
 	public void save(Prestamo prestamo);

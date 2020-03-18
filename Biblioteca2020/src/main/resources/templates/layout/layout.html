@@ -45,7 +45,7 @@
 						th:href="@{/usuarios/listar}"><i class="fas fa-user"></i>
 							Usuarios</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
 						th:href="@{/prestamos/listar}"><i class="fas fa-shield-alt"></i>
 							Préstamos</a></li>
 					<li class="nav-item"><a class="nav-link"

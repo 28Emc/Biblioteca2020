@@ -1,6 +1,5 @@
 package com.biblioteca2020.controllers;
 
-import java.security.Principal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -47,29 +46,47 @@ public class PrestamoController {
 	@Autowired
 	private IUsuarioService usuarioService;
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// FILTRO DE LISTADO POR ROLES:
+	// EMPLEADO: VE PRESTAMOS REALIZADOS A SU NOMBRE
+	// SUPERVISOR Y ADMIN: VEN PRESTAMOS DEL LOCAL ENTERO
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/listar")
-	public String listarPrestamos(Model model) {
+	public String listarPrestamosPorRol(Model model, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+		switch (userDetails.getAuthorities().toString()) {
+		case "[ROLE_ADMIN]":
+			model.addAttribute("prestamos", prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado());
+			break;
+		case "[ROLE_SUPERVISOR]":
+			model.addAttribute("prestamos", prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado());
+			break;
+		case "[ROLE_EMPLEADO]":
+			Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+			model.addAttribute("prestamos",
+					prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId()));
+			break;
+		}
+
 		model.addAttribute("titulo", "Listado de Préstamos");
-		model.addAttribute("prestamos", prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado());
 		return "/prestamos/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
+	// HISTORIAL DE PRESTAMOS DE USUARIO
+	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@GetMapping(value = "/historialUser")
-	public String listarHistorialUser(Model model, Principal principal) {
+	public String listarHistorialUser(Model model, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
 		model.addAttribute("titulo", "Historial de Préstamos");
-		Usuario usuario = usuarioService.findByUsername(principal.getName());
 		model.addAttribute("prestamos",
 				prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(usuario.getId()));
 		return "/prestamos/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO', 'ROLE_USER')")
 	@GetMapping(value = "/cancelar")
-	public String cancelar(Model model) {
-		model.addAttribute("titulo", "Listado de Préstamos");
-		model.addAttribute("prestamos", prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado());
+	public String cancelar() {
 		return "redirect:/prestamos/listar";
 	}
 
@@ -91,27 +108,28 @@ public class PrestamoController {
 		return empleadoService.findAllByNroDocumento(term);
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// CARGA DE FORMULARIO DE CREACIÓN DE PRÉSTAMOS
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/crear")
 	public String crearPrestamo(Map<String, Object> model, Authentication authentication) {
-		Prestamo prestamo = new Prestamo();
-		model.put("titulo", "Creación de Prestamo");
-		model.put("prestamo", prestamo);
+		Prestamo prestamo = new Prestamo();		
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleadoPrestamo = empleadoService.findByUsernameAndEstado(userDetails.getUsername(), true);
+		model.put("titulo", "Creación de Préstamo");
+		model.put("prestamo", prestamo);
 		model.put("empleado", empleadoPrestamo);
 		return "/prestamos/crear";
 	}
-
-	/*
-	 * LA LOGICA DE REGISTRO DE prestamo: 1- EL LIBRO SE BUSCA ENTRE LOS EXISTENTES
-	 * (AJAX), DEVUELVE SU NOMBRE Y SU AUTOR, SE ALMACENA SU CODIGO; 2- EL
-	 * SUSCRIPTOR SE BUSCA ENTRE LOS EXISTENTES (AJAX), DEVUELVE EL NOMBRE Y
-	 * APELLIDO, SE ALMACENA EN EL prestamo SU CODIGO; 3- LA FECHA DE DEVOLUCIÒN SE
-	 * SETEA CON LA FECHA ACTUAL; 4- EL EMPLEADO QUE ATIENDE SE SETEA CON EL
-	 * EMPLEADO LOGUEADO EN ESE MOMENTO EN EL SISTEMA, SE ALMACENA SU CODIGO;
-	 */
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	
+	 // REGISTRO DE PRÉSTAMOS: 
+	 // 1: EL LIBRO SE BUSCA ENTRE LOS EXISTENTES (AJAX), 
+	 //    OBTENGO NOMBRE, AUTOR Y SE ALMACENA SU CODIGO;
+	 // 2: EL SUSCRIPTOR SE BUSCA ENTRE LOS EXISTENTES (AJAX),
+	 //    OBTENGO NOMBRES, APELLIDOS Y SE ALMACENA EN SU CÓDIGO;
+	 // 3: LA FECHA DE DEVOLUCIÒN SE SETEA CON LA FECHA ACTUAL; 
+	 // 4: EL EMPLEADO QUE REGISTRA EL PRÉSTAMO SE SETEA CON EL EMPLEADO LOGUEADO EN EL SISTEMA
+	 //    Y SE ALMACENA SU CODIGO;	 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@PostMapping(value = "/crear")
 	public String guardarPrestamo(Prestamo prestamo, @RequestParam(name = "id_libro", required = false) Long id_libro,
 			@RequestParam(name = "id_usuario", required = false) Long id_usuario,
@@ -119,18 +137,19 @@ public class PrestamoController {
 			RedirectAttributes flash, SessionStatus status, Model model, Authentication authentication) {
 
 		if (id_libro == null || id_usuario == null || fecha_devolucion == null) {
-			model.addAttribute("titulo", "Creación de Prestamo");
+			model.addAttribute("titulo", "Creación de Préstamo");
 			model.addAttribute("error", "El prestamo necesita un libro, un usuario y una fecha de despacho VÁLIDOS.");
 			return "/prestamos/crear";
 		}
 
 		// LIBRO
 		Libro libroPrestamo;
+
 		try {
 			libroPrestamo = libroService.findOne(id_libro);
 			prestamo.setLibro(libroPrestamo);
 
-			// LOGICA DE STOCK
+			// ACTUALIZACIÓN DE STOCK
 			if (libroPrestamo.getStock() <= 0) {
 				model.addAttribute("error", "Lo sentimos, no hay stock suficiente del libro seleccionado ("
 						+ libroPrestamo.getTitulo() + ")");
@@ -145,6 +164,7 @@ public class PrestamoController {
 
 		// USUARIO
 		Usuario usuarioPrestamo;
+
 		try {
 			usuarioPrestamo = usuarioService.findById(id_usuario);
 			prestamo.setUsuario(usuarioPrestamo);
@@ -164,6 +184,7 @@ public class PrestamoController {
 
 		// FECHA DEVOLUCIÓN
 		Date fechaDevolucionPrestamo;
+
 		try {
 			fechaDevolucionPrestamo = new SimpleDateFormat("yyyy-mm-dd").parse(fecha_devolucion);
 			prestamo.setFecha_devolucion(fechaDevolucionPrestamo);
@@ -173,19 +194,23 @@ public class PrestamoController {
 		}
 
 		// OBSERVACIONES
-		prestamo.setObservaciones("No hay observaciones.");
+		prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo()
+				+ " ha sido programado para su devolución el día " + prestamoService.mostrarFechaAmigable()
+				+ ", por el empleado: " + empleadoPrestamo.getNombres().concat(", " + empleadoPrestamo.getApellidos())
+				+ " (código empleado " + empleadoPrestamo.getId() + ") al usuario: " + usuarioPrestamo.getNombres()
+				+ " (código usuario " + usuarioPrestamo.getId() + ")");
 
 		// DEVOLUCION
 		prestamo.setDevolucion(false);
 
 		prestamoService.save(prestamo);
-		flash.addFlashAttribute("success", "El prestamo ha sido creado correctamente.");
+		flash.addFlashAttribute("success", "Orden de prestamo creada correctamente.");
 		status.setComplete();
 		return "redirect:/prestamos/listar";
 	}
 
-	// MÉTODO DE CONFIRMACIÓN DE DEVOLUCIÒN DEL LIBRO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// CONFIRMACIÓN DE DEVOLUCIÒN DE LIBRO
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/devolverLibro/{id}")
 	public String devolverLibro(@PathVariable(value = "id") Long id, RedirectAttributes flash,
 			Authentication authentication, Model model) {
@@ -197,32 +222,31 @@ public class PrestamoController {
 			prestamo = prestamoService.findById(id);
 			prestamo.setDevolucion(true);
 
-			// LÓGICA DE STOCK
+			// ACTUALIZACIÓN DE STOCK
 			int stockNuevo = prestamo.getLibro().getStock();
 			Libro libro;
 
 			try {
 				libro = libroService.findOne(prestamo.getLibro().getId());
 				libro.setStock(stockNuevo + 1);
-
 			} catch (Exception e) {
 				model.addAttribute("error", e.getMessage());
 				return "redirect:/prestamos/listar";
 			}
 
 			prestamo.setFecha_devolucion(fechaDevolución);
-			prestamo.setObservaciones("El libro '" + prestamo.getLibro().getTitulo() + "' ha sido devuelto el día "
-					+ prestamoService.mostrarFechaAmigable() + ", por el empleado "
-					+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código empleado: "
-					+ empleado.getId() + ").");
+			prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo() + ", ha sido devuelto el día "
+					+ prestamoService.mostrarFechaAmigable() + ", por el empleado: "
+					+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código empleado "
+					+ empleado.getId() + ")");
 			prestamoService.save(prestamo);
 			flash.addFlashAttribute("info", "El libro '" + prestamo.getLibro().getTitulo() + "' ha sido devuelto.");
 		}
 		return "redirect:/prestamos/listar";
 	}
 
-	// MÉTODO DE ANULACIÒN DE PRÉSTAMO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// ANULACIÒN DE PRÉSTAMO
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/anularPrestamo/{id}")
 	public String anularPrestamo(@PathVariable(value = "id") Long id, RedirectAttributes flash,
 			Authentication authentication, Model model) {
@@ -234,24 +258,23 @@ public class PrestamoController {
 			prestamo = prestamoService.findById(id);
 			prestamo.setDevolucion(true);
 
-			// LÓGICA DE STOCK
+			// ACTUALIZACIÓN DE STOCK
 			int stockNuevo = prestamo.getLibro().getStock();
 			Libro libro;
 
 			try {
 				libro = libroService.findOne(prestamo.getLibro().getId());
 				libro.setStock(stockNuevo + 1);
-
 			} catch (Exception e) {
 				model.addAttribute("error", e.getMessage());
 				return "redirect:/prestamos/listar";
 			}
 
 			prestamo.setFecha_devolucion(fechaDevolución);
-			prestamo.setObservaciones("El préstamo del libro '" + prestamo.getLibro().getTitulo() + "' con código ("
-					+ id + ") ha sido anulado el día " + prestamoService.mostrarFechaAmigable() + ", por el empleado "
-					+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código empleado: "
-					+ empleado.getId() + ").");
+			prestamo.setObservaciones("El préstamo del libro: " + prestamo.getLibro().getTitulo() + " (código " + id
+					+ "), ha sido anulado el día " + prestamoService.mostrarFechaAmigable() + ", por el empleado: "
+					+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código empleado "
+					+ empleado.getId() + ")");
 			prestamoService.save(prestamo);
 			flash.addFlashAttribute("warning",
 					"El préstamo del libro '" + prestamo.getLibro().getTitulo() + "' ha sido anulado.");

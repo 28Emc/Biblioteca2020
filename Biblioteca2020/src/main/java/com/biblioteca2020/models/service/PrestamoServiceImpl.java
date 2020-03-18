@@ -59,8 +59,8 @@ public class PrestamoServiceImpl implements IPrestamoService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado() {
-		return prestamoDao.fetchByIdWithLibroWithUsuarioWithEmpleado();
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(Long idEmpleado) {
+		return prestamoDao.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(idEmpleado);
 	}
 
 	@Override
@@ -94,4 +94,11 @@ public class PrestamoServiceImpl implements IPrestamoService {
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(Long id) {
 		return prestamoDao.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(id);
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado() {
+		return prestamoDao.fetchByIdWithLibroWithUsuarioWithEmpleado();
+	}
+
 }
