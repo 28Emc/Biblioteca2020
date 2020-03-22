@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Usuario;
 import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.IRoleService;
@@ -55,7 +58,19 @@ public class UsuarioController {
 	@GetMapping(value = "/librosAllUser")
 	public String listarAllLibrosUser(Model model, Principal principal) {
 		model.addAttribute("titulo", "Catálogo de libros");
-		model.addAttribute("libros", libroService.findAll());
+		List<Libro> libros = libroService.findAll();
+		
+		// LÓGICA DE MOSTRAR UNA DESCRICIÓN REDUCIDA DE 150 CARACTERES DEL LIBRO
+		for (int i = 0; i < libros.size(); i++) {
+			String descripcionMin = libros.get(i).getDescripcion().substring(0, 150);
+			String descripcionFull = libros.get(i).getDescripcion().substring(150,
+					libros.get(i).getDescripcion().length());
+			libros.get(i).setDescripcionMin(descripcionMin + " ...");
+			libros.get(i).setDescripcion(descripcionFull);
+			model.addAttribute("libros", libros);
+		}
+
+		// model.addAttribute("libros", libros);
 		return "/usuarios/librosAllUser";
 	}
 

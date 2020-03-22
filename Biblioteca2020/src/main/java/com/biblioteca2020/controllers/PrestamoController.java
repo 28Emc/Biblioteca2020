@@ -93,13 +93,13 @@ public class PrestamoController {
 	// MÉTODO PARA REALIZAR LA BUSQUEDA DE LIBROS MEDIANTE AUTOCOMPLETADO
 	@RequestMapping(value = "/cargarLibros/{term}", produces = { "application/json" })
 	public @ResponseBody List<Libro> cargarLibros(@PathVariable String term) {
-		return prestamoService.findByTitulo(term);
+		return libroService.findByTituloLikeIgnoreCaseAndEstado(term, true);
 	}
 
 	// MÉTODO PARA REALIZAR LA BUSQUEDA DE USUARIOS MEDIANTE AUTOCOMPLETADO
 	@RequestMapping(value = "/cargarUsuarios/{term}", produces = { "application/json" })
 	public @ResponseBody List<Usuario> cargarUsuarios(@PathVariable String term) {
-		return usuarioService.findAllByNroDocumento(term);
+		return usuarioService.findAllByNroDocumentoAndEstado(term, true);
 	}
 
 	// MÉTODO PARA REALIZAR LA BUSQUEDA DE EMPLEADOS MEDIANTE AUTOCOMPLETADO

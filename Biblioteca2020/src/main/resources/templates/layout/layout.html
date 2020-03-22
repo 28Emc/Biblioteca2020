@@ -54,8 +54,8 @@
 							class="fas fa-clipboard-list"></i> Préstamos</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_USER')"
-						th:href="@{/usuarios/librosAllUser}"><i
-							class="fas fa-book"></i> Ver libros</a></li>
+						th:href="@{/usuarios/librosAllUser}"><i class="fas fa-book"></i>
+							Ver libros</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_USER')"
 						th:href="@{/prestamos/historialUser}"><i
@@ -113,7 +113,7 @@
 	</header>
 
 
-	<footer th:fragment="footer" class="container-fluid text-center">
+	<footer th:fragment="footer" class="container-fluid text-center py-5">
 		<span class="text-muted">Biblioteca ©2020 </span>
 		<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
 		<script th:src="@{/js/popper.min.js}"></script>

@@ -11,7 +11,7 @@ public interface IPrestamoService {
 	public List<Prestamo> findAll();
 	
 	public List<Libro> findByTitulo(String term);
-	
+		
 	public List<Prestamo> findByDevolucion(String devolucion);
 	
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado();

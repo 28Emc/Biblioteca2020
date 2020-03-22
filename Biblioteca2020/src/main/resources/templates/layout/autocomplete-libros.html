@@ -20,7 +20,8 @@
 								return {
 									value : item.id,
 									label : item.titulo,
-									autor : item.autor
+									autor : item.autor,
+									stock : item.stock
 								};
 							}));
 						}
@@ -33,6 +34,7 @@
 					$("#buscar_libro").val(ui.item.label);
 					$("#id_libro").val(ui.item.value);
 					$("#autor_libro").val(ui.item.autor);
+					$("#stock_libro").val(ui.item.stock);
 					return false;
 				}
 			});

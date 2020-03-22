@@ -40,10 +40,27 @@
 					<td th:text="${empleado.nombres}"></td>
 					<td th:text="${empleado.apellidos}"></td>
 					<td th:text="${empleado.local.empresa.razonSocial}"></td>
-					<td th:text="${empleado.direccion}"></td>
-					<td th:text="${empleado.email}"></td>
+					
+					<th:block th:switch="${empleado.direccion}">
+						<td th:case="null" th:text="'No tiene'"></td>
+						<td th:case="''" th:text="'No tiene'"></td>
+						<td th:case="*" th:text="${empleado.direccion}"></td>
+					</th:block>
+					
+					<th:block th:switch="${empleado.email}">
+						<td th:case="null" th:text="'No tiene'"></td>
+						<td th:case="''" th:text="'No tiene'"></td>
+						<td th:case="*" th:text="${empleado.email}"></td>
+					</th:block>
+					
 					<td th:text="${empleado.nroDocumento}"></td>
-					<td th:text="${empleado.celular}"></td>
+					
+					<th:block th:switch="${empleado.celular}">
+						<td th:case="null" th:text="'No tiene'"></td>
+						<td th:case="''" th:text="'No tiene'"></td>
+						<td th:case="*" th:text="${empleado.celular}"></td>
+					</th:block>
+					
 					<td th:text="${empleado.fecha_registro}"></td>
 					<td th:text="${empleado.username}"
 						sec:authorize="hasRole('ROLE_ADMIN')"></td>

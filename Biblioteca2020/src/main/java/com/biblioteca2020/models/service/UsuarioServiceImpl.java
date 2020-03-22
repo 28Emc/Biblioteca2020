@@ -147,7 +147,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Usuario> findAllByNroDocumento(String term) {
-		return usuarioDao.findAllByNroDocumento("%" + term + "%");
+	public List<Usuario> findAllByNroDocumentoAndEstado(String term, Boolean estado) {
+		return usuarioDao.findAllByNroDocumentoAndEstado("%" + term + "%", estado);
 	}
 }

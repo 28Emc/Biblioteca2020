@@ -170,8 +170,9 @@ public class EmpleadoController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@PostMapping(value = "/editar")
 	public String guardarEmpleado(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Principal principal) {
-		Empleado empleadoLogueado = empleadoService.findByUsername(principal.getName());
+			RedirectAttributes flash, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleadoLogueado = empleadoService.findByUsername(userDetails.getUsername());
 		if (result.hasErrors()) {
 			try {
 				model.addAttribute("localesList", localService.findFirstByEmpresa(empleadoLogueado.getLocal().getEmpresa()));

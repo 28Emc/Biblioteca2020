@@ -51,8 +51,8 @@ public class LibroServiceImpl implements ILibroService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Libro> findByTituloLikeIgnoreCase(String term) {
-		return libroDao.findByTituloLikeIgnoreCase("%" + term + "%");
+	public List<Libro> findByTituloLikeIgnoreCaseAndEstado(String term, Boolean estado) {
+		return libroDao.findByTituloLikeIgnoreCaseAndEstado("%" + term + "%", estado);
 	}
 
 	@Override

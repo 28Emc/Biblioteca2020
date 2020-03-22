@@ -7,37 +7,52 @@
 <body>
 	<header th:replace="layout/layout :: header"></header>
 
+	<div class="container p-3">
+		<h1 th:text="${titulo}" class="pt-3"></h1>
 
-	<div class="container p-4">
+		<hr class="col-1 bg-secondary my-5">
 
-		<div class="card-deck">
-
-			<div th:each="libro: ${libros}" class="card" style="width: 18rem;">
-				<div class="card-header text-white bg-dark"
-					th:text="${libro.titulo}">Card header</div>
-				<img class="card-img-top px-5" src="/images/el-camino-de-los-reyes.jpg" alt="Card image cap" height="350">
+		<div class="card-deck my-4">
+			<div th:each="libro: ${libros}" class="card">
+				<div class="px-5">
+					<img class="responsive card-img-top px-3" height="500"
+						th:src="${libro.foto_libro}!='' ? @{'/uploads/'}+${libro.foto_libro} : @{'/uploads/no-image.png'}"
+						alt="Imagen libro">
+				</div>
 				<div class="card-body">
-					<h4 class="card-title text-right" th:text="${libro.autor}">Card title</h4>
+					<h4 class="card-title text-right" th:text="${libro.titulo}"></h4>
 					<h5 class="card-title text-right text-muted"
-						th:text="${libro.categoria.nombre}">Card title</h5>
-					<p class="card-text text-right" th:text="${libro.descripcion}">Some quick
-						example text to build on the card title and make up the bulk of
-						the card's content.</p>
-					<div class="card-footer p-0 py-2
-					 bg-white">
+						th:text="${libro.autor}"></h5>
+					<p class="card-text text-right" id="textArea"
+						th:text="${libro.descripcionMin}"></p>
+
+					<div class="card-footer p-0 pt-2 bg-white">
 						<small class="text-muted"
-							th:text="'Fecha de Publicación: ' + ${libro.fechaPublicacion}">Fecha
-							de Publicación</small><br />
-						<div class="badge badge-info mt-3 p-1"
-							th:text="'Stock: ' + ${libro.stock}">Stock</div>
+							th:text="'Fecha de Publicación: ' + ${libro.fechaPublicacion}"></small><br />
+						<small class="text-muted"
+							th:text="'Género: ' + ${libro.categoria.nombre}"></small>
+
+						<div class="row h-100 mt-2">
+							<div class="col-6 my-auto">
+								<h5>
+									<span class="badge badge-success"
+										th:text="'Stock: ' + ${libro.stock}"></span>
+								</h5>
+							</div>
+							<div class="col-6">
+								<div class="p-0 py-2">
+									<a class="btn btn-info btn-block text-white disabled" th:text="'Ver Disponibilidad'"></a>
+								</div>
+							</div>
+						</div>
 					</div>
+
 				</div>
 			</div>
 
 		</div>
 
 	</div>
-
 
 	<footer th:replace="layout/layout :: footer"></footer>
 </body>

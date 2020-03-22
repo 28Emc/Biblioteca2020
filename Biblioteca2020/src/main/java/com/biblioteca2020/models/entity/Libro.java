@@ -17,12 +17,15 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import org.hibernate.annotations.Type;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.biblioteca2020.models.entity.Categoria;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -70,9 +73,13 @@ public class Libro implements Serializable {
 	@Size(min = 1, max = 100)
 	private String autor;
 
-	@Column(length = 255)
+	/*@Column(length = 255)*/
 	@Size(max = 255)
+	@Type(type="text")
 	private String descripcion;
+	
+	@Transient
+	private String descripcionMin;
 
 	// yyyy-mm-dd
 	@Column(name = "fecha_publicacion", nullable = false)

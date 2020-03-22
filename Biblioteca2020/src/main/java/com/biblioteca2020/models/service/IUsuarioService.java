@@ -15,7 +15,7 @@ public interface IUsuarioService {
 	
 	public Usuario findByNroDocumento(String nroDocumento);
 	
-	public List<Usuario> findAllByNroDocumento(String term);	
+	public List<Usuario> findAllByNroDocumentoAndEstado(String term, Boolean estado);	
 		
 	public void save(Usuario usuario) throws Exception;
 	

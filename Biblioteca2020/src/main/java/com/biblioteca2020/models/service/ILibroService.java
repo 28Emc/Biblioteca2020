@@ -11,13 +11,11 @@ public interface ILibroService {
 
 	public Libro findOne(Long id) throws Exception;
 
-	//public void delete(Long id);
-
 	public List<Libro> findByEstado(Boolean estado);
 
 	public List<Libro> findByTitulo(String term);
 	
-	public List<Libro> findByTituloLikeIgnoreCase(String term);
+	public List<Libro> findByTituloLikeIgnoreCaseAndEstado(String term, Boolean estado);
 	
 	public List<Libro> fetchByIdWithLocalesWithEmpleado(Long id, Long idEmpleado) throws Exception;
 	

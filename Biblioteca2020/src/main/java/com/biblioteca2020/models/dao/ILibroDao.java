@@ -13,7 +13,8 @@ public interface ILibroDao extends CrudRepository<Libro, Long> {
 	@Query("select l from Libro l where l.titulo like ?1")
 	public List<Libro> findByTitulo(String term);
 	
-	public List<Libro> findByTituloLikeIgnoreCase(String term);
+	@Query("select l from Libro l where l.titulo like ?1 and l.estado = ?2")
+	public List<Libro> findByTituloLikeIgnoreCaseAndEstado(String term, Boolean estado);
 	
 	@Query("select l from Libro l join fetch l.local lo join fetch lo.empleados em where lo.id=?1 and em.id=?2")
 	public List<Libro> fetchByIdWithLocalesWithEmpleado(Long id, Long idEmpleado);

@@ -14,8 +14,8 @@ public interface IUsuarioDao extends CrudRepository<Usuario, Long> {
 
 	public Usuario findByNroDocumento(String nroDocumento);
 	
-	@Query("select u from Usuario u where u.nroDocumento like ?1")
-	public List<Usuario> findAllByNroDocumento(String term);	
+	@Query("select u from Usuario u where u.nroDocumento like ?1 and u.estado = ?2")
+	public List<Usuario> findAllByNroDocumentoAndEstado(String term, Boolean estado);	
 	
 	public Usuario findByUsernameAndEstado(String username, boolean estado);
 

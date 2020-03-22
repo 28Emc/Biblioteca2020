@@ -25,10 +25,10 @@
 					<th>Email</th>
 					<th>Celular</th>
 					<th>Fecha Registro</th>
+					<th sec:authorize="!hasRole('ROLE_USER')">Username</th>
+					<th sec:authorize="!hasRole('ROLE_USER')">Estado</th>
 					<th:block
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
-						<th>Username</th>
-						<th>Estado</th>
+						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">						
 						<th colspan="2">Opciones</th>
 					</th:block>
 				</tr>
@@ -39,24 +39,32 @@
 					<td th:text="${usuario.nombres}"></td>
 					<td th:text="${usuario.apellidos}"></td>
 					<td th:text="${usuario.nroDocumento}"></td>
-					<td th:text="${usuario.direccion}"></td>
+					
+					<th:block th:switch="${usuario.direccion}">
+						<td th:case="null" th:text="'No tiene'"></td>
+						<td th:case="''" th:text="'No tiene'"></td>
+						<td th:case="*" th:text="${usuario.direccion}"></td>
+					</th:block>
+
 					<td th:text="${usuario.email}"></td>
 					<td th:text="${usuario.celular}"></td>
 					<td th:text="${usuario.fecha_registro}"></td>
-					<td th:text="${usuario.username}"></td>
+					<td
+						sec:authorize="!hasRole('ROLE_USER')"
+						th:text="${usuario.username}"></td>
 
 					<th:block
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						sec:authorize="!hasRole('ROLE_USER')"
 						th:with="estado=${usuario.estado}">
 						<td th:if="${estado}">
 							<h5>
 								<span class="badge badge-success" th:text="'Activo'"></span>
 							</h5>
 						</td>
-						<td th:if="${estado}"><a class="btn btn-warning btn-xs"
+						<td th:if="${estado}" sec:authorize="!hasRole('ROLE_EMPLEADO')"><a class="btn btn-warning btn-xs"
 							th:href="@{/usuarios/editar/}+${usuario.id}"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td th:if="${estado}"><a
+						<td th:if="${estado}" sec:authorize="!hasRole('ROLE_EMPLEADO')"><a
 							class="btn btn-info btn-xs text-white"
 							th:onclick="'javascript:confirmDeshabilitar(\''+ ${usuario.id} +'\');'"><i
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
@@ -65,10 +73,10 @@
 								<span class="badge badge-danger" th:text="'Inactivo'"></span>
 							</h5>
 						</td>
-						<td th:unless="${estado}"><a
+						<td th:unless="${estado}" sec:authorize="!hasRole('ROLE_EMPLEADO')"><a
 							class="disabled btn btn-secondary btn-xs"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td th:unless="${estado}"><a
+						<td th:unless="${estado}" sec:authorize="!hasRole('ROLE_EMPLEADO')"><a
 							class="disabled btn btn-secondary btn-xs text-white"><i
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 					</th:block>
