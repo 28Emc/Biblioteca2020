@@ -14,10 +14,13 @@
 			sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO')">
 			<p>
 				<a class="btn btn-primary btn-xs" th:href="@{/prestamos/crear}"><i
-					class="fas fa-shield-alt"></i> Crear Préstamo</a>
+					class="fas fa-shield-alt"></i> Generar Préstamo</a>
 			</p>
 		</th:block>
-		<table class="table table-responsive">
+		<h1 th:if="${#lists.isEmpty(prestamos)}">No hay préstamos para
+			mostrar</h1>
+		<table class="table table-responsive"
+			th:if="${not #lists.isEmpty(prestamos)}">
 			<thead>
 				<tr>
 					<th>Id</th>
@@ -26,14 +29,10 @@
 					<th>Local Empleado</th>
 					<th>Nombre Suscriptor</th>
 					<th>Fecha Despacho</th>
-					<th>Fecha Devolución</th>
+					<th>Fecha Devolución/Anulación</th>
 					<th>Observaciones</th>
-
-					<th:block sec:authorize="!hasRole('ROLE_USER')">
-						<th>Estado</th>
-						<th colspan="3">Opciones</th>
-					</th:block>
-
+					<th>Estado</th>
+					<th colspan="3">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -80,11 +79,10 @@
 							onclick="return confirm('Seguro de querer anular el préstamo?');"><i
 								class="fas fa-shield-alt"></i> Anular Préstamo</a></td>
 					</th:block>
-
 				</tr>
 			</tbody>
 		</table>
-		<h1 th:if="${prestamos}==null">No hay préstamos para mostrar</h1>
+
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>

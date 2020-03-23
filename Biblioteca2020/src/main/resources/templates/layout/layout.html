@@ -68,9 +68,18 @@
 					<li sec:authorize="isAuthenticated()" class="dropdown show"><a
 						class="btn btn-outline-dark text-white dropdown-toggle" href="#"
 						role="button" id="dropdownMenuLink" data-toggle="dropdown"
-						aria-haspopup="true" aria-expanded="false"><span
-							sec:authentication="name"></span> </a>
+						aria-haspopup="true" aria-expanded="false"> <span
+							sec:authentication="name"></span>
+					</a>
 						<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+							<a sec:authorize="hasRole('ROLE_ADMIN')" class="dropdown-item"
+								th:href="@{/empleados/perfilAdmin}">Mi Perfil (Admin)</a> 
+							<a sec:authorize="hasRole('ROLE_SUPERVISOR')" class="dropdown-item"
+								th:href="@{/empleados/perfilSupervisor}">Mi Perfil (Supervisor)</a>
+							<a sec:authorize="hasRole('ROLE_EMPLEADO')" class="dropdown-item"
+								th:href="@{/empleados/perfilEmpleado}">Mi Perfil (Empleado)</a>
+							<a sec:authorize="hasRole('ROLE_USER')" class="dropdown-item"
+								th:href="@{/usuarios/perfil}">Mi Perfil</a> 							
 							<form id="logoutForm" th:action="@{/logout}" method="post">
 								<button class="dropdown-item"
 									onclick="documento.getElementById('logoutForm').submit();"
@@ -80,6 +89,7 @@
 				</ul>
 			</div>
 		</nav>
+
 		<!-- Mensajes flash para indicar el estado de las peticiones -->
 		<div class="alert alert-success alert-dismissible fade show"
 			role="alert" th:if="${success!=null}" th:text="${success}">
@@ -111,7 +121,6 @@
 		</div>
 
 	</header>
-
 
 	<footer th:fragment="footer" class="container-fluid text-center py-5">
 		<span class="text-muted">Biblioteca ©2020 </span>

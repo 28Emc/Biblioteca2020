@@ -24,10 +24,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-
 import org.hibernate.annotations.Type;
 import org.springframework.format.annotation.DateTimeFormat;
-import com.biblioteca2020.models.entity.Categoria;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -106,6 +104,7 @@ public class Libro implements Serializable {
 	public void prePersist() {
 		fechaRegistro = new Date();
 		estado = true;
+		foto_libro="no-book.jpg";
 	}
 
 	private static final long serialVersionUID = 1L;

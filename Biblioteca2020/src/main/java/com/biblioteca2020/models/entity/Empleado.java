@@ -26,7 +26,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
-import com.biblioteca2020.models.entity.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
@@ -50,7 +49,7 @@ public class Empleado implements Serializable {
 	@JsonIgnore
 	@OneToMany(mappedBy = "empleado", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Prestamo> prestamos;
-	
+
 	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Local local;
@@ -103,10 +102,13 @@ public class Empleado implements Serializable {
 	@Column(nullable = false)
 	private Boolean estado;
 
+	private String foto_empleado;
+
 	@PrePersist
 	public void prePersist() {
 		fecha_registro = new Date();
 		estado = true;
+		foto_empleado = "no-image.jpg";
 	}
 
 	private static final long serialVersionUID = 1L;

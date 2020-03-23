@@ -81,6 +81,7 @@ public class PrestamoController {
 		model.addAttribute("titulo", "Historial de Préstamos");
 		model.addAttribute("prestamos",
 				prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(usuario.getId()));
+		System.out.println(prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(usuario.getId()));
 		return "/prestamos/listar";
 	}
 

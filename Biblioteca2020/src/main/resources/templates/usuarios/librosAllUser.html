@@ -16,7 +16,7 @@
 			<div th:each="libro: ${libros}" class="card">
 				<div class="px-5">
 					<img class="responsive card-img-top px-3" height="500"
-						th:src="${libro.foto_libro}!='' ? @{'/uploads/'}+${libro.foto_libro} : @{'/uploads/no-image.png'}"
+						th:src="${libro.foto_libro}!='' ? @{'/uploads/'}+${libro.foto_libro} : @{'/uploads/no-book.jpg'}"
 						alt="Imagen libro">
 				</div>
 				<div class="card-body">

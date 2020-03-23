@@ -9,7 +9,7 @@
 
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<form
+		<form enctype="multipart/form-data"
 			th:action="${editable} ?@{/empleados/editar} :@{/empleados/crear}"
 			th:object="${empleado}" method="post">
 			<h3 th:text="'Datos personales'"></h3>
@@ -17,7 +17,8 @@
 				<label class="col-sm-2 col-form-label">Nombre</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="text" th:field="*{nombres}"
-						th:errorclass="'form-control alert-danger'" placeholder="Nombre Completo..."/> <small
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Nombre Completo..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}"></small>
 				</div>
@@ -26,7 +27,8 @@
 				<label class="col-sm-2 col-form-label">Apellidos</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="text" th:field="*{apellidos}"
-						th:errorclass="'form-control alert-danger'" placeholder="Apellido Paterno y Materno..."/> <small
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Apellido Paterno y Materno..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></small>
 				</div>
@@ -37,8 +39,8 @@
 				<div class="col-sm-6">
 					<input class="form-control" type="number"
 						th:field="*{nroDocumento}"
-						th:errorclass="'form-control alert-danger'" placeholder="00000000" /> <small
-						class="form-text text-danger"
+						th:errorclass="'form-control alert-danger'" placeholder="00000000" />
+					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('nroDocumento')}"
 						th:errors="*{nroDocumento}"></small>
 				</div>
@@ -49,8 +51,8 @@
 				<label class="col-sm-2 col-form-label">Usuario</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="text" th:field="*{username}"
-						th:errorclass="'form-control alert-danger'" placeholder="Usuario..." /> <small
-						class="form-text text-danger"
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Usuario..." /> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></small>
 				</div>
 			</div>
@@ -68,18 +70,16 @@
 						th:errors="${empleado.roles}"></small>
 				</div>
 			</div>
-			
+
 			<div class="form-group" hidden>
 				<label class="col-sm-2 col-form-label">Local</label>
 				<div class="col-sm-6">
-					<select class="form-control"
-						th:field="${empleado.local}"
+					<select class="form-control" th:field="${empleado.local}"
 						th:errorclass="'form-control alert-danger'">
 						<option th:each="local :${localesList}" th:value="${local.id}"
 							th:text="${local.direccion}"></option>
 					</select> <small class="form-text text-danger"
-						th:if="${#fields.hasErrors('local')}"
-						th:errors="${local.id}"></small>
+						th:if="${#fields.hasErrors('local')}" th:errors="${local.id}"></small>
 				</div>
 			</div>
 
@@ -87,7 +87,8 @@
 				<label class="col-sm-2 col-form-label">Contraseña</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="password" th:field="*{password}"
-						th:errorclass="'form-control alert-danger'" placeholder="Contraseña..." /> <small
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Contraseña..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small>
 				</div>
@@ -97,7 +98,8 @@
 				<div class="col-sm-6">
 					<input class="form-control" type="password"
 						th:field="*{passwordConfirmacion}"
-						th:errorclass="'form-control alert-danger'" placeholder="Repite nuevamente tu contraseña..." /> <small
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Repite nuevamente tu contraseña..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('passwordConfirmacion')}"
 						th:errors="*{passwordConfirmacion}"></small>
@@ -109,7 +111,8 @@
 				<label class="col-sm-2 col-form-label">Dirección</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="text" th:field="*{direccion}"
-						th:errorclass="'form-control alert-danger'" placeholder="Av/Jr/Calle..." /> <small
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Av/Jr/Calle..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></small>
 				</div>
@@ -118,7 +121,8 @@
 				<label class="col-sm-2 col-form-label">Email</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="email" th:field="*{email}"
-						th:errorclass="'form-control alert-danger'" placeholder="test@email.com" /> <small
+						th:errorclass="'form-control alert-danger'"
+						placeholder="test@email.com" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
 				</div>
@@ -127,9 +131,26 @@
 				<label class="col-sm-2 col-form-label">Celular</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="number" th:field="*{celular}"
-						th:errorclass="'form-control alert-danger'" placeholder="99999999" /> <small
-						class="form-text text-danger"
+						th:errorclass="'form-control alert-danger'" placeholder="99999999" />
+					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('celular')}" th:errors="*{celular}"></small>
+				</div>
+			</div>
+
+			<h3 class="mb-4">Foto</h3>
+			<div class="form-group">
+				<div class="col-sm-6">
+					<img
+						th:if="${empleado.foto_empleado!=null && #strings.length(empleado.foto_empleado) > 0}"
+						class="img-thumbnail rounded float-left" style="max-width: 50%;"
+						th:alt="${empleado.foto_empleado}"
+						th:src="@{'/uploads/'+${empleado.foto_empleado}}">
+				</div>
+				<div class="col-sm-6">
+					<input class="form-control" type="file" name="foto_emp" /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('foto_empleado')}"
+						th:errors="*{foto_empleado}"></small>
 				</div>
 			</div>
 
@@ -137,7 +158,7 @@
 				<div class="col-sm-6">
 					<a class="btn btn-light btn-block"
 						th:href="@{'/empleados/cancelar'}"><i
-								class="fas fa-shield-alt"></i> Cancelar</a>
+						class="fas fa-shield-alt"></i> Cancelar</a>
 				</div>
 				<div class="col-sm-6">
 					<input class="btn btn-dark btn-block" type="submit"

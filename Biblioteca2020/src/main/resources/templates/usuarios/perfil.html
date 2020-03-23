@@ -4,11 +4,10 @@
 <meta charset="UTF-8" />
 <head th:replace="layout/layout :: head"></head>
 <body>
-	<header th:replace="layout/layout :: header"></header>
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<form class="form" role="form"
-			th:action="${editable} ?@{/usuarios/editar} :@{/usuarios/crear}"
+			th:action="${editable} ?@{/usuarios/editarPerfil} :@{/usuarios/crearPerfil}"
 			th:object="${usuario}" method="post" enctype="multipart/form-data">
 
 			<div th:switch="${editable}">
@@ -146,7 +145,7 @@
 					<div class="form-group">
 						<div class="col-sm-6">
 							<img th:if="${usuario.foto_usuario!=null && #strings.length(usuario.foto_usuario) > 0}"
-								class="img-thumbnail rounded float-left" style="max-width: 50%;"
+								class="img-thumbnail rounded float-left" style="max-width: 25%;"
 								th:alt="${usuario.foto_usuario}"
 								th:src="@{'/uploads/'+${usuario.foto_usuario}}">
 						</div>
@@ -312,7 +311,7 @@
 			<div class="form-group row">
 				<div class="col-sm-6">
 					<a class="btn btn-light btn-block"
-						th:href="@{'/usuarios/cancelar'}"><i class="fas fa-shield-alt"></i>
+						th:href="@{'/login'}"><i class="fas fa-shield-alt"></i>
 						Cancelar</a>
 				</div>
 				<div class="col-sm-6">

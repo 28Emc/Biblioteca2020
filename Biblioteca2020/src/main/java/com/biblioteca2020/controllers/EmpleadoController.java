@@ -1,5 +1,9 @@
 package com.biblioteca2020.controllers;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +17,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.service.IEmpleadoService;
@@ -89,7 +95,7 @@ public class EmpleadoController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@PostMapping(value = "/crear")
 	public String crearEmpleado(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash) {
+			RedirectAttributes flash, @RequestParam("foto_emp") MultipartFile foto) {
 		if (result.hasErrors()) {
 			model.addAttribute("empleado", empleado);
 			try {
@@ -102,6 +108,21 @@ public class EmpleadoController {
 			model.addAttribute("titulo", "Registro de Empleado");
 			return "/empleados/crear";
 		}
+		
+		if (!foto.isEmpty()) {
+			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+
+			try {
+				byte[] bytes = foto.getBytes();
+				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+				Files.write(rutaCompleta, bytes);
+				empleado.setFoto_empleado(foto.getOriginalFilename());
+			} catch (IOException e) {
+				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+			}
+		}
+		
 		try {
 			empleadoService.save(empleado);
 			flash.addFlashAttribute("success",
@@ -170,7 +191,7 @@ public class EmpleadoController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
 	@PostMapping(value = "/editar")
 	public String guardarEmpleado(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Authentication authentication) {
+			RedirectAttributes flash, Authentication authentication, @RequestParam("foto_emp") MultipartFile foto) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleadoLogueado = empleadoService.findByUsername(userDetails.getUsername());
 		if (result.hasErrors()) {
@@ -186,6 +207,21 @@ public class EmpleadoController {
 			model.addAttribute("titulo", "Modificar Empleado");
 			return "/empleados/editar";
 		}
+		
+		if (!foto.isEmpty()) {
+			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+
+			try {
+				byte[] bytes = foto.getBytes();
+				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+				Files.write(rutaCompleta, bytes);
+				empleado.setFoto_empleado(foto.getOriginalFilename());
+			} catch (IOException e) {
+				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+			}
+		}
+		
 		try {
 			empleadoService.update(empleado);
 			flash.addFlashAttribute("warning",
@@ -222,5 +258,23 @@ public class EmpleadoController {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "redirect:/empleados/listar";
 		}
+	}
+	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@GetMapping("/perfilAdmin")
+	public String perfilAdmin() {
+		return "/empleados/perfilAdmin";
+	}
+	
+	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR')")
+	@GetMapping("/perfilSupervisor")
+	public String perfilSupervisor() {
+		return "/empleados/perfilSupervisor";
+	}
+	
+	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO')")
+	@GetMapping("/perfilEmpleado")
+	public String perfilEmpleado() {
+		return "/empleados/perfilEmpleado";
 	}
 }

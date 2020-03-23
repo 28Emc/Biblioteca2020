@@ -25,7 +25,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
-import com.biblioteca2020.models.entity.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
@@ -104,6 +103,7 @@ public class Usuario implements Serializable {
 	public void prePersist() {
 		fecha_registro = new Date();
 		estado = true;
+		foto_usuario = "no-image.jpg";
 	}
 
 	private static final long serialVersionUID = 1L;

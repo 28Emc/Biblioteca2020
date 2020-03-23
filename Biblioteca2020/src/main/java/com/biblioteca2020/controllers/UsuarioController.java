@@ -10,6 +10,8 @@ import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -42,6 +44,155 @@ public class UsuarioController {
 
 	@Autowired
 	private ILibroService libroService;
+	
+	// ----------------------------- ROLE USER
+
+	// CATÁLOGO DE LIBROS PARA EL USUARIO
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_SUPERVISOR', 'ROLE_USER')")
+	@GetMapping(value = "/librosAllUser")
+	public String listarAllLibrosUser(Model model, Principal principal) {
+		model.addAttribute("titulo", "Catálogo de libros");
+		List<Libro> libros = libroService.findAll();
+
+		// LÓGICA DE MOSTRAR UNA DESCRICIÓN REDUCIDA DE 150 CARACTERES DEL LIBRO
+		for (int i = 0; i < libros.size(); i++) {
+			String descripcionMin = libros.get(i).getDescripcion().substring(0, 150);
+			String descripcionFull = libros.get(i).getDescripcion().substring(150,
+					libros.get(i).getDescripcion().length());
+			libros.get(i).setDescripcionMin(descripcionMin + " ...");
+			libros.get(i).setDescripcion(descripcionFull);
+			model.addAttribute("libros", libros);
+		}
+
+		return "/usuarios/librosAllUser";
+	}
+
+	@GetMapping("/crearPerfil")
+	public String perfil(Model model) {
+		model.addAttribute("usuario", new Usuario());
+		model.addAttribute("roles", roleService.findOnlyUsers());
+		model.addAttribute("titulo", "Registro de Usuario");
+		return "/usuarios/perfil";
+	}
+
+	@PostMapping(value = "/crearPerfil")
+	public String crearPerfil(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
+			SessionStatus status, RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
+		if (result.hasErrors()) {
+			model.addAttribute("usuario", usuario);
+			model.addAttribute("roles", roleService.findOnlyUsers());
+			model.addAttribute("titulo", "Registro de Usuario");
+			return "/usuarios/perfil";
+		}
+
+		if (!foto.isEmpty()) {
+			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+
+			try {
+				byte[] bytes = foto.getBytes();
+				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+				Files.write(rutaCompleta, bytes);
+				usuario.setFoto_usuario(foto.getOriginalFilename());
+			} catch (IOException e) {
+				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+			}
+		}
+
+		try {
+			usuarioService.save(usuario);
+			flash.addFlashAttribute("success", "El usuario ha sido registrado en la base de datos.");
+			status.setComplete();
+			return "redirect:/login";
+		} catch (Exception e) {
+			model.addAttribute("usuario", usuario);
+			model.addAttribute("roles", roleService.findOnlyUsers());
+			model.addAttribute("titulo", "Registro de Usuario");
+			model.addAttribute("error", e.getMessage());
+			return "/usuarios/perfil";
+		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_USER')")
+	@GetMapping("/editarPerfil/{id}")
+	public String editarPerfil(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
+			RedirectAttributes flash) {
+		Usuario usuario = null;
+		modelMap.put("editable", true);
+		modelMap.put("roles", roleService.findOnlyUsers());
+		modelMap.put("titulo", "Modificar Usuario");
+		try {
+			usuario = usuarioService.findById(id);
+			modelMap.put("usuario", usuario);
+			return "/usuarios/perfil";
+		} catch (Exception e) {
+			flash.addFlashAttribute("error", e.getMessage());
+			return "redirect:/usuarios/perfil";
+		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_USER')")
+	@PostMapping(value = "/editarPerfil")
+	public String guardarPerfil(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
+			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_usu") MultipartFile foto) {
+		if (result.hasErrors()) {
+			model.addAttribute("usuario", usuario);
+			model.addAttribute("editable", true);
+			model.addAttribute("roles", roleService.findOnlyUsers());
+			model.addAttribute("titulo", "Modificar Usuario");
+			return "/usuarios/perfil";
+		}
+
+		if (!foto.isEmpty()) {
+			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+
+			try {
+				byte[] bytes = foto.getBytes();
+				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+				Files.write(rutaCompleta, bytes);
+				usuario.setFoto_usuario(foto.getOriginalFilename());
+			} catch (IOException e) {
+				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+			}
+		}
+
+		try {
+			usuarioService.update(usuario);
+			flash.addFlashAttribute("warning",
+					"La información de su perfil han sido actualizados en la base de datos.");
+			status.setComplete();
+			return "redirect:/usuarios/perfil";
+		} catch (Exception e) {
+			model.addAttribute("usuario", usuario);
+			model.addAttribute("editable", true);
+			model.addAttribute("roles", roleService.findOnlyUsers());
+			model.addAttribute("titulo", "Modificar Usuario");
+			model.addAttribute("error", e.getMessage());
+			return "/usuarios/perfil";
+		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_USER')")
+	@GetMapping(value = "/deshabilitarPerfil")
+	public String deshabilitarPerfil(RedirectAttributes flash, Authentication authentication) {
+		try {
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+			usuario.setEstado(false);
+			usuarioService.update(usuario);
+			flash.addFlashAttribute("info", "Su cuenta ha sido deshabilitada.");
+			// CON ESTA PROPIEDAD ELIMINO LA SESIÓN DEL USUARIO LOGUEADO, PARA PODERLO
+			// REDIRECCIONAR AL LOGIN
+			authentication.setAuthenticated(false);
+			return "redirect:/login";
+		} catch (Exception e) {
+			flash.addFlashAttribute("error", e.getMessage());
+			return "redirect:/usuarios/perfilUsuario";
+		}
+	}
+
+	// ----------------------------- ROLE ADMIN, SUPERVISOR, EMPLEADO
 
 	// LISTADO DE USUARIOS
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
@@ -53,34 +204,13 @@ public class UsuarioController {
 		return "usuarios/listar";
 	}
 
-	// CATÁLOGO DE LIBROS PARA EL USUARIO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_SUPERVISOR', 'ROLE_USER')")
-	@GetMapping(value = "/librosAllUser")
-	public String listarAllLibrosUser(Model model, Principal principal) {
-		model.addAttribute("titulo", "Catálogo de libros");
-		List<Libro> libros = libroService.findAll();
-		
-		// LÓGICA DE MOSTRAR UNA DESCRICIÓN REDUCIDA DE 150 CARACTERES DEL LIBRO
-		for (int i = 0; i < libros.size(); i++) {
-			String descripcionMin = libros.get(i).getDescripcion().substring(0, 150);
-			String descripcionFull = libros.get(i).getDescripcion().substring(150,
-					libros.get(i).getDescripcion().length());
-			libros.get(i).setDescripcionMin(descripcionMin + " ...");
-			libros.get(i).setDescripcion(descripcionFull);
-			model.addAttribute("libros", libros);
-		}
-
-		// model.addAttribute("libros", libros);
-		return "/usuarios/librosAllUser";
-	}
-
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
 	@GetMapping("/cancelar")
 	public String cancelar() {
 		return "redirect:/usuarios/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_USER')")
 	@GetMapping("/crear")
 	public String crearFormUsuario(Map<String, Object> modelMap) {
 		modelMap.put("usuario", new Usuario());
@@ -89,7 +219,7 @@ public class UsuarioController {
 		return "usuarios/crear";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_USER')")
 	@PostMapping(value = "/crear")
 	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
 			SessionStatus status, RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
