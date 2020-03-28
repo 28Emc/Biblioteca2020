@@ -1,6 +1,7 @@
 package com.biblioteca2020.models.service;
 
 import java.util.List;
+import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.entity.Usuario;
 
 public interface IUsuarioService {
@@ -20,6 +21,8 @@ public interface IUsuarioService {
 	public void save(Usuario usuario) throws Exception;
 	
 	public void update(Usuario usuario) throws Exception;
+	
+	public Usuario cambiarPassword(CambiarPassword form) throws Exception;
 	
 	public void borrarUsuario(Long id) throws Exception;
 }

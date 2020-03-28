@@ -7,8 +7,8 @@
 
 	<div class="p-3">
 		<h1 class="p-5 text-center">INICIO DE BIBLIOTECA</h1>
-		<div sec:authorize="isAuthenticated()" class="container text-center">
-
+		<div sec:authorize="isAuthenticated()" class="container text-center">	
+	
 			<div class="card p-5">
 				<div class="card-body p-5">
 					<th:block th:if="${empleado}!=null">
@@ -89,5 +89,6 @@
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>
+
 </body>
 </html>

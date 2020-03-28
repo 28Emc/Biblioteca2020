@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import org.springframework.ui.Model;
+import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.entity.Empleado;
 
 public interface IEmpleadoService {
@@ -31,6 +32,8 @@ public interface IEmpleadoService {
 	public void save(Empleado empleado) throws Exception;
 	
 	public void update(Empleado empleado) throws Exception;
+	
+	public Empleado cambiarPassword(CambiarPassword form) throws Exception;
 	
 	public void borrarEmpleado(Long id) throws Exception;
 		

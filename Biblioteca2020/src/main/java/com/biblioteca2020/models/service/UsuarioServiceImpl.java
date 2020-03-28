@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.biblioteca2020.models.dao.IUsuarioDao;
+import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.entity.Usuario;
 
 @Service
@@ -149,5 +150,26 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	@Transactional(readOnly = true)
 	public List<Usuario> findAllByNroDocumentoAndEstado(String term, Boolean estado) {
 		return usuarioDao.findAllByNroDocumentoAndEstado("%" + term + "%", estado);
+	}
+
+	@Override
+	public Usuario cambiarPassword(CambiarPassword form) throws Exception {	
+		Usuario usuario = findById(form.getId());
+		
+		if (!passwordEncoder.matches(form.getPasswordActual(), usuario.getPassword())) {
+			throw new Exception("La contraseña actual es incorrecta");
+		}
+		
+		if (passwordEncoder.matches(form.getNuevaPassword(), usuario.getPassword())) {
+			throw new Exception("La nueva contraseña debe ser diferente a la actual");
+		}
+		
+		if (!form.getNuevaPassword().equals(form.getConfirmarPassword())) {
+			throw new Exception("Las contraseñas no coinciden");
+		}
+		
+		String passwordHash = passwordEncoder.encode(form.getNuevaPassword());
+		usuario.setPassword(passwordHash);
+		return usuarioDao.save(usuario);
 	}
 }

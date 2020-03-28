@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +26,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Usuario;
 import com.biblioteca2020.models.service.ILibroService;
@@ -44,7 +46,7 @@ public class UsuarioController {
 
 	@Autowired
 	private ILibroService libroService;
-	
+
 	// ----------------------------- ROLE USER
 
 	// CATÁLOGO DE LIBROS PARA EL USUARIO
@@ -66,7 +68,8 @@ public class UsuarioController {
 
 		return "/usuarios/librosAllUser";
 	}
-
+	
+	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@GetMapping("/crearPerfil")
 	public String perfil(Model model) {
 		model.addAttribute("usuario", new Usuario());
@@ -75,6 +78,13 @@ public class UsuarioController {
 		return "/usuarios/perfil";
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_USER')")
+	@GetMapping("/cancelarPerfil")
+	public String cancelarPerfil() {
+		return "redirect:/home";
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@PostMapping(value = "/crearPerfil")
 	public String crearPerfil(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
 			SessionStatus status, RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
@@ -114,15 +124,15 @@ public class UsuarioController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
-	@GetMapping("/editarPerfil/{id}")
-	public String editarPerfil(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
-			RedirectAttributes flash) {
-		Usuario usuario = null;
+	@GetMapping("/editarPerfil")
+	public String editarPerfil(Map<String, Object> modelMap, RedirectAttributes flash, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
 		modelMap.put("editable", true);
+		modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
 		modelMap.put("roles", roleService.findOnlyUsers());
 		modelMap.put("titulo", "Modificar Usuario");
 		try {
-			usuario = usuarioService.findById(id);
 			modelMap.put("usuario", usuario);
 			return "/usuarios/perfil";
 		} catch (Exception e) {
@@ -138,8 +148,9 @@ public class UsuarioController {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
+			modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
 			model.addAttribute("roles", roleService.findOnlyUsers());
-			model.addAttribute("titulo", "Modificar Usuario");
+			model.addAttribute("titulo", "Modificar Perfil");
 			return "/usuarios/perfil";
 		}
 
@@ -155,6 +166,8 @@ public class UsuarioController {
 			} catch (IOException e) {
 				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
 			}
+		} else if (usuario.getFoto_usuario() == null || usuario.getFoto_usuario() == "") {
+			usuario.setFoto_usuario("no-image.jpg");
 		}
 
 		try {
@@ -162,15 +175,51 @@ public class UsuarioController {
 			flash.addFlashAttribute("warning",
 					"La información de su perfil han sido actualizados en la base de datos.");
 			status.setComplete();
-			return "redirect:/usuarios/perfil";
+			return "redirect:/home";
 		} catch (Exception e) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
+			modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
 			model.addAttribute("roles", roleService.findOnlyUsers());
-			model.addAttribute("titulo", "Modificar Usuario");
+			model.addAttribute("titulo", "Modificar Perfil");
 			model.addAttribute("error", e.getMessage());
 			return "/usuarios/perfil";
 		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_USER')")
+	@GetMapping("/cambioPassword")
+	public String cambioPasswordUser(Model model, Authentication authentication) {
+		CambiarPassword cambiarPassword = new CambiarPassword();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+		cambiarPassword.setId(usuario.getId());
+		model.addAttribute("passwordForm", cambiarPassword);
+		model.addAttribute("titulo", "Cambiar Password");
+		return "/usuarios/cambio-password";
+	}
+
+	@PostMapping("/cambioPassword")
+	public String cambioPasswordUser(@Valid CambiarPassword form, Model model, Errors errors,
+			RedirectAttributes flash, Authentication authentication) {
+		if (errors.hasErrors()) {
+			String result = errors.getAllErrors().stream().map(x -> x.getDefaultMessage())
+					.collect(Collectors.joining(", "));
+			model.addAttribute("cambiarPasswordError", result);
+			return "/usuarios/cambio-password";
+		}
+
+		try {
+			usuarioService.cambiarPassword(form);
+			flash.addFlashAttribute("success", "Password Actualizada");
+			return "redirect:/home";
+		} catch (Exception e) {
+			model.addAttribute("passwordForm", form);
+			model.addAttribute("titulo", "Cambiar Password");
+			model.addAttribute("cambiarPasswordError", e.getMessage());
+			return "/usuarios/cambio-password";
+		}
+		
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
@@ -188,7 +237,7 @@ public class UsuarioController {
 			return "redirect:/login";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
-			return "redirect:/usuarios/perfilUsuario";
+			return "redirect:/usuarios/perfil";
 		}
 	}
 
@@ -265,6 +314,7 @@ public class UsuarioController {
 			RedirectAttributes flash) {
 		Usuario usuario = null;
 		modelMap.put("editable", true);
+		modelMap.put("passwordForm", new CambiarPassword(id));
 		modelMap.put("roles", roleService.findOnlyUsers());
 		modelMap.put("titulo", "Modificar Usuario");
 		try {
@@ -284,6 +334,7 @@ public class UsuarioController {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
+			modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
 			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Modificar Usuario");
 			return "/usuarios/editar";
@@ -312,6 +363,7 @@ public class UsuarioController {
 		} catch (Exception e) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
+			modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
 			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Modificar Usuario");
 			model.addAttribute("error", e.getMessage());

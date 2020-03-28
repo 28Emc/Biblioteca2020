@@ -4,15 +4,20 @@
 <head th:replace="layout/layout :: head"></head>
 <body>
 
-	<th:block th:if="${editable}">
-		<header th:replace="layout/layout :: header"></header>
-	</th:block>
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="alert alert-success alert-dismissible fade show d-none"
+		role="alert" id="formSuccess">
+		<button type="button" class="close" data-dismiss="alert"
+			aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
 
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<form
-			th:action="${editable} ?@{/usuarios/editarPerfil} :@{/usuarios/crearPerfil}"
-			th:object="${usuario}" method="post" enctype="multipart/form-data">
+		<form th:action="@{/empleados/editarPerfil}" th:object="${empleado}"
+			method="post" enctype="multipart/form-data">
 
 			<h3 th:text="'Datos personales'"></h3>
 
@@ -20,12 +25,12 @@
 				<label class="col-sm-2 col-form-label">Nombre(s)</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="text"
-						th:field="${usuario.nombres}"
+						th:field="${empleado.nombres}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="Nombre Completo..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('nombres')}"
-						th:errors="${usuario.nombres}"></small>
+						th:errors="${empleado.nombres}"></small>
 				</div>
 			</div>
 
@@ -33,23 +38,23 @@
 				<label class="col-sm-2 col-form-label">Apellidos</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="text"
-						th:field="${usuario.apellidos}"
+						th:field="${empleado.apellidos}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="Apellido Paterno y Materno..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('apellidos')}"
-						th:errors="${usuario.apellidos}"></small>
+						th:errors="${empleado.apellidos}"></small>
 				</div>
 			</div>
 			<div class="form-group">
 				<label class="col-sm-2 col-form-label">Nro. Documento</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="number"
-						th:field="${usuario.nroDocumento}"
+						th:field="${empleado.nroDocumento}"
 						th:errorclass="'form-control alert-danger'" placeholder="00000000" />
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('nroDocumento')}"
-						th:errors="${usuario.nroDocumento}"></small>
+						th:errors="${empleado.nroDocumento}"></small>
 				</div>
 			</div>
 			<h3 th:text="'Datos de usuario'"></h3>
@@ -57,47 +62,48 @@
 				<label class="col-sm-2 col-form-label">Usuario</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="text"
-						th:field="${usuario.username}"
+						th:field="${empleado.username}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="Usuario..." /> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('username')}"
-						th:errors="${usuario.username}"></small>
+						th:errors="${empleado.username}"></small>
 				</div>
 			</div>
 			<div class="form-group" th:if="${editable==null or editable==false}">
 				<label class="col-sm-2 col-form-label">Contraseña</label>
 				<div class="col-sm-6">
 					<input readonly class="form-control" type="password"
-						th:field="${usuario.password}"
+						th:field="${empleado.password}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="Contraseña..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('password')}"
-						th:errors="${usuario.password}"></small>
+						th:errors="${empleado.password}"></small>
 				</div>
 			</div>
 			<div class="form-group" th:if="${editable==null or editable==false}">
 				<label class="col-sm-2 col-form-label">Confirmar Contraseña</label>
 				<div class="col-sm-6">
 					<input readonly class="form-control" type="password"
-						th:field="${usuario.passwordConfirmacion}"
+						th:field="${empleado.passwordConfirmacion}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="Escribe nuevamente tu contraseña..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('passwordConfirmacion')}"
-						th:errors="${usuario.passwordConfirmacion}"></small>
+						th:errors="${empleado.passwordConfirmacion}"></small>
 				</div>
 			</div>
 
 			<div class="form-group" hidden>
 				<label class="col-sm-2 col-form-label">Rol</label>
 				<div class="col-sm-6">
-					<select class="form-control" th:field="${usuario.roles}"
+					<select class="form-control" th:field="${empleado.roles}"
 						th:errorclass="'form-control alert-danger'">
 						<option th:each="rol :${roles}" th:value="${rol.id}"
 							th:text="${rol.authority}"></option>
 					</select> <small class="form-text text-danger"
-						th:if="${#fields.hasErrors('roles')}" th:errors="${usuario.roles}"></small>
+						th:if="${#fields.hasErrors('roles')}"
+						th:errors="${empleado.roles}"></small>
 				</div>
 			</div>
 
@@ -106,34 +112,35 @@
 				<label class="col-sm-2 col-form-label">Dirección</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="text"
-						th:field="${usuario.direccion}"
+						th:field="${empleado.direccion}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="Av/Jr/Calle..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('direccion')}"
-						th:errors="${usuario.direccion}"></small>
+						th:errors="${empleado.direccion}"></small>
 				</div>
 			</div>
 			<div class="form-group">
 				<label class="col-sm-2 col-form-label">Email</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="email"
-						th:field="${usuario.email}"
+						th:field="${empleado.email}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="test@email.com" /> <small
 						class="form-text text-danger"
-						th:if="${#fields.hasErrors('email')}" th:errors="${usuario.email}"></small>
+						th:if="${#fields.hasErrors('email')}"
+						th:errors="${empleado.email}"></small>
 				</div>
 			</div>
 			<div class="form-group">
 				<label class="col-sm-2 col-form-label">Celular</label>
 				<div class="col-sm-6">
 					<input class="form-control" type="number"
-						th:field="${usuario.celular}"
+						th:field="${empleado.celular}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="999999999" /> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('celular')}"
-						th:errors="${usuario.celular}"></small>
+						th:errors="${empleado.celular}"></small>
 				</div>
 			</div>
 
@@ -141,33 +148,27 @@
 			<div class="form-group">
 				<div class="col-sm-6">
 					<img
-						th:if="${usuario.foto_usuario!=null && #strings.length(usuario.foto_usuario) > 0}"
-						class="img-thumbnail rounded float-left" style="max-width: 25%;"
-						th:alt="${usuario.foto_usuario}"
-						th:src="@{'/uploads/'+${usuario.foto_usuario}}">
+						th:if="${empleado.foto_empleado!=null && #strings.length(empleado.foto_empleado) > 0}"
+						name="imgActual" class="img-thumbnail rounded float-left"
+						style="max-width: 50%;" th:alt="${empleado.foto_empleado}"
+						th:src="@{'/uploads/'+${empleado.foto_empleado}}">
 				</div>
 				<div class="col-sm-6">
-					<input class="form-control" type="file" name="foto_usu" /> <small
+					<input class="form-control" type="file" name="foto_emp" /> <small
 						class="form-text text-danger"
-						th:if="${#fields.hasErrors('foto_usuario')}"
-						th:errors="*{foto_usuario}"></small>
+						th:if="${#fields.hasErrors('foto_empleado')}"
+						th:errors="*{foto_empleado}"></small>
 				</div>
 			</div>
 
 			<div class="form-group row">
 				<div class="col-6">
-					<th:block th:if="${editable}" sec:authorize="isAuthenticated()">
-						<a class="btn btn-light btn-block" th:href="@{'/home'}"><i
-							class="fas fa-shield-alt"></i> Cancelar</a>
-					</th:block>
-					<th:block th:else sec:authorize="!isAuthenticated()">
-						<a class="btn btn-light btn-block" th:href="@{'/login'}"><i
-							class="fas fa-shield-alt"></i> Cancelar</a>
-					</th:block>
+					<a class="btn btn-light btn-block" th:href="@{'/home'}"><i
+						class="fas fa-shield-alt"></i> Cancelar</a>
 				</div>
 				<div class="col-6">
 					<input class="btn btn-dark btn-block" type="submit"
-						th:value="${editable}?'Guardar Usuario':'Crear Usuario'" />
+						th:value="'Guardar Empleado'" />
 				</div>
 			</div>
 

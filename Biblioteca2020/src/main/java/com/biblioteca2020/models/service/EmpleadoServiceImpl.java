@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import com.biblioteca2020.models.dao.IEmpleadoDao;
+import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.entity.Empleado;
 
 @Service
@@ -166,5 +167,26 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	@Transactional(readOnly = true)
 	public Empleado findByNroDocumento(String nroDocumento) {
 		return empleadoDao.findByNroDocumento(nroDocumento);
+	}
+
+	@Override
+	public Empleado cambiarPassword(CambiarPassword form) throws Exception {
+		Empleado empleado = findById(form.getId());
+		
+		if (!passwordEncoder.matches(form.getPasswordActual(), empleado.getPassword())) {
+			throw new Exception("La contraseña actual es incorrecta");
+		}
+		
+		if (passwordEncoder.matches(form.getNuevaPassword(), empleado.getPassword())) {
+			throw new Exception("La nueva contraseña debe ser diferente a la actual");
+		}
+		
+		if (!form.getNuevaPassword().equals(form.getConfirmarPassword())) {
+			throw new Exception("Las contraseñas no coinciden");
+		}
+		
+		String passwordHash = passwordEncoder.encode(form.getNuevaPassword());
+		empleado.setPassword(passwordHash);
+		return empleadoDao.save(empleado);
 	}
 }

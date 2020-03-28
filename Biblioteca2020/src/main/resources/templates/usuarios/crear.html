@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<meta charset="UTF-8" />
 <head th:replace="layout/layout :: head"></head>
 <body>
 	<header th:replace="layout/layout :: header"></header>
@@ -145,7 +144,8 @@
 					<h3 class="mb-4">Foto</h3>
 					<div class="form-group">
 						<div class="col-sm-6">
-							<img th:if="${usuario.foto_usuario!=null && #strings.length(usuario.foto_usuario) > 0}"
+							<img
+								th:if="${usuario.foto_usuario!=null && #strings.length(usuario.foto_usuario) > 0}"
 								class="img-thumbnail rounded float-left" style="max-width: 50%;"
 								th:alt="${usuario.foto_usuario}"
 								th:src="@{'/uploads/'+${usuario.foto_usuario}}">
@@ -293,7 +293,8 @@
 					<h3 class="mb-4">Foto</h3>
 					<div class="form-group">
 						<div class="col-sm-6">
-							<img th:if="${usuario.foto_usuario!=null && #strings.length(usuario.foto_usuario) > 0}"
+							<img
+								th:if="${usuario.foto_usuario!=null && #strings.length(usuario.foto_usuario) > 0}"
 								class="img-thumbnail rounded float-left" style="max-width: 25%;"
 								th:alt="${usuario.foto_usuario}"
 								th:src="@{'/uploads/'+${usuario.foto_usuario}}">
@@ -309,13 +310,13 @@
 				</div>
 			</div>
 
-			<div class="form-group row">
-				<div class="col-sm-6">
+			<div class="row">
+				<div class="col-6">
 					<a class="btn btn-light btn-block"
 						th:href="@{'/usuarios/cancelar'}"><i class="fas fa-shield-alt"></i>
 						Cancelar</a>
 				</div>
-				<div class="col-sm-6">
+				<div class="col-6">
 					<input class="btn btn-dark btn-block" type="submit"
 						th:value="${editable}?'Guardar Usuario':'Crear Usuario'" />
 				</div>
@@ -325,5 +326,6 @@
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>
+
 </body>
 </html>

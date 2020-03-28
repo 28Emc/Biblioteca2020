@@ -97,9 +97,10 @@ public class LibroController {
 				Files.write(rutaCompleta, bytes);
 				libro.setFoto_libro(foto.getOriginalFilename());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar la imagen del libro");
 			}
+		} else if (libro.getFoto_libro() == null || libro.getFoto_libro() == "") {
+			libro.setFoto_libro("no-book.jpg");
 		}
 
 		try {
@@ -161,6 +162,8 @@ public class LibroController {
 				model.addAttribute("error", e.getMessage());
 			}
 
+		} else if (libro.getFoto_libro() == null || libro.getFoto_libro() == "") {
+			libro.setFoto_libro("no-book.jpg");
 		}
 
 		try {
@@ -285,7 +288,7 @@ public class LibroController {
 				return "redirect:/locales/listar/" + idLocal + "/libros/listar";
 			}
 		}
-		
+
 		if (!foto.isEmpty()) {
 			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 			String rootPath = directorioRecursos.toFile().getAbsolutePath();
@@ -299,6 +302,8 @@ public class LibroController {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		} else if (libro.getFoto_libro() == null || libro.getFoto_libro() == "") {
+			libro.setFoto_libro("no-book.jpg");
 		}
 
 		try {
@@ -355,7 +360,7 @@ public class LibroController {
 	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
 	@PostMapping("/locales/listar/{idLocal}/libros/editar")
 	public String guardarLibro(@PathVariable(value = "idLocal") Long idLocal, @Valid Libro libro, BindingResult result,
-			Model model, SessionStatus status, RedirectAttributes flash,  @RequestParam("foto_li") MultipartFile foto) {
+			Model model, SessionStatus status, RedirectAttributes flash, @RequestParam("foto_li") MultipartFile foto) {
 		model.addAttribute("empresaLocales", idLocal);
 		model.addAttribute("idLocal", idLocal);
 		if (result.hasErrors()) {
@@ -371,8 +376,8 @@ public class LibroController {
 				model.addAttribute("error", e.getMessage());
 				return "redirect:/locales/listar/" + idLocal + "/libros/listar";
 			}
-		}	
-		
+		}
+
 		if (!foto.isEmpty()) {
 			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 			String rootPath = directorioRecursos.toFile().getAbsolutePath();
@@ -386,6 +391,8 @@ public class LibroController {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		} else if (libro.getFoto_libro() == null || libro.getFoto_libro() == "") {
+			libro.setFoto_libro("no-book.jpg");
 		}
 
 		try {

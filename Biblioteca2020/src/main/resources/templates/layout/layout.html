@@ -72,14 +72,19 @@
 							sec:authentication="name"></span>
 					</a>
 						<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-							<a sec:authorize="hasRole('ROLE_ADMIN')" class="dropdown-item"
-								th:href="@{/empleados/perfilAdmin}">Mi Perfil (Admin)</a> 
-							<a sec:authorize="hasRole('ROLE_SUPERVISOR')" class="dropdown-item"
-								th:href="@{/empleados/perfilSupervisor}">Mi Perfil (Supervisor)</a>
-							<a sec:authorize="hasRole('ROLE_EMPLEADO')" class="dropdown-item"
-								th:href="@{/empleados/perfilEmpleado}">Mi Perfil (Empleado)</a>
-							<a sec:authorize="hasRole('ROLE_USER')" class="dropdown-item"
-								th:href="@{/usuarios/perfil}">Mi Perfil</a> 							
+							<a
+								sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
+								class="dropdown-item" th:href="@{/empleados/editarPerfil}">Mi
+								Perfil</a> 
+							<a sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
+								class="dropdown-item"
+								th:href="@{/empleados/cambioPassword}">Cambiar Password</a> 
+							<a sec:authorize="hasRole('ROLE_USER')"
+								class="dropdown-item" th:href="@{/usuarios/editarPerfil}">Mi
+								Perfil (User)</a> 
+							<a sec:authorize="hasRole('ROLE_USER')"
+								class="dropdown-item"
+								th:href="@{/usuarios/cambioPassword}">Cambiar Password (User)</a> 
 							<form id="logoutForm" th:action="@{/logout}" method="post">
 								<button class="dropdown-item"
 									onclick="documento.getElementById('logoutForm').submit();"
@@ -91,28 +96,32 @@
 		</nav>
 
 		<!-- Mensajes flash para indicar el estado de las peticiones -->
-		<div class="alert alert-success alert-dismissible fade show"
-			role="alert" th:if="${success!=null}" th:text="${success}">
+		<div id="alertPers"
+			class="alert alert-success alert-dismissible fade show" role="alert"
+			th:if="${success!=null}" th:text="${success}">
 			<button type="button" class="close" data-dismiss="alert"
 				aria-label="Close">
 				<span aria-hidden="true">&times;</span>
 			</button>
 		</div>
-		<div class="alert alert-danger alert-dismissible fade show"
-			role="alert" th:if="${error!=null}" th:text="${error}">
+		<div id="alertPers"
+			class="alert alert-danger alert-dismissible fade show" role="alert"
+			th:if="${error!=null}" th:text="${error}">
 			<button type="button" class="close" data-dismiss="alert"
 				aria-label="Close">
 				<span aria-hidden="true">&times;</span>
 			</button>
 		</div>
-		<div class="alert alert-warning alert-dismissible fade show"
-			role="alert" th:if="${warning!=null}" th:text="${warning}">
+		<div id="alertPers"
+			class="alert alert-warning alert-dismissible fade show" role="alert"
+			th:if="${warning!=null}" th:text="${warning}">
 			<button type="button" class="close" data-dismiss="alert"
 				aria-label="Close">
 				<span aria-hidden="true">&times;</span>
 			</button>
 		</div>
-		<div class="alert alert-info alert-dismissible fade show" role="alert"
+		<div id="alertPers"
+			class="alert alert-info alert-dismissible fade show" role="alert"
 			th:if="${info!=null}" th:text="${info}">
 			<button type="button" class="close" data-dismiss="alert"
 				aria-label="Close">
@@ -131,13 +140,13 @@
 		<script th:src="@{/js/font-awesome.js}"></script>
 		<script type="text/javascript">
 			setTimeout(function() {
-				$(".alert").alert('close');
+				$("#alertPers").alert('close');
 			}, 3000);
 
 			$(function() {
 				$('[data-toggle="tooltip"]').tooltip()
 			});
-		</script>
+		</script>		
 	</footer>
 
 </body>
