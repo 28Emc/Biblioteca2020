@@ -8,6 +8,15 @@
 		<header th:replace="layout/layout :: header"></header>
 	</th:block>
 
+	<div id="alertPers"
+		class="alert alert-danger alert-dismissible fade show" role="alert"
+		th:if="${error!=null}" th:text="${error}">
+		<button type="button" class="close" data-dismiss="alert"
+			aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<form
@@ -67,7 +76,7 @@
 			<div class="form-group" th:if="${editable==null or editable==false}">
 				<label class="col-sm-2 col-form-label">Contraseña</label>
 				<div class="col-sm-6">
-					<input readonly class="form-control" type="password"
+					<input class="form-control" type="password"
 						th:field="${usuario.password}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="Contraseña..." /> <small
@@ -79,7 +88,7 @@
 			<div class="form-group" th:if="${editable==null or editable==false}">
 				<label class="col-sm-2 col-form-label">Confirmar Contraseña</label>
 				<div class="col-sm-6">
-					<input readonly class="form-control" type="password"
+					<input class="form-control" type="password"
 						th:field="${usuario.passwordConfirmacion}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="Escribe nuevamente tu contraseña..." /> <small

@@ -23,5 +23,8 @@ public interface IUsuarioDao extends CrudRepository<Usuario, Long> {
 	public List<Usuario> findByAnotherUsername(String username);
 
 	public Usuario findByCelular(String celular);
+	
+	/* VALIDACIÓN EMAIL */
+	public Usuario findByEmailIgnoreCase(String email);
 
 }

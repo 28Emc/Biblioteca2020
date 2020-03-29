@@ -53,7 +53,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http
 		.csrf().disable()
-		.authorizeRequests().antMatchers("/css/**", "/js/**", "/images/**", "/**/crearPerfil", "/**/editarPerfil").permitAll()
+		.authorizeRequests().antMatchers("/css/**", "/js/**", "/images/**", "/**/crearPerfil", "/**/editarPerfil", "/**/cuenta-verificada/**").permitAll()
 			.and()
 			.formLogin().successHandler(successHandler)
 			// es AQUI que yo realmente gestiono mi LOGIN

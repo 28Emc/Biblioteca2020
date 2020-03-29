@@ -25,4 +25,6 @@ public interface IUsuarioService {
 	public Usuario cambiarPassword(CambiarPassword form) throws Exception;
 	
 	public void borrarUsuario(Long id) throws Exception;
+	
+	public Usuario findByEmailIgnoreCase(String email);
 }

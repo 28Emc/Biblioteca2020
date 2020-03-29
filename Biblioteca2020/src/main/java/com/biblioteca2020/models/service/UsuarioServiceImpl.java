@@ -172,4 +172,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
 		usuario.setPassword(passwordHash);
 		return usuarioDao.save(usuario);
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Usuario findByEmailIgnoreCase(String email) {
+		return usuarioDao.findByEmailIgnoreCase(email);
+	}
 }

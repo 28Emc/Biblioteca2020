@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,14 +22,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.biblioteca2020.models.dao.IConfirmationTokenDao;
 import com.biblioteca2020.models.dto.CambiarPassword;
+import com.biblioteca2020.models.entity.ConfirmationToken;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Usuario;
+import com.biblioteca2020.models.service.EmailSenderService;
 import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.IRoleService;
 import com.biblioteca2020.models.service.IUsuarioService;
@@ -40,6 +46,12 @@ public class UsuarioController {
 
 	@Autowired
 	private IUsuarioService usuarioService;
+
+	@Autowired
+	private IConfirmationTokenDao confirmationTokenRepository;
+
+	@Autowired
+	private EmailSenderService emailSenderService;
 
 	@Autowired
 	private IRoleService roleService;
@@ -68,8 +80,7 @@ public class UsuarioController {
 
 		return "/usuarios/librosAllUser";
 	}
-	
-	@PreAuthorize("hasAnyRole('ROLE_USER')")
+
 	@GetMapping("/crearPerfil")
 	public String perfil(Model model) {
 		model.addAttribute("usuario", new Usuario());
@@ -84,7 +95,6 @@ public class UsuarioController {
 		return "redirect:/home";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@PostMapping(value = "/crearPerfil")
 	public String crearPerfil(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
 			SessionStatus status, RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
@@ -95,31 +105,78 @@ public class UsuarioController {
 			return "/usuarios/perfil";
 		}
 
-		if (!foto.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+		/* VALIDACIÓN EMAIL */
+		Usuario usuarioExistente = usuarioService.findByEmailIgnoreCase(usuario.getEmail());
+		if (usuarioExistente != null) {
+			model.addAttribute("error", "El correo ya está asociado a otro usuario!");
+			return "/usuarios/perfil";
+		} else {
+			/* LÓGICA DE REGISTRO DE USUARIOS */
+			if (!foto.isEmpty()) {
+				Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+				String rootPath = directorioRecursos.toFile().getAbsolutePath();
+
+				try {
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					usuario.setFoto_usuario(foto.getOriginalFilename());
+				} catch (IOException e) {
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+				}
+			}
 
 			try {
-				byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
-				usuario.setFoto_usuario(foto.getOriginalFilename());
-			} catch (IOException e) {
-				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
-			}
-		}
+				usuarioService.save(usuario);
+				
+				/* REGISTRO EL TOKEN DE REGISTRO SEGUN EL CORREO DEL USUARIO, PARA SU VALIDACIÒN */ 
+				ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
+				confirmationTokenRepository.save(confirmationToken);
+				
+				/* ENVÌO DEL CORREO DE VALIDACIÒN */
+				SimpleMailMessage mailMessage = new SimpleMailMessage();
+				mailMessage.setTo(usuario.getEmail());
+				mailMessage.setSubject("Completar Registro | Biblioteca2020");
+				mailMessage.setFrom("edmech25@gmail.com");
+				mailMessage.setText(
+						"Buenas noches, hemos recibido tu peticiòn de registro a Biblioteca2020. Para confirmar tu cuenta, entrar aquì: "
+								+ "http://localhost:8080/usuarios/cuenta-verificada?token="
+								+ confirmationToken.getConfirmationToken());
+				flash.addFlashAttribute("success", "El usuario ha sido registrado en la base de datos.");
+				emailSenderService.sendEmail(mailMessage);
 
-		try {
-			usuarioService.save(usuario);
-			flash.addFlashAttribute("success", "El usuario ha sido registrado en la base de datos.");
-			status.setComplete();
-			return "redirect:/login";
-		} catch (Exception e) {
-			model.addAttribute("usuario", usuario);
-			model.addAttribute("roles", roleService.findOnlyUsers());
-			model.addAttribute("titulo", "Registro de Usuario");
-			model.addAttribute("error", e.getMessage());
-			return "/usuarios/perfil";
+				model.addAttribute("titulo", "Registro exitoso");
+				model.addAttribute("email", usuario.getEmail());
+				return "/usuarios/registro-exitoso";
+			} catch (Exception e) {
+				model.addAttribute("usuario", usuario);
+				model.addAttribute("roles", roleService.findOnlyUsers());
+				model.addAttribute("titulo", "Registro de Usuario");
+				model.addAttribute("error", e.getMessage());
+				return "/usuarios/perfil";
+			}
+		}		
+	}
+
+	@RequestMapping(value = "/cuenta-verificada", method = { RequestMethod.GET, RequestMethod.POST })
+	public String verificarCuenta(Model model, @RequestParam("token") String confirmationToken) {
+		ConfirmationToken token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
+
+		if (token != null) {
+			try {
+				Usuario usuario = usuarioService.findByEmailIgnoreCase(token.getUsuario().getEmail());
+				usuario.setEstado(true);
+				usuarioService.update(usuario);
+				model.addAttribute("titulo", "Cuenta Verificada");
+				return "/usuarios/cuenta-verificada";
+			} catch (Exception e) {
+				model.addAttribute("error", "Error: " + e.getMessage());
+				model.addAttribute("titulo", "Error al Registrar");
+				return "/usuarios/error-registro";
+			}		
+		} else {
+			model.addAttribute("error", "El enlace es invàlido!");
+			return "/usuarios/error-registro";
 		}
 	}
 
@@ -199,9 +256,10 @@ public class UsuarioController {
 		return "/usuarios/cambio-password";
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@PostMapping("/cambioPassword")
-	public String cambioPasswordUser(@Valid CambiarPassword form, Model model, Errors errors,
-			RedirectAttributes flash, Authentication authentication) {
+	public String cambioPasswordUser(@Valid CambiarPassword form, Model model, Errors errors, RedirectAttributes flash,
+			Authentication authentication) {
 		if (errors.hasErrors()) {
 			String result = errors.getAllErrors().stream().map(x -> x.getDefaultMessage())
 					.collect(Collectors.joining(", "));
@@ -219,7 +277,7 @@ public class UsuarioController {
 			model.addAttribute("cambiarPasswordError", e.getMessage());
 			return "/usuarios/cambio-password";
 		}
-		
+
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")

@@ -102,7 +102,7 @@ public class Usuario implements Serializable {
 	@PrePersist
 	public void prePersist() {
 		fecha_registro = new Date();
-		estado = true;
+		estado = false;
 		foto_usuario = "no-image.jpg";
 	}
 
