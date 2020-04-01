@@ -22,32 +22,37 @@
 					<li class="nav-item"><a class="nav-link" th:href="@{/home}"><i
 							class="fas fa-home"></i> Inicio </a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						sec:authorize="hasRole('ROLE_ADMIN')"
 						th:href="@{/empresas/listar}"><i class="fas fa-shield-alt"></i>
 							Empresa</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						sec:authorize="hasRole('ROLE_ADMIN')"
 						th:href="@{/empleados/listar}"><i class="fas fa-shield-alt"></i>
 							Empleados</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						sec:authorize="hasRole('ROLE_ADMIN')"
 						th:href="@{/categorias/listar}"><i class="fas fa-shield-alt"></i>
 							Categorias</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/libros/listar}"><i
-							class="fas fa-shield-alt"></i> Libros</a></li>
+						sec:authorize="hasRole('ROLE_ADMIN')"
+						th:href="@{/locales/libros/listar}"><i
+							class="fas fa-book"></i> Libros</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						sec:authorize="hasRole('ROLE_ADMIN')"
 						th:href="@{/usuarios/listar}"><i class="fas fa-shield-alt"></i>
 							Usuarios</a></li>
 					<li class="nav-item"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_EMPLEADO')"
-						th:href="@{/usuarios/listar}"><i class="fas fa-user"></i>
-							Usuarios</a></li>
-					<li class="nav-item"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"
+						sec:authorize="hasRole('ROLE_ADMIN')"
 						th:href="@{/prestamos/listar}"><i class="fas fa-shield-alt"></i>
 							Préstamos</a></li>
+					<li class="nav-item"><a class="nav-link"
+						sec:authorize="hasRole('ROLE_EMPLEADO')"
+						th:href="@{/locales/libros/listar}"><i
+							class="fas fa-book"></i> Libros</a></li>
+					<li class="nav-item"><a class="nav-link"
+						sec:authorize="hasRole('ROLE_EMPLEADO')"
+						th:href="@{/usuarios/listar}"><i class="fas fa-user"></i>
+							Usuarios</a></li>					
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_EMPLEADO')"
 						th:href="@{/prestamos/listar}"><i
@@ -73,18 +78,16 @@
 					</a>
 						<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
 							<a
-								sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
+								sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
 								class="dropdown-item" th:href="@{/empleados/editarPerfil}">Mi
-								Perfil</a> 
-							<a sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
-								class="dropdown-item"
-								th:href="@{/empleados/cambioPassword}">Cambiar Password</a> 
-							<a sec:authorize="hasRole('ROLE_USER')"
+								Perfil</a> <a
+								sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
+								class="dropdown-item" th:href="@{/empleados/cambioPassword}">Cambiar
+								Password</a> <a sec:authorize="hasRole('ROLE_USER')"
 								class="dropdown-item" th:href="@{/usuarios/editarPerfil}">Mi
-								Perfil (User)</a> 
-							<a sec:authorize="hasRole('ROLE_USER')"
-								class="dropdown-item"
-								th:href="@{/usuarios/cambioPassword}">Cambiar Password (User)</a> 
+								Perfil (User)</a> <a sec:authorize="hasRole('ROLE_USER')"
+								class="dropdown-item" th:href="@{/usuarios/cambioPassword}">Cambiar
+								Password (User)</a>
 							<form id="logoutForm" th:action="@{/logout}" method="post">
 								<button class="dropdown-item"
 									onclick="documento.getElementById('logoutForm').submit();"
@@ -146,7 +149,7 @@
 			$(function() {
 				$('[data-toggle="tooltip"]').tooltip()
 			});
-		</script>		
+		</script>
 	</footer>
 
 </body>

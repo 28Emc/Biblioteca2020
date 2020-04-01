@@ -10,28 +10,28 @@
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<h1 hidden th:text="${idLocal}"></h1>
-		<p sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
+		<p sec:authorize="hasRole('ROLE_ADMIN')">
 			<a class="btn btn-primary btn-xs"
-				th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/crear/'}"><i
+				th:href="@{'/locales/libros/crear/'}"><i
 				class="fas fa-shield-alt"></i> Registrar Libro</a>
 		</p>
 		<p sec:authorize="hasRole('ROLE_SYSADMIN')">
 			<a class="btn btn-primary btn-xs" th:href="@{'/libros/crear/'}"><i
 				class="fas fa-user-shield"></i> Registrar Libro</a>
 		</p>
-		<table class="table table-responsive" th:if="${libros}!=null">
+		<h1 th:if="${#lists.isEmpty(libros)}">No hay libros en este local</h1>
+		<table class="table table-responsive"th:if="${not #lists.isEmpty(libros)}">
 			<thead>
 				<tr>
 					<th>Id</th>
 					<th>Titulo</th>
 					<th>Autor</th>
-					<th>Descripción</th>
 					<th>Categoría</th>
 					<th>Fecha Publicación</th>
 					<th>Fecha Registro</th>
 					<th>Stock</th>
 					<th>Estado</th>
-					<th colspan="2">Opciones</th>
+					<th colspan="2" sec:authorize="hasRole('ROLE_ADMIN')">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -39,12 +39,10 @@
 					<td th:text="${libro.id}"></td>
 					<td th:text="${libro.titulo}"></td>
 					<td th:text="${libro.autor}"></td>
-					<td th:text="${libro.descripcion}"></td>
 					<td th:text="${libro.categoria.nombre}"></td>
 					<td th:text="${libro.fechaPublicacion}"></td>
 					<td th:text="${libro.fechaRegistro}"></td>
 					<td th:text="${libro.stock}"></td>
-
 					<th:block th:with="estado=${libro.estado}">
 						<td th:if="${estado}">
 							<h5>
@@ -55,11 +53,10 @@
 							class="btn btn-warning btn-xs"
 							th:href="@{'/libros/editar/'}+${libro.id}"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td th:if="${estado}"
-							sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
+						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')">
 							<a class="btn btn-warning btn-xs"
-							th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/editar/'}+${libro.id}">
-								<i class="fas fa-shield-alt"></i> Editar
+							th:href="@{'/locales/libros/editar/'}+${libro.id}"> <i
+								class="fas fa-shield-alt"></i> Editar
 						</a>
 						</td>
 						<td th:if="${estado}" sec:authorize="hasRole('ROLE_SYSADMIN')"><a
@@ -69,10 +66,9 @@
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
 							class="btn btn-info btn-xs"
-							th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/deshabilitar/'}+${libro.id}"
+							th:href="@{'/locales/libros/deshabilitar/'}+${libro.id}"
 							onclick="return confirm('Seguro de querer deshabilitar el libro?');"><i
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
-
 						<td th:unless="${estado}">
 							<h5>
 								<span class="badge badge-danger" th:text="'Inactivo'"></span>
@@ -82,11 +78,10 @@
 							class="disabled btn btn-secondary btn-xs"
 							th:href="@{'/libros/editar/'}+${libro.id}"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td th:unless="${estado}"
-							sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
+						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_ADMIN')">
 							<a class="disabled btn btn-secondary btn-xs"
-							th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/editar/'}+${libro.id}">
-								<i class="fas fa-shield-alt"></i> Editar
+							th:href="@{'/locales/libros/editar/'}+${libro.id}"> <i
+								class="fas fa-shield-alt"></i> Editar
 						</a>
 						</td>
 						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_SYSADMIN')"><a
@@ -96,16 +91,16 @@
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
 							class="disabled btn btn-secondary btn-xs"
-							th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/deshabilitar/'}+${libro.id}"
+							th:href="@{'/locales/libros/deshabilitar/'}+${libro.id}"
 							onclick="return confirm('Seguro de querer deshabilitar el libro?');"><i
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 					</th:block>
 				</tr>
 			</tbody>
 		</table>
-		<h1 th:if="${libros}==null">No hay libros en este local</h1>
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>
+
 </body>
 </html>

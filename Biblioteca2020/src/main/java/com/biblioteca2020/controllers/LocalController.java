@@ -1,10 +1,11 @@
 package com.biblioteca2020.controllers;
 
-import java.security.Principal;
 import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -44,10 +45,11 @@ public class LocalController {
 
 	// LOS SUPERVISORES PUEDEN VER EL LOCAL ANEXO A SU
 	// EMPRESA, EN CASO CONTRARIO NO TENGO ACCESO
-	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/listar/{id}")
-	public String listarLocalesPorEmpresa(@PathVariable(value = "id") Long id, Model model, Principal principal) {
-		Empleado empleado = empleadoService.findByUsername(principal.getName());
+	public String listarLocalesPorEmpresa(@PathVariable(value = "id") Long id, Model model, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		Local local;
 		// VALIDO QUE EL LOCAL EXISTE
 		try {
@@ -67,13 +69,13 @@ public class LocalController {
 			model.addAttribute("error", e.getMessage());
 			return "/home";
 		}
-
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/cancelar")
-	public String cancelar(ModelMap modelMap, Principal principal) {
-		Empleado empleado = empleadoService.findByUsername(principal.getName());
+	public String cancelar(ModelMap modelMap, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
 		modelMap.put("empresaLocales", empresaLocales);
 		return "redirect:/locales/listar/" + empresaLocales.getId();
@@ -81,11 +83,12 @@ public class LocalController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/crear")
-	public String crearLocal(Map<String, Object> model, Principal principal) {
+	public String crearLocal(Map<String, Object> model, Authentication authentication) {
 		model.put("titulo", "Registro de Local");
 		model.put("local", new Local());
 		// AQUÍ TENGO QUE LLAMAR A LOS DATOS DE LA EMPRESA DE ESE LOCAL
-		Empleado empleado = empleadoService.findByUsername(principal.getName());
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
 		model.put("empresaLocales", empresaLocales);
 		return "/locales/crear";
@@ -94,8 +97,9 @@ public class LocalController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
 	public String crearLocal(@Valid Local local, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Principal principal) {
-		Empleado empleado = empleadoService.findByUsername(principal.getName());
+			RedirectAttributes flash, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
 		model.addAttribute("empresaLocales", empresaLocales);
 		if (result.hasErrors()) {
@@ -122,11 +126,12 @@ public class LocalController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/editar/{id}")
 	public String editarLocal(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
-			RedirectAttributes flash, Principal principal) {
+			RedirectAttributes flash, Authentication authentication) {
 		Local local = null;
 		modelMap.put("editable", true);
 		modelMap.put("titulo", "Modificar Local");
-		Empleado empleado = empleadoService.findByUsername(principal.getName());
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
 		modelMap.put("empresaLocales", empresaLocales);
 		try {
@@ -142,8 +147,9 @@ public class LocalController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarLocal(@Valid Local local, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Map<String, Object> modelMap, Principal principal) {
-		Empleado empleado = empleadoService.findByUsername(principal.getName());
+			RedirectAttributes flash, Map<String, Object> modelMap, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
 		modelMap.put("empresaLocales", empresaLocales);
 		if (result.hasErrors()) {

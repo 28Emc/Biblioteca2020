@@ -7,10 +7,9 @@
 	<header th:replace="layout/layout :: header"></header>
 	<div class="container-fluid my-5">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<h1 hidden th:text="${idLocal}"></h1>
 		<form enctype="multipart/form-data"
 			sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')"
-			th:action="${editable} ? @{'/locales/listar/'}+${idLocal}+@{/libros/editar} : @{'/locales/listar/'}+${idLocal}+@{/libros/crear/}"
+			th:action="${editable} ? @{'/locales/libros/editar'} : @{'/locales/libros/crear'}"
 			th:object="${libro}" method="post">
 			<h3 class="mb-4">Título</h3>
 			<div class="form-group">
@@ -111,7 +110,7 @@
 			<div class="form-group row">
 				<div class="col-sm-6">
 					<a class="btn btn-light btn-block"
-						th:href="@{'/locales/listar/'}+${idLocal}+@{'/libros/cancelar/'}"><i
+						th:href="@{'/locales/libros/cancelar/'}"><i
 						class="fas fa-shield-alt"></i> Cancelar</a>
 				</div>
 				<div class="col-sm-6">

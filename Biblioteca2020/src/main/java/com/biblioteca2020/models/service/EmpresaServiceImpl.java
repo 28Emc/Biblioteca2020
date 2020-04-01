@@ -18,25 +18,19 @@ public class EmpresaServiceImpl implements IEmpresaService {
 	public List<Empresa> findAll() {
 		return (List<Empresa>) empresaDao.findAll();
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Empresa findOne(Long id) throws Exception {
 		return empresaDao.findById(id).orElseThrow(() -> new Exception("La empresa con id " + id + " no existe."));
 	}
 
-	/*@Override
-	@Transactional
-	public void delete(Long id) {
-		empresaDao.deleteById(id);
-	}*/
-
 	@Override
 	@Transactional(readOnly = true)
 	public Empresa findByEstado(Boolean estado) {
 		return empresaDao.findByEstado(estado);
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Empresa findByRucAndEstado(String ruc, boolean estado) {
@@ -66,7 +60,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
 			empresaDao.save(empresa);
 		}
 	}*/
-
+	// USADO
 	@Override
 	@Transactional
 	public void update(Empresa empresa) throws Exception {

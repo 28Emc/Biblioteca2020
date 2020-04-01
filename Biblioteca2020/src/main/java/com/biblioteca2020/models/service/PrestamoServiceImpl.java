@@ -38,7 +38,7 @@ public class PrestamoServiceImpl implements IPrestamoService {
 	public void update(Prestamo prestamo) {
 		prestamoDao.save(prestamo);
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Prestamo findById(Long id) {
@@ -56,13 +56,13 @@ public class PrestamoServiceImpl implements IPrestamoService {
 	public List<Libro> findByTitulo(String term) {
 		return libroDao.findByTitulo("%" + term + "%");
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(Long idEmpleado) {
 		return prestamoDao.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(idEmpleado);
 	}
-
+	// USADO
 	@Override
 	public String mostrarFechaAmigable() {
 		// ARMANDO FECHA MAS AMIGABLE AL USUARIO CON TIME
@@ -88,13 +88,13 @@ public class PrestamoServiceImpl implements IPrestamoService {
 		String fechaFull = diaFinal + " " + diaNum + " de " + mesFinal + " " + anio;
 		return fechaFull;
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(Long id) {
 		return prestamoDao.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(id);
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado() {

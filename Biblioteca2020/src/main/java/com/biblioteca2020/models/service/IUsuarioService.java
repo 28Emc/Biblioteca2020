@@ -5,26 +5,26 @@ import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.entity.Usuario;
 
 public interface IUsuarioService {
-
+	// USADO
 	public List<Usuario> findAll();
-		
+	// USADO	
 	public Usuario findById(Long id) throws Exception;
-
+	// USADO
 	public Usuario findByUsername(String username);
-	
+	// USADO
 	public Usuario findByUsernameAndEstado(String username, boolean estado);
 	
 	public Usuario findByNroDocumento(String nroDocumento);
-	
-	public List<Usuario> findAllByNroDocumentoAndEstado(String term, Boolean estado);	
-		
+	// USADO
+	public List<Usuario> findByNroDocumentoAndEstado(String term, boolean estado);	
+	// USADO	
 	public void save(Usuario usuario) throws Exception;
-	
+	// USADO
 	public void update(Usuario usuario) throws Exception;
-	
+	// USADO
 	public Usuario cambiarPassword(CambiarPassword form) throws Exception;
 	
 	public void borrarUsuario(Long id) throws Exception;
-	
+	// USADO
 	public Usuario findByEmailIgnoreCase(String email);
 }

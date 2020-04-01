@@ -12,7 +12,7 @@ public class LibroServiceImpl implements ILibroService {
 
 	@Autowired
 	private ILibroDao libroDao;
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Libro> findAll() {
@@ -24,7 +24,7 @@ public class LibroServiceImpl implements ILibroService {
 	public void save(Libro libro) {
 		libroDao.save(libro);
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Libro findOne(Long id) throws Exception {
@@ -48,19 +48,16 @@ public class LibroServiceImpl implements ILibroService {
 	public List<Libro> findByTitulo(String term) {
 		return libroDao.findByTitulo(term);
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
-	public List<Libro> findByTituloLikeIgnoreCaseAndEstado(String term, Boolean estado) {
-		return libroDao.findByTituloLikeIgnoreCaseAndEstado("%" + term + "%", estado);
+	public List<Libro> findByTituloLikeIgnoreCaseAndLocalAndEstado(String term, Long id, Boolean estado) {
+		return libroDao.findByTituloLikeIgnoreCaseAndLocalAndEstado("%" + term + "%", id, estado);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Libro> fetchByIdWithLocalesWithEmpleado(Long id, Long idEmpleado) throws Exception {
-		if (libroDao.fetchByIdWithLocalesWithEmpleado(id, idEmpleado).isEmpty()) {
-			throw new Exception("No tienes acceso a estos libros ya que pertenecen a un local sin permiso de acceso.");
-		}
+	public List<Libro> fetchByIdWithLocalesWithEmpleado(Long id, Long idEmpleado) {
 		return libroDao.fetchByIdWithLocalesWithEmpleado(id, idEmpleado);
 	}
 

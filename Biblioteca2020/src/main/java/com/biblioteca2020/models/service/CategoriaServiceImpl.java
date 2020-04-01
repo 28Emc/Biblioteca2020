@@ -12,13 +12,13 @@ public class CategoriaServiceImpl implements ICategoriaService {
 
 	@Autowired
 	private ICategoriaDao categoriaDao;
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Categoria> findAll() {
 		return (List<Categoria>) categoriaDao.findAll();
 	}
-
+	// USADO
 	public boolean verificarCategoria(Categoria categoria) throws Exception {
 		Categoria categoriaEncontrada = categoriaDao.findByNombre(categoria.getNombre());
 		if (categoriaEncontrada != null) {
@@ -26,7 +26,7 @@ public class CategoriaServiceImpl implements ICategoriaService {
 		}
 		return true;
 	}
-
+	// USADO
 	@Override
 	@Transactional
 	public void save(Categoria categoria) throws Exception {
@@ -34,7 +34,7 @@ public class CategoriaServiceImpl implements ICategoriaService {
 			categoriaDao.save(categoria);
 		}
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Categoria findOne(Long id) throws Exception {
@@ -52,19 +52,21 @@ public class CategoriaServiceImpl implements ICategoriaService {
 	public List<Categoria> findByEstado(Boolean estado) {
 		return categoriaDao.findByEstado(estado);
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Categoria> findByNombreLikeIgnoreCase(String term) {
 		return categoriaDao.findByNombreLikeIgnoreCase("%" + term + "%");
 	}
-
+	// USADO
 	@Override
+	@Transactional
 	public void update(Categoria categoria) {
 		categoriaDao.save(categoria);
 	}
 
 	@Override
+	@Transactional
 	public Categoria findByNombre(String categoria) {
 		return categoriaDao.findByNombre(categoria);
 	}

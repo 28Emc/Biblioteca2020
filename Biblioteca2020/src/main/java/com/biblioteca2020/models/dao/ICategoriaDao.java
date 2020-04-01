@@ -7,9 +7,9 @@ import com.biblioteca2020.models.entity.Categoria;
 public interface ICategoriaDao extends CrudRepository<Categoria, Long> {
 	
 	public List<Categoria> findByEstado(Boolean estado);
-
+	// USADO
 	public List<Categoria> findByNombreLikeIgnoreCase(String string);
-	
+	// USADO
 	public Categoria findByNombre(String categoria);
 	
 }

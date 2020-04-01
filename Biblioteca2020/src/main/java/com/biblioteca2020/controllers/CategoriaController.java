@@ -26,8 +26,8 @@ public class CategoriaController {
 
 	@Autowired
 	private ICategoriaService categoriaService;
-
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
+	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/listar")
 	public String listarCategorias(Model model) {
 		model.addAttribute("categoria", new Categoria());
@@ -41,13 +41,13 @@ public class CategoriaController {
 		return categoriaService.findByNombreLikeIgnoreCase(term);
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/cancelar")
 	public String cancelar() {
 		return "redirect:/categorias/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@RequestMapping(value = "/crear")
 	public String crearFormCategoria(Map<String, Object> modelMap) {
 		Categoria categoria = new Categoria();
@@ -56,7 +56,7 @@ public class CategoriaController {
 		return "categorias/crear";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
 	public String crearCategoria(@Valid Categoria categoria, BindingResult result, Model model, 
 			SessionStatus status, RedirectAttributes flash) {
@@ -77,7 +77,7 @@ public class CategoriaController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/crear/{id}")
 	public String editarCategorias(@PathVariable(value = "id") Long id, Map<String, Object> model,
 			RedirectAttributes flash) {
@@ -92,10 +92,9 @@ public class CategoriaController {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "redirect:/categorias/listar";
 		}
-
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarCategoria(@Valid Categoria categoria, BindingResult result, Model model,
 			SessionStatus status, RedirectAttributes flash) {
@@ -111,7 +110,7 @@ public class CategoriaController {
 		return "redirect:/categorias/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@RequestMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarCategoria(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Categoria categoria = null;

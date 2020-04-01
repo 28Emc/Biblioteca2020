@@ -45,9 +45,8 @@ public class EmpleadoController {
 	@Autowired
 	private IRoleService roleService;
 
-	// -------------------------------------------- ROLE EMPLEADO
-
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_SUPERVISOR', 'ROLE_ADMIN')")
+	// ############################## ROLE EMPLEADO, ROLE ADMIN
+	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
 	@GetMapping("/editarPerfil")
 	public String editarPerfil(Map<String, Object> modelMap, RedirectAttributes flash, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -65,7 +64,7 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_SUPERVISOR', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
 	@PostMapping(value = "/editarPerfil")
 	public String guardarPerfil(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_emp") MultipartFile foto) {
@@ -77,11 +76,9 @@ public class EmpleadoController {
 			model.addAttribute("titulo", "Modificar Perfil");
 			return "/empleados/perfil";
 		}
-
 		if (!foto.isEmpty()) {
 			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 			String rootPath = directorioRecursos.toFile().getAbsolutePath();
-
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -111,13 +108,13 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_SUPERVISOR', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
 	@GetMapping("/cancelarPerfil")
 	public String cancelarPerfil() {
 		return "redirect:/home";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_SUPERVISOR', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
 	@GetMapping("/cambioPassword")
 	public String cambioPasswordEmpleado(Model model, Authentication authentication) {
 		CambiarPassword cambiarPassword = new CambiarPassword();
@@ -138,7 +135,6 @@ public class EmpleadoController {
 			model.addAttribute("cambiarPasswordError", result);
 			return "/empleados/cambio-password";
 		}
-
 		try {
 			empleadoService.cambiarPassword(form);
 			flash.addFlashAttribute("success", "Password Actualizada");
@@ -149,10 +145,9 @@ public class EmpleadoController {
 			model.addAttribute("cambiarPasswordError", e.getMessage());
 			return "/empleados/cambio-password";
 		}
-
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_SUPERVISOR', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
 	@GetMapping(value = "/deshabilitarPerfil")
 	public String deshabilitarPerfil(RedirectAttributes flash, Authentication authentication) {
 		try {
@@ -171,11 +166,12 @@ public class EmpleadoController {
 		}
 	}
 
-	// LISTADO DE EMPLEADOS:
-	// - SI SOY ADMIN, VEO MI REGISTRO
-	// - SI NO, LO OCULTO
+	// ############################## ROLE ADMIN
+	// LISTADO DE EMPLEADOS
+	// SI SOY ADMIN, VEO MI REGISTRO
+	// SI NO, LO OCULTO
 	// MÉTODO TEMPORAL, YA QUE EL ADMIN NO VA A PERTENECER A LOS 'EMPLEADOS'
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/listar")
 	public String listarEmpleados(Model model, Authentication authentication, Principal principal) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -193,22 +189,22 @@ public class EmpleadoController {
 		}
 
 		model.addAttribute("empleado", new Empleado());
-		model.addAttribute("titulo", "Listado de Empleados");
+		model.addAttribute("titulo",
+				"Listado de Empleados de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
 		return "empleados/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/cancelar")
 	public String cancelar() {
 		return "redirect:/empleados/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/crear")
 	public String crearFormEmpleado(Model model, Authentication authentication, RedirectAttributes flash) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-
 		try {
 			model.addAttribute("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
 			model.addAttribute("empleado", new Empleado());
@@ -221,7 +217,7 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
 	public String crearEmpleado(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, @RequestParam("foto_emp") MultipartFile foto) {
@@ -237,7 +233,6 @@ public class EmpleadoController {
 			model.addAttribute("titulo", "Registro de Empleado");
 			return "/empleados/crear";
 		}
-
 		if (!foto.isEmpty()) {
 			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 			String rootPath = directorioRecursos.toFile().getAbsolutePath();
@@ -251,7 +246,6 @@ public class EmpleadoController {
 				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
 			}
 		}
-
 		try {
 			empleadoService.save(empleado);
 			flash.addFlashAttribute("success",
@@ -273,15 +267,13 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/editar/{id}")
 	public String editarFormEmpleado(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash,
 			Authentication authentication) {
-
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		// AQUI VALIDO SI EL USUARIO LOGUEADO ES ADMIN Y PUEDE EDITAR SU MISMO REGISTRO
-		// EL ADMIN DEBE SER CAMBIADO DE TABLA 'EMPLEADO' A 'USUARIO'
 		try {
 			Empleado empleadoAdmin = empleadoService.findById(id);
 			if (empleadoAdmin.getRoles().toString().contains("ROLE_ADMIN") == true
@@ -294,19 +286,16 @@ public class EmpleadoController {
 			return "redirect:/empleados/listar";
 		}
 		// FIN VALIDACION ADMIN
-
 		try {
 			model.addAttribute("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "/empleados/crear";
 		}
-
 		Empleado empleadoEditable = null;
 		model.addAttribute("editable", true);
 		model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
 		model.addAttribute("titulo", "Modificar Empleado");
-
 		try {
 			empleadoEditable = empleadoService.findById(id);
 			model.addAttribute("empleado", empleadoEditable);
@@ -317,7 +306,7 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarEmpleado(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Authentication authentication, @RequestParam("foto_emp") MultipartFile foto) {
@@ -337,7 +326,6 @@ public class EmpleadoController {
 			model.addAttribute("titulo", "Modificar Empleado");
 			return "/empleados/editar";
 		}
-
 		if (!foto.isEmpty()) {
 			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 			String rootPath = directorioRecursos.toFile().getAbsolutePath();
@@ -351,7 +339,6 @@ public class EmpleadoController {
 				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
 			}
 		}
-
 		try {
 			empleadoService.update(empleado);
 			flash.addFlashAttribute("warning",
@@ -395,12 +382,6 @@ public class EmpleadoController {
 	@GetMapping("/perfilAdmin")
 	public String perfilAdmin() {
 		return "/empleados/perfilAdmin";
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR')")
-	@GetMapping("/perfilSupervisor")
-	public String perfilSupervisor() {
-		return "/empleados/perfilSupervisor";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO')")

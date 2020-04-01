@@ -19,27 +19,24 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
 
-	/*
-	 * MÉTODO PARA BUSCAR TODOS LOS USUARIOS.
-	 */
+	// MÉTODO PARA BUSCAR TODOS LOS USUARIOS 
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Usuario> findAll() {
 		return (List<Usuario>) usuarioDao.findAll();
 	}
 
-	/*
-	 * MÉTODO PARA BUSCAR EL USUARIO POR SU ID.
-	 */
+	// MÉTODO PARA BUSCAR EL USUARIO POR SU ID.
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Usuario findById(Long id) throws Exception {
 		return usuarioDao.findById(id).orElseThrow(() -> new Exception("El usuario no existe."));
 	}
 
-	/*
-	 * MÉTODO PARA BUSCAR EL USUARIO POR SU USERNAME.
-	 */
+	// MÉTODO PARA BUSCAR EL USUARIO POR SU USERNAME.
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Usuario findByUsername(String username) {
@@ -55,9 +52,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
 		return usuarioDao.findByNroDocumento(nroDocumento);
 	}
 
-	/*
-	 * MÉTODO PARA CREAR UN NUEVO USUARIO, CON VALIDACIONES.
-	 */
+	// MÉTODO PARA CREAR UN NUEVO USUARIO, CON VALIDACIONES
+	// USADO
 	@Override
 	@Transactional
 	public void save(Usuario usuario) throws Exception {
@@ -68,9 +64,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
 		}
 	}
 
-	/*
-	 * MÉTODO PARA ACTUALIZAR EL USUARIO.
-	 */
+	// MÉTODO PARA ACTUALIZAR EL USUARIO
+	// USADO
 	@Override
 	@Transactional
 	public void update(Usuario usuario) throws Exception {
@@ -93,6 +88,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	 * CAPTURO SU EXCEPCION ESPECÍFICA PARA MOSTAR UN MENSJAE DE ERROR
 	 * PERSONALIZADO.
 	 */
+	// USADO
 	public boolean verificarUsername(Usuario usuario) throws ConstraintViolationException {
 		Usuario usuarioEncontrado = usuarioDao.findByUsername(usuario.getUsername());
 		if (usuarioEncontrado != null) {
@@ -106,6 +102,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	 * CAPTURO SU EXCEPCION ESPECÍFICA PARA MOSTAR UN MENSJAE DE ERROR
 	 * PERSONALIZADO.
 	 */
+	// USADO
 	public boolean verificarCelular(Usuario usuario) throws ConstraintViolationException {
 		Usuario usuarioEncontrado = usuarioDao.findByCelular(usuario.getCelular());
 		if (usuarioEncontrado != null) {
@@ -118,6 +115,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	 * MÉTODO PARA VERIFICAR EL CAMPO DNI EN LA BD. EL CAMPO ES ÚNICO, Y CAPTURO SU
 	 * EXCEPCION ESPECÍFICA PARA MOSTAR UN MENSJAE DE ERROR PERSONALIZADO.
 	 */
+	// USADO
 	public boolean verificarDNI(Usuario usuario) throws ConstraintViolationException {
 		Usuario usuarioEncontrado = usuarioDao.findByNroDocumento(usuario.getNroDocumento());
 		if (usuarioEncontrado != null) {
@@ -139,19 +137,19 @@ public class UsuarioServiceImpl implements IUsuarioService {
 		}
 		return true;
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Usuario findByUsernameAndEstado(String username, boolean estado) {
 		return usuarioDao.findByUsernameAndEstado(username, estado);
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
-	public List<Usuario> findAllByNroDocumentoAndEstado(String term, Boolean estado) {
-		return usuarioDao.findAllByNroDocumentoAndEstado("%" + term + "%", estado);
+	public List<Usuario> findByNroDocumentoAndEstado(String term, boolean estado) {
+		return usuarioDao.findByNroDocumentoAndEstado("%" + term + "%", estado);
 	}
-
+	// USADO
 	@Override
 	public Usuario cambiarPassword(CambiarPassword form) throws Exception {	
 		Usuario usuario = findById(form.getId());
@@ -172,7 +170,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 		usuario.setPassword(passwordHash);
 		return usuarioDao.save(usuario);
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Usuario findByEmailIgnoreCase(String email) {

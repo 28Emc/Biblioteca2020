@@ -9,19 +9,20 @@ import com.biblioteca2020.models.entity.Empleado;
 public interface IEmpleadoDao extends CrudRepository<Empleado, Long> {
 
 	public Optional<Empleado> findById(Long id);
-
+	// USADO
 	public Empleado findByUsername(String username);
 	
 	public Empleado findByNroDocumento(String nroDocumento);
 
-	@Query("select e from Empleado e where e.nroDocumento like ?1")
-	public List<Empleado> findAllByNroDocumento(String term);
-
+	// USADO
+	@Query("select e from Empleado e where e.nroDocumento like ?1 and e.estado = ?2")
+	public List<Empleado> findAllByNroDocumentoAndEstado(String term, boolean estado);
+	// USADO
 	public Empleado findByUsernameAndEstado(String username, boolean estado);
-	
+	// USADO
 	@Query("select e from Empleado e join fetch e.local l join fetch l.empresa em where em.id=?1")
 	public List<Empleado> fetchByIdWithLocalWithEmpresa(Long id);
-	
+	// USADO
 	@Query("select e from Empleado e join fetch e.roles r join fetch e.local l join fetch l.empresa em where em.id=?1 and r.authority not like 'ROLE_ADMIN'")
 	public List<Empleado> fetchByIdWithLocalWithEmpresaNotAdmin(Long id);
 

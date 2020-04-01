@@ -59,15 +59,13 @@ public class UsuarioController {
 	@Autowired
 	private ILibroService libroService;
 
-	// ----------------------------- ROLE USER
-
+	// ############################ ROLE USER ############################
 	// CATÁLOGO DE LIBROS PARA EL USUARIO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_SUPERVISOR', 'ROLE_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
 	@GetMapping(value = "/librosAllUser")
 	public String listarAllLibrosUser(Model model, Principal principal) {
 		model.addAttribute("titulo", "Catálogo de libros");
 		List<Libro> libros = libroService.findAll();
-
 		// LÓGICA DE MOSTRAR UNA DESCRICIÓN REDUCIDA DE 150 CARACTERES DEL LIBRO
 		for (int i = 0; i < libros.size(); i++) {
 			String descripcionMin = libros.get(i).getDescripcion().substring(0, 150);
@@ -77,7 +75,6 @@ public class UsuarioController {
 			libros.get(i).setDescripcion(descripcionFull);
 			model.addAttribute("libros", libros);
 		}
-
 		return "/usuarios/librosAllUser";
 	}
 
@@ -104,7 +101,6 @@ public class UsuarioController {
 			model.addAttribute("titulo", "Registro de Usuario");
 			return "/usuarios/perfil";
 		}
-
 		/* VALIDACIÓN EMAIL */
 		Usuario usuarioExistente = usuarioService.findByEmailIgnoreCase(usuario.getEmail());
 		if (usuarioExistente != null) {
@@ -115,7 +111,6 @@ public class UsuarioController {
 			if (!foto.isEmpty()) {
 				Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 				String rootPath = directorioRecursos.toFile().getAbsolutePath();
-
 				try {
 					byte[] bytes = foto.getBytes();
 					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -127,12 +122,10 @@ public class UsuarioController {
 			}
 
 			try {
-				usuarioService.save(usuario);
-				
+				usuarioService.save(usuario);				
 				/* REGISTRO EL TOKEN DE REGISTRO SEGUN EL CORREO DEL USUARIO, PARA SU VALIDACIÒN */ 
 				ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
-				confirmationTokenRepository.save(confirmationToken);
-				
+				confirmationTokenRepository.save(confirmationToken);				
 				/* ENVÌO DEL CORREO DE VALIDACIÒN */
 				SimpleMailMessage mailMessage = new SimpleMailMessage();
 				mailMessage.setTo(usuario.getEmail());
@@ -144,7 +137,6 @@ public class UsuarioController {
 								+ confirmationToken.getConfirmationToken());
 				flash.addFlashAttribute("success", "El usuario ha sido registrado en la base de datos.");
 				emailSenderService.sendEmail(mailMessage);
-
 				model.addAttribute("titulo", "Registro exitoso");
 				model.addAttribute("email", usuario.getEmail());
 				return "/usuarios/registro-exitoso";
@@ -161,7 +153,6 @@ public class UsuarioController {
 	@RequestMapping(value = "/cuenta-verificada", method = { RequestMethod.GET, RequestMethod.POST })
 	public String verificarCuenta(Model model, @RequestParam("token") String confirmationToken) {
 		ConfirmationToken token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
-
 		if (token != null) {
 			try {
 				Usuario usuario = usuarioService.findByEmailIgnoreCase(token.getUsuario().getEmail());
@@ -184,7 +175,7 @@ public class UsuarioController {
 	@GetMapping("/editarPerfil")
 	public String editarPerfil(Map<String, Object> modelMap, RedirectAttributes flash, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+		Usuario usuario = usuarioService.findByUsernameAndEstado(userDetails.getUsername(), true);
 		modelMap.put("editable", true);
 		modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
 		modelMap.put("roles", roleService.findOnlyUsers());
@@ -210,11 +201,9 @@ public class UsuarioController {
 			model.addAttribute("titulo", "Modificar Perfil");
 			return "/usuarios/perfil";
 		}
-
 		if (!foto.isEmpty()) {
 			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 			String rootPath = directorioRecursos.toFile().getAbsolutePath();
-
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -277,7 +266,6 @@ public class UsuarioController {
 			model.addAttribute("cambiarPasswordError", e.getMessage());
 			return "/usuarios/cambio-password";
 		}
-
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
@@ -299,10 +287,9 @@ public class UsuarioController {
 		}
 	}
 
-	// ----------------------------- ROLE ADMIN, SUPERVISOR, EMPLEADO
-
+	// ############################ ROLE ADMIN, EMPLEADO ############################
 	// LISTADO DE USUARIOS
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/listar")
 	public String listarUsuarios(Model model) {
 		model.addAttribute("usuario", new Usuario());
@@ -311,13 +298,13 @@ public class UsuarioController {
 		return "usuarios/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/cancelar")
 	public String cancelar() {
 		return "redirect:/usuarios/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
 	@GetMapping("/crear")
 	public String crearFormUsuario(Map<String, Object> modelMap) {
 		modelMap.put("usuario", new Usuario());
@@ -326,7 +313,7 @@ public class UsuarioController {
 		return "usuarios/crear";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR', 'ROLE_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
 	@PostMapping(value = "/crear")
 	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
 			SessionStatus status, RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
@@ -340,7 +327,6 @@ public class UsuarioController {
 		if (!foto.isEmpty()) {
 			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 			String rootPath = directorioRecursos.toFile().getAbsolutePath();
-
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -366,7 +352,7 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/editar/{id}")
 	public String editarFormUsuario(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
 			RedirectAttributes flash) {
@@ -385,7 +371,7 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_usu") MultipartFile foto) {
@@ -401,7 +387,6 @@ public class UsuarioController {
 		if (!foto.isEmpty()) {
 			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 			String rootPath = directorioRecursos.toFile().getAbsolutePath();
-
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -429,7 +414,7 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_SUPERVISOR')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Usuario usuario = null;

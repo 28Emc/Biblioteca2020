@@ -9,10 +9,10 @@ import com.biblioteca2020.models.entity.Role;
 public interface IRoleDao extends CrudRepository<Role, Long> {
 	
 	public List<Role> findAll();
-
+	// USADO
 	@Query("select r from Role r where r.authority like 'ROLE_USER'")
 	public List<Role> findOnlyUsers();
-	
+	// USADO
 	@Query("select r from Role r where r.authority not in ('ROLE_USER')")
 	public List<Role> findEmpleadoAndSupervisor();
 	

@@ -53,9 +53,9 @@
 					</th:block>
 
 					<td
-						sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')">
+						sec:authorize="hasRole('ROLE_ADMIN')">
 						<a class="btn btn-dark btn-xs"
-						th:href="${local.id}+@{/libros/listar}">Ver Libros</a>
+						th:href="@{/locales/libros/listar}">Ver Libros</a>
 					</td>
 				</tr>
 			</tbody>

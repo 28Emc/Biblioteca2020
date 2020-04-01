@@ -25,22 +25,21 @@ import com.biblioteca2020.models.service.IEmpresaService;
 @RequestMapping("/empresas")
 @SessionAttributes("empresa")
 public class EmpresaController {
-
 	@Autowired
 	private IEmpresaService empresaService;
 
 	@Autowired
 	private IEmpleadoService empleadoService;
 
+	// ################################ ROLE ADMIN
 	// AQUI BUSCO EL ID DEL EMPLEADO PARA FILTRAR LA TABLA SEGUN SU LOCAL Y EMPRESA
 	// DONDE PERTENECE
-	@PreAuthorize("hasAnyRole('ROLE_SUPERVISOR', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/listar")
 	public String listarEmpresaPorEmpleado(Model model, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		Empresa empresa = empleado.getLocal().getEmpresa();
-		model.addAttribute("titulo", "Datos de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "' (RUC "
-				+ empleado.getLocal().getEmpresa().getRuc() + ")");
+		model.addAttribute("titulo", "Datos de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
 		model.addAttribute("empresas", empresa);
 		return "/empresas/listar";
 	}
@@ -50,14 +49,6 @@ public class EmpresaController {
 	public String cancelar() {
 		return "redirect:/empresas/listar";
 	}
-
-	/*
-	 * @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	 * 
-	 * @GetMapping(value = "/crear") public String crearEmpresa(Map<String, Object>
-	 * model) { model.put("titulo", "Registro de Empresa"); model.put("empresa", new
-	 * Empresa()); return "empresas/crear"; }
-	 */
 
 	// MÉTODO PARA REALIZAR LA BUSQUEDA DE EMPRESAS MEDIANTE AUTOCOMPLETADO
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
@@ -129,17 +120,4 @@ public class EmpresaController {
 			return "/empresas/crear";
 		}
 	}
-
-	/*
-	 * @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	 * 
-	 * @RequestMapping(value = "/deshabilitar/{id}") public String
-	 * deshabilitarEmpresa(@PathVariable(value = "id") Long id, RedirectAttributes
-	 * flash) { Empresa empresa = null; try { empresa = empresaService.findOne(id);
-	 * empresa.setEstado(false); empresaService.update(empresa);
-	 * flash.addFlashAttribute("warning", "La empresa con código " + empresa.getId()
-	 * + " ha sido deshabilitada."); return "redirect:/empresas/listar"; } catch
-	 * (Exception e) { flash.addFlashAttribute("error", e.getMessage()); return
-	 * "redirect:/empresas/listar"; } }
-	 */
 }

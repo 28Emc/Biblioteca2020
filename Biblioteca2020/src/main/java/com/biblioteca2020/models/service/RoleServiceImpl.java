@@ -18,14 +18,15 @@ public class RoleServiceImpl implements IRoleService {
 	public List<Role> findAll() {
 		return roleDao.findAll();
 	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Role> findOnlyUsers() {
 		return roleDao.findOnlyUsers();
 	}
-
+	// USADO
 	@Override
+	@Transactional(readOnly = true)
 	public List<Role> findEmpleadoAndSupervisor() {
 		return roleDao.findEmpleadoAndSupervisor();
 	}

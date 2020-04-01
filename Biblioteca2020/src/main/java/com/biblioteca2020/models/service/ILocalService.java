@@ -8,13 +8,11 @@ import com.biblioteca2020.models.entity.Local;
 public interface ILocalService {
 	
 	public List<Local> findAll();
-
+	// USADO
 	public void save(Local local) throws Exception;
-	
+	// USADO
 	public void update(Local local) throws Exception;
-
-	//public void delete(Long id);
-	
+	// USADO
 	public Local findById(Long id) throws Exception;
 	
 	public List<Local> findByEstado(Boolean estado);
@@ -22,9 +20,9 @@ public interface ILocalService {
 	public List<Local> findByDireccionLikeIgnoreCase(String term);
 	
 	public Local findByDireccion(String direccion);
-			
+	// USADO		
 	public Local findFirstByEmpresa(Empresa empresa);
-	
+	// USADO
 	public Local fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado) throws Exception;
 
 }
