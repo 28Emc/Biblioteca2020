@@ -67,4 +67,13 @@ public class LibroServiceImpl implements ILibroService {
 		libroDao.save(libro);
 	}
 
+	@Override
+	public List<Libro> findByTituloGroup() {
+		return libroDao.findByTituloGroup();
+	}
+
+	@Override
+	public List<Libro> findByTituloLikeIgnoreCase(String titulo) {
+		return libroDao.findByTituloLikeIgnoreCase(titulo);
+	}
 }

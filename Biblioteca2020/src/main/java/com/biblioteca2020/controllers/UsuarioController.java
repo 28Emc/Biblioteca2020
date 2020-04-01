@@ -62,10 +62,12 @@ public class UsuarioController {
 	// ############################ ROLE USER ############################
 	// CATÁLOGO DE LIBROS PARA EL USUARIO
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
-	@GetMapping(value = "/librosAllUser")
+	@GetMapping(value = "/biblioteca")
 	public String listarAllLibrosUser(Model model, Principal principal) {
 		model.addAttribute("titulo", "Catálogo de libros");
-		List<Libro> libros = libroService.findAll();
+		// ESTE MÈTODO ES DE REFERENCIA NADA MAS, A LA HORA DE VER LA DISPONIBILIDAD,
+		// AHI SI FILTRO POR LOCAL
+		List<Libro> libros = libroService.findByTituloGroup();
 		// LÓGICA DE MOSTRAR UNA DESCRICIÓN REDUCIDA DE 150 CARACTERES DEL LIBRO
 		for (int i = 0; i < libros.size(); i++) {
 			String descripcionMin = libros.get(i).getDescripcion().substring(0, 150);
@@ -75,8 +77,46 @@ public class UsuarioController {
 			libros.get(i).setDescripcion(descripcionFull);
 			model.addAttribute("libros", libros);
 		}
-		return "/usuarios/librosAllUser";
+		return "/usuarios/biblioteca";
 	}
+
+	// DISPONIBILIDAD DE LIBRO SEGUN SU TITULO
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
+	@GetMapping(value = "/biblioteca/ver/{titulo}")
+	public String listarAllLibrosUser(@PathVariable("titulo") String titulo, Model model,
+			Authentication authentication) {
+		/*
+		 * UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		 * Usuario usuario =
+		 * usuarioService.findByUsernameAndEstado(userDetails.getUsername(), true);
+		 */
+		List<Libro> libros = libroService.findByTituloLikeIgnoreCase(titulo);
+		model.addAttribute("titulo", "Ver disponibilidad");
+		model.addAttribute("libros", libros);
+		model.addAttribute("libroDetalle", libros.get(0));
+		return "/usuarios/biblioteca/ver";
+	}
+
+	/*
+	 * QUERY SIMPLE PARA MOSTRAR EN LA TABLA DE DISPONIBILIDAD LIBRO SELECT
+	 * lo.direccion AS LOCAL, li.estado AS DISPONIBLE, li.stock AS STOCK FROM
+	 * biblioteca2020.libros li INNER JOIN biblioteca2020.locales lo ON li.local_id
+	 * = lo.id WHERE li.titulo like 'Las noches Blancas';
+	 */
+	/*
+	 * QUERY COMPLETA PARA LLMAR DESDE LA BD SELECT
+	 *
+	 * FROM biblioteca2020.libros li INNER JOIN biblioteca2020.locales lo ON
+	 * li.local_id = lo.id WHERE li.titulo like 'Las noches Blancas';
+	 */
+
+	/*
+	 * QUERY FINAL PARA MOSTRAR EN LA TABLA DE DISPONIBILIDAD LIBRO SELECT
+	 * lo.direccion AS LOCAL, ( case when li.estado = 1 then 'DISPONIBLE' else 'NO
+	 * DISPONIBLE' END ) AS DISPONIBILIDAD, li.stock AS STOCK FROM
+	 * biblioteca2020.libros li INNER JOIN biblioteca2020.locales lo ON li.local_id
+	 * = lo.id WHERE li.titulo like 'Las noches Blancas';
+	 */
 
 	@GetMapping("/crearPerfil")
 	public String perfil(Model model) {
@@ -122,10 +162,12 @@ public class UsuarioController {
 			}
 
 			try {
-				usuarioService.save(usuario);				
-				/* REGISTRO EL TOKEN DE REGISTRO SEGUN EL CORREO DEL USUARIO, PARA SU VALIDACIÒN */ 
+				usuarioService.save(usuario);
+				/*
+				 * REGISTRO EL TOKEN DE REGISTRO SEGUN EL CORREO DEL USUARIO, PARA SU VALIDACIÒN
+				 */
 				ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
-				confirmationTokenRepository.save(confirmationToken);				
+				confirmationTokenRepository.save(confirmationToken);
 				/* ENVÌO DEL CORREO DE VALIDACIÒN */
 				SimpleMailMessage mailMessage = new SimpleMailMessage();
 				mailMessage.setTo(usuario.getEmail());
@@ -147,7 +189,7 @@ public class UsuarioController {
 				model.addAttribute("error", e.getMessage());
 				return "/usuarios/perfil";
 			}
-		}		
+		}
 	}
 
 	@RequestMapping(value = "/cuenta-verificada", method = { RequestMethod.GET, RequestMethod.POST })
@@ -164,7 +206,7 @@ public class UsuarioController {
 				model.addAttribute("error", "Error: " + e.getMessage());
 				model.addAttribute("titulo", "Error al Registrar");
 				return "/usuarios/error-registro";
-			}		
+			}
 		} else {
 			model.addAttribute("error", "El enlace es invàlido!");
 			return "/usuarios/error-registro";
@@ -287,7 +329,8 @@ public class UsuarioController {
 		}
 	}
 
-	// ############################ ROLE ADMIN, EMPLEADO ############################
+	// ############################ ROLE ADMIN, EMPLEADO
+	// ############################
 	// LISTADO DE USUARIOS
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/listar")
