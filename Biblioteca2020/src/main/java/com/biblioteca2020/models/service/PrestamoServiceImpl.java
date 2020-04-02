@@ -66,7 +66,7 @@ public class PrestamoServiceImpl implements IPrestamoService {
 	@Override
 	public String mostrarFechaAmigable() {
 		// ARMANDO FECHA MAS AMIGABLE AL USUARIO CON TIME
-		Locale esp = new Locale("es", "ES");
+		Locale esp = new Locale("es", "PE");
 		
 		// Obtienes el dia, mes y año actuales
 		String diaNum = String.valueOf(LocalDate.now().getDayOfMonth());
@@ -100,5 +100,4 @@ public class PrestamoServiceImpl implements IPrestamoService {
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado() {
 		return prestamoDao.fetchByIdWithLibroWithUsuarioWithEmpleado();
 	}
-
 }

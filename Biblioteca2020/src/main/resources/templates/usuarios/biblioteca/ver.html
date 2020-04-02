@@ -2,14 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <meta charset="UTF-8" />
-<title th:text="'Biblioteca'"></title>
+<title th:text="'Biblioteca | '+${titulo}"></title>
 <head th:replace="layout/layout :: head"></head>
 <body>
 	<header th:replace="layout/layout :: header"></header>
 
 	<div class="container-fluid my-5">
 		<h1 class="text-warning m-4" th:text="${titulo}"></h1>
-		
+
 		<th:block>
 			<div class="row">
 				<div class="col-md-6 text-center">
@@ -53,12 +53,9 @@
 						<td th:case="*" th:text="'No Disponible'" class="text-danger"></td>
 					</th:block>
 					<td th:text="${libro.stock}"></td>
-					<!-- <td><a class="btn btn-outline-dark btn-xs"
-						th:href="@{'/usuarios/biblioteca/solicitarLibro'}" onclick="alert('Solicitaste el libro');"><i
-							class="fas fa-book"></i> Solicitar Libro</a></td> -->
-					<td><a class="btn btn-light btn-xs"
-						onclick="alert('Solicitaste el libro');"><i
-							class="fas fa-book"></i> Solicitar Libro</a></td>
+					<td><a class="btn btn-outline-dark btn-xs"
+						th:href="@{'/usuarios/biblioteca/solicitarLibro/'} + ${libro.local.id} + @{'/'} + ${libro.titulo}">
+						<i class="fas fa-book"></i> Solicitar Libro</a></td>
 				</tr>
 			</tbody>
 		</table>

@@ -5,7 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -28,14 +34,15 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.biblioteca2020.models.dao.IConfirmationTokenDao;
 import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.entity.ConfirmationToken;
 import com.biblioteca2020.models.entity.Libro;
+import com.biblioteca2020.models.entity.Prestamo;
 import com.biblioteca2020.models.entity.Usuario;
 import com.biblioteca2020.models.service.EmailSenderService;
 import com.biblioteca2020.models.service.ILibroService;
+import com.biblioteca2020.models.service.IPrestamoService;
 import com.biblioteca2020.models.service.IRoleService;
 import com.biblioteca2020.models.service.IUsuarioService;
 
@@ -46,6 +53,9 @@ public class UsuarioController {
 
 	@Autowired
 	private IUsuarioService usuarioService;
+
+	@Autowired
+	private IPrestamoService prestamoService;
 
 	@Autowired
 	private IConfirmationTokenDao confirmationTokenRepository;
@@ -62,7 +72,7 @@ public class UsuarioController {
 	// ############################ ROLE USER ############################
 	// CATÁLOGO DE LIBROS PARA EL USUARIO
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
-	@GetMapping(value = "/biblioteca")
+	@GetMapping("/biblioteca")
 	public String listarAllLibrosUser(Model model, Principal principal) {
 		model.addAttribute("titulo", "Catálogo de libros");
 		// ESTE MÈTODO ES DE REFERENCIA NADA MAS, A LA HORA DE VER LA DISPONIBILIDAD,
@@ -82,19 +92,104 @@ public class UsuarioController {
 
 	// DISPONIBILIDAD DE LIBRO SEGUN SU TITULO
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
-	@GetMapping(value = "/biblioteca/ver/{titulo}")
-	public String listarAllLibrosUser(@PathVariable("titulo") String titulo, Model model,
-			Authentication authentication) {
-		/*
-		 * UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		 * Usuario usuario =
-		 * usuarioService.findByUsernameAndEstado(userDetails.getUsername(), true);
-		 */
+	@GetMapping("/biblioteca/ver/{titulo}")
+	public String verLibro(@PathVariable("titulo") String titulo, Model model, Authentication authentication) {
 		List<Libro> libros = libroService.findByTituloLikeIgnoreCase(titulo);
 		model.addAttribute("titulo", "Ver disponibilidad");
 		model.addAttribute("libros", libros);
 		model.addAttribute("libroDetalle", libros.get(0));
 		return "/usuarios/biblioteca/ver";
+	}
+
+	// CARGAR FORMULARIO DE ORDEN DE PRÉSTAMO
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
+	@GetMapping("/biblioteca/solicitarLibro/{id}/{titulo}")
+	public String solicitarLibroForm(@PathVariable("titulo") String titulo, @PathVariable("id") Long id_local,
+			Model model, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Usuario usuario = usuarioService.findByUsernameAndEstado(userDetails.getUsername(), true);
+		Libro libro = libroService.findByTituloAndLocalAndEstado(titulo, id_local, true);
+		model.addAttribute("titulo", "Solicitar Libro");
+		model.addAttribute("libro", libro);
+		//model.addAttribute("local", libro.getLocal());
+		model.addAttribute("usuario", usuario);
+		model.addAttribute("prestamo", new Prestamo());
+		return "/usuarios/biblioteca/solicitarLibro";
+	}
+
+	// GENERAR ORDEN DE PRÉSTAMO
+	// TE QUEDASTE AQUI - NO FUNCIONE ESTE MÈTODO - 2.04.2020
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
+	@PostMapping("/biblioteca/solicitarLibro")
+	public String solicitarLibro(@Valid Prestamo prestamo, @RequestParam(name = "id_libro", required = false) Long id_libro,
+			@RequestParam(name = "id_usuario", required = false) Long id_usuario,
+			@RequestParam(name = "fechaDevolucion", required = false) String fechaDevolucion, RedirectAttributes flash,
+			SessionStatus status, Model model, Authentication authentication) {
+		// System.out.println(libro.getId() + ", " + usuario.getId() + ", " +
+		// fechaDevolucion);
+		try {
+			if (id_libro == null || id_usuario == null || fechaDevolucion == null) {
+				//model.addAttribute("libro", libroService.findOne(id_libro));
+				//model.addAttribute("local", libroService.findOne(id_libro).getLocal());
+				//model.addAttribute("usuario", usuarioService.findById(id_usuario));
+				model.addAttribute("prestamo", prestamo);
+				model.addAttribute("error",
+						"El prestamo necesita un libro, un usuario y una fecha de despacho VÁLIDOS.");
+				return "/usuarios/biblioteca/solicitarLibro";
+			}
+
+			/* LÓGICA DE REGISTRO DE ORDEN DE LIBRO */
+			// LA ORDEN DE PRÈSTAMO VALIDA ID_LIBRO, ID_USUARIO,
+			// FECHA_DESPACHO, FECHA_DEVOLUCIÒN Y OBSERVACIONES.
+			// LIBRO
+			Libro libroAPrestar = libroService.findByTituloAndLocalAndEstado(libroService.findOne(id_libro).getTitulo(),
+					libroService.findOne(id_libro).getLocal().getId(), true);
+			prestamo.setLibro(libroAPrestar);
+			// ACTUALIZAR STOCK LIBRO
+			if (libroAPrestar.getStock() <= 0) {
+				model.addAttribute("error", "Lo sentimos, no hay stock suficiente del libro seleccionado ("
+						+ libroAPrestar.getTitulo() + ")");
+				return "/usuarios/biblioteca/solicitarLibro";
+			} else {
+				libroAPrestar.setStock(libroAPrestar.getStock() - 1);
+			}
+			// USUARIO
+			prestamo.setUsuario(usuarioService.findById(id_usuario));
+			// EMPLEADO
+			prestamo.setEmpleado(null);
+			// FECHA_DESPACHO
+			Date fechaDespacho = new Date();
+			prestamo.setFecha_despacho(fechaDespacho);
+			// FECHA DEVOLUCIÓN
+			try {
+				DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+				Date fechaDevolucionPrestamo = null;
+				fechaDevolucionPrestamo = formatter.parse(fechaDevolucion);
+				prestamo.setFecha_devolucion(fechaDevolucionPrestamo);
+			} catch (ParseException pe) {
+				model.addAttribute("error", pe.getMessage());
+				return "/usuarios/biblioteca/solicitarLibro";
+			}
+			// USO CALENDAR PARA MOSTRAR LA FECHA DE DEVOLUCION
+			Calendar calendar = Calendar.getInstance(new Locale("es", "ES"));
+			calendar.setTime(prestamo.getFecha_devolucion());
+			// MOSTRAR FECHA POR DIA, MES Y ANIO
+			String anio = String.valueOf(calendar.get(Calendar.YEAR));
+			String mes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, new Locale("es", "ES"));
+			String dia = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+			String fechaPrestamoHoy = dia + " de " + mes + " " + anio;
+			// OBSERVACIONES
+			prestamo.setObservaciones("El usuario: " + prestamo.getUsuario().getNombres() + ", "
+					+ prestamo.getUsuario().getApellidos() + "(DNI " + prestamo.getUsuario().getNroDocumento()
+					+ ") ha solicitado el libro: " + prestamo.getLibro().getTitulo() + " para el dìa "
+					+ fechaPrestamoHoy + ", hasta el dìa " + prestamo.getFecha_devolucion() + ".");
+			// DEVOLUCION
+			prestamo.setDevolucion(false);
+			prestamoService.save(prestamo);
+		} catch (Exception e) {
+			model.addAttribute("error", e.getMessage());
+		}
+		return "/usuarios/biblioteca/solicitarLibro";
 	}
 
 	/*
@@ -104,18 +199,10 @@ public class UsuarioController {
 	 * = lo.id WHERE li.titulo like 'Las noches Blancas';
 	 */
 	/*
-	 * QUERY COMPLETA PARA LLMAR DESDE LA BD SELECT
+	 * QUERY COMPLETA PARA LLAMAR DESDE LA BD SELECT
 	 *
 	 * FROM biblioteca2020.libros li INNER JOIN biblioteca2020.locales lo ON
 	 * li.local_id = lo.id WHERE li.titulo like 'Las noches Blancas';
-	 */
-
-	/*
-	 * QUERY FINAL PARA MOSTRAR EN LA TABLA DE DISPONIBILIDAD LIBRO SELECT
-	 * lo.direccion AS LOCAL, ( case when li.estado = 1 then 'DISPONIBLE' else 'NO
-	 * DISPONIBLE' END ) AS DISPONIBILIDAD, li.stock AS STOCK FROM
-	 * biblioteca2020.libros li INNER JOIN biblioteca2020.locales lo ON li.local_id
-	 * = lo.id WHERE li.titulo like 'Las noches Blancas';
 	 */
 
 	@GetMapping("/crearPerfil")

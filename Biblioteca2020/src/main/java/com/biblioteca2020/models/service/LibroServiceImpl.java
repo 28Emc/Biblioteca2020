@@ -68,12 +68,20 @@ public class LibroServiceImpl implements ILibroService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Libro> findByTituloGroup() {
 		return libroDao.findByTituloGroup();
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Libro> findByTituloLikeIgnoreCase(String titulo) {
 		return libroDao.findByTituloLikeIgnoreCase(titulo);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Libro findByTituloAndLocalAndEstado(String term, Long id, Boolean estado) {
+		return libroDao.findByTituloAndLocalAndEstado(term, id, estado);
 	}
 }

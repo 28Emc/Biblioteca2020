@@ -13,7 +13,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import lombok.Getter;
@@ -32,7 +31,6 @@ public class Prestamo implements Serializable {
 	private Long id;
 
 	// PRESTAMOS(*):USER(1)
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "usuario_id", nullable = false)
 	private Usuario usuario;
@@ -43,7 +41,6 @@ public class Prestamo implements Serializable {
 	private Empleado empleado;
 
 	// PRESTAMOS(*):LIBRO(1)
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "libro_id", nullable = false)
 	private Libro libro;
@@ -52,9 +49,8 @@ public class Prestamo implements Serializable {
 	@DateTimeFormat(pattern = "yyyy-mm-dd")
 	private Date fecha_despacho;
 	
-	@NotNull
 	@Temporal(TemporalType.DATE)
-	@DateTimeFormat(pattern = "yyyy-mm-dd")
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date fecha_devolucion;
 
 	private Boolean devolucion;

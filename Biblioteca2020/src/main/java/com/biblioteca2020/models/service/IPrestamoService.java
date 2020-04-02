@@ -21,7 +21,7 @@ public interface IPrestamoService {
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(Long id);
 
 	public void save(Prestamo prestamo);
-	
+		
 	public void update(Prestamo prestamo);
 	// USADO
 	public String mostrarFechaAmigable();	

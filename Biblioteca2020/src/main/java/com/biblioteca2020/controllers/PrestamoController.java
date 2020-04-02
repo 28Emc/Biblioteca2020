@@ -1,9 +1,12 @@
 package com.biblioteca2020.controllers;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -81,7 +84,8 @@ public class PrestamoController {
 	public @ResponseBody List<Libro> cargarLibros(@PathVariable String term, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleadoPrestamo = empleadoService.findByUsernameAndEstado(userDetails.getUsername(), true);
-		return libroService.findByTituloLikeIgnoreCaseAndLocalAndEstado(term, empleadoPrestamo.getLocal().getId(), true);
+		return libroService.findByTituloLikeIgnoreCaseAndLocalAndEstado(term, empleadoPrestamo.getLocal().getId(),
+				true);
 	}
 
 	// MÉTODO PARA REALIZAR LA BUSQUEDA DE USUARIOS ACTIVOS MEDIANTE AUTOCOMPLETADO
@@ -163,20 +167,29 @@ public class PrestamoController {
 		Date fechaDespacho = new Date();
 		prestamo.setFecha_despacho(fechaDespacho);
 		// FECHA DEVOLUCIÓN
-		Date fechaDevolucionPrestamo;
 		try {
-			fechaDevolucionPrestamo = new SimpleDateFormat("yyyy-mm-dd").parse(fecha_devolucion);
+			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			Date fechaDevolucionPrestamo = null;
+			fechaDevolucionPrestamo = formatter.parse(fecha_devolucion);
 			prestamo.setFecha_devolucion(fechaDevolucionPrestamo);
 		} catch (ParseException pe) {
 			model.addAttribute("error", pe.getMessage());
 			return "/prestamos/crear";
 		}
+		// USO CALENDAR PARA MOSTRAR LA FECHA DE DEVOLUCION
+		Calendar calendar = Calendar.getInstance(new Locale("es", "ES"));
+		calendar.setTime(prestamo.getFecha_devolucion());
+		// MOSTRAR FECHA POR DIA, MES Y ANIO
+		String anio = String.valueOf(calendar.get(Calendar.YEAR));
+		String mes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, new Locale("es", "ES"));
+		String dia = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+		String fechaPrestamoHoy = dia + " de " + mes + " " + anio;
 		// OBSERVACIONES
 		prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo()
-				+ " ha sido programado para su devolución el día " + prestamoService.mostrarFechaAmigable()
-				+ ", por el empleado: " + empleadoPrestamo.getNombres().concat(", " + empleadoPrestamo.getApellidos())
-				+ " (código empleado " + empleadoPrestamo.getId() + ") al usuario: " + usuarioPrestamo.getNombres()
-				+ " (código usuario " + usuarioPrestamo.getId() + ")");
+				+ " ha sido programado para su devolución el día " + fechaPrestamoHoy + ", por el empleado: "
+				+ empleadoPrestamo.getNombres().concat(", " + empleadoPrestamo.getApellidos()) + " (código empleado "
+				+ empleadoPrestamo.getId() + ") al usuario: " + usuarioPrestamo.getNombres() + " (código usuario "
+				+ usuarioPrestamo.getId() + ")");
 		// DEVOLUCION
 		prestamo.setDevolucion(false);
 		prestamoService.save(prestamo);

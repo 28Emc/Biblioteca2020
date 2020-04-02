@@ -21,6 +21,8 @@ public interface ILibroService {
 	// USADO
 	public List<Libro> findByTituloLikeIgnoreCaseAndLocalAndEstado(String term, Long id, Boolean estado);
 	// USADO
+	public Libro findByTituloAndLocalAndEstado(String term, Long id, Boolean estado);
+	// USADO
 	public List<Libro> fetchByIdWithLocalesWithEmpleado(Long id, Long idEmpleado);
 	
 	public void update(Libro libro);
