@@ -4,21 +4,21 @@
 
 <head th:replace="layout/layout :: head"></head>
 
-<body>
+<body class="bg-light">
 
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container-fluid my-5">
-		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<th:block
-			sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_EMPLEADO')">
-			<p>
-				<a class="btn btn-primary btn-xs" th:href="@{/prestamos/crear}"><i
-					class="fas fa-shield-alt"></i> Generar Préstamo</a>
-			</p>
-		</th:block>
-		<h1 th:if="${#lists.isEmpty(prestamos)}">No hay préstamos para
-			mostrar</h1>
+	<div class="container my-4">
+
+		<h1 class="text-warning py-2" th:text="${titulo}"></h1>
+
+		<p sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')">
+			<a class="btn btn-primary btn-xs" th:href="@{/prestamos/crear}"><i
+				class="fas fa-shield-alt"></i> Generar Préstamo</a>
+		</p>
+		
+		<h1 th:if="${#lists.isEmpty(prestamos)}">No hay préstamos para mostrar</h1>
+		
 		<table class="table table-responsive"
 			th:if="${not #lists.isEmpty(prestamos)}">
 			<thead>

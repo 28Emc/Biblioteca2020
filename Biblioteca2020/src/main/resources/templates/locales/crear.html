@@ -4,31 +4,23 @@
 
 <head th:replace="layout/layout :: head"></head>
 
-<body>
+<body class="bg-light">
 
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container-fluid my-5">
-		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<form th:action="${editable} ?@{/locales/editar} :@{/locales/crear}"
-			th:object="${local}" method="post">
-			<div class="form-group">
-				<label class="col-sm-2 col-form-label">Dirección</label>
-				<div class="col-sm-6">
-					<input class="form-control" type="text" th:field="*{direccion}"
-						th:errorclass="'form-control alert-danger'"
-						placeholder="Ejm. Av. Lima 123" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></small>
-				</div>
-			</div>
+	<div class="container my-4">
 
-			<div class="form-group" sec:authorize="hasRole('ROLE_ADMIN')" hidden>
-				<label class="col-sm-2 col-form-label">Empresa</label>
-				<div class="col-sm-6">
-					<select class="form-control" th:field="${local.empresa}"
+		<h1 class="text-warning" th:text="${titulo}"></h1>
+
+		<form th:action="${editable} ? @{/locales/editar} : @{/locales/crear}"
+			th:object="${local}" method="post">
+
+			<div class="form-group row">
+				<div class="col-md-6">
+					<label class="col-form-label" for="empresa">Empresa</label> <select
+						name="empresa" id="empresa" class="form-control" th:field="${local.empresa}"
 						th:errorclass="'form-control alert-danger'">
-						<option th:each="empresa :${empresaLocales}"
+						<option th:each="empresa : ${empresaLocales}"
 							th:value="${empresa.id}" th:text="${empresa.razonSocial}">
 						</option>
 					</select> <small class="form-text text-danger"
@@ -37,26 +29,34 @@
 				</div>
 			</div>
 
-			<div class="form-group">
-				<label class="col-sm-2 col-form-label">Observaciones</label>
-				<div class="col-sm-6">
-					<textarea class="form-control" cols="3" type="text"
-						th:field="*{observaciones}"
+			<div class="form-group row">
+				<div class="col-md-6">
+					<label class="col-form-label" for="direccion">Dirección</label> <input
+						class="form-control" type="text" th:field="${local.direccion}"
 						th:errorclass="'form-control alert-danger'"
-						placeholder="Ejm. 'Este local contiene solo libros de habla hispana.'"></textarea>
+						placeholder="Ejm. Av. Lima 123" name="direccion" id="direccion" /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('direccion')}" th:errors="${local.direccion}"></small>
+				</div>
+				<div class="col-md-6">
+					<label class="col-form-label" for="observaciones">Observaciones</label>
+					<textarea class="form-control" rows="3" th:field="${local.observaciones}"
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Ejm. 'Este local contiene solo libros de habla hispana.'"
+						name="observaciones" id="observaciones"></textarea>
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('observaciones')}"
-						th:errors="*{observaciones}"></small>
+						th:errors="${local.observaciones}"></small>
 				</div>
 			</div>
-			<div class="form-group row">
-				<div class="col-sm-6">
+			<div class="form-group row py-4">
+				<div class="col-md-6">
 					<a class="btn btn-light btn-block" th:href="@{'/locales/cancelar'}"><i
 						class="fas fa-shield-alt"></i> Cancelar</a>
 				</div>
-				<div class="col-sm-6">
-					<input class="btn btn-outline-dark btn-block" type="submit"
-						th:value="${editable}?'Guardar Local':'Crear Local'" />
+				<div class="col-md-6">
+					<input class="btn btn-dark btn-block" type="submit"
+						th:value="${editable} ? 'Guardar Local' : 'Crear Local'" />
 				</div>
 			</div>
 		</form>

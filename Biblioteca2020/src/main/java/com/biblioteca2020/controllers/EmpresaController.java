@@ -104,7 +104,7 @@ public class EmpresaController {
 			model.addAttribute("empresa", empresa);
 			model.addAttribute("editable", true);
 			model.addAttribute("titulo", "Modificar Empresa");
-			return "/empresas/editar";
+			return "/empresas/crear";
 		}
 		try {
 			empresaService.update(empresa);

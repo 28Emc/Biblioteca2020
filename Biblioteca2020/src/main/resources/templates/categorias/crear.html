@@ -3,37 +3,43 @@
 
 <head th:replace="layout/layout :: head"></head>
 
-<body>
+<body class="bg-light">
 
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container-fluid my-5">
+	<div class="container my-4">
+
 		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<form th:action="${editable} ?@{/categorias/editar} :@{/categorias/crear}" 
-		th:object="${categoria}" method="post">
-			<div class="form-group">
-				<label class="col-sm-2 col-form-label">Nombre</label>
-				<div class="col-sm-6">
-					<input class="form-control" type="text" th:field="*{nombre}"
-						th:errorclass="'form-control alert-danger'" placeholder="Nombre de la categoría..." /> <small
+
+		<form
+			th:action="${editable} ?@{/categorias/editar} :@{/categorias/crear}"
+			th:object="${categoria}" method="post">
+
+			<div class="form-group row">
+				<div class="col-md-6">
+					<label class="col-form-label" for="nombre">Nombre</label> <input
+						class="form-control" type="text" th:field="*{nombre}"
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Nombre de la categoría..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
 				</div>
-			</div>	
-					
-			<div class="form-group row">
-				<div class="col-sm-6">
+			</div>
+
+			<div class="form-group row py-4">
+				<div class="col-md-6">
 					<a class="btn btn-light btn-block"
 						th:href="@{'/categorias/cancelar'}"><i
-								class="fas fa-shield-alt"></i> Cancelar</a>
+						class="fas fa-shield-alt"></i> Cancelar</a>
 				</div>
-				<div class="col-sm-6">
+				<div class="col-md-6">
 					<input class="btn btn-dark btn-block" type="submit"
 						th:value="${editable}?'Guardar Categoría':'Crear Categoría'" />
 				</div>
 			</div>
-			
+
 		</form>
+		
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>

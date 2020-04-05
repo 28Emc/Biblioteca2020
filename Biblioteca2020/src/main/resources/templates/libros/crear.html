@@ -3,88 +3,74 @@
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="layout/layout :: head"></head>
-<body>
+
+<body class="bg-light">
+
 	<header th:replace="layout/layout :: header"></header>
-	<div class="container-fluid my-5">
+
+	<div class="container my-4">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 		<form enctype="multipart/form-data"
-			sec:authorize="hasRole('ROLE_SUPERVISOR') || hasRole('ROLE_ADMIN')"
-			th:action="${editable} ? @{'/locales/libros/editar'} : @{'/locales/libros/crear'}"
-			th:object="${libro}" method="post">
-			<h3 class="mb-4">Título</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<input class="form-control" type="text" name="titulo"
+			sec:authorize="hasRole('ROLE_ADMIN')" th:object="${libro}"
+			method="post"
+			th:action="${editable} ? @{'/locales/libros/editar'} : @{'/locales/libros/crear'}">
+
+			<div class="form-group row">
+				<div class="col-md-6">
+					<label class="col-form-label" for="titulo">Titulo</label> <input
+						class="form-control" type="text" name="titulo"
 						placeholder="Título..." th:field="*{titulo}" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></small>
 				</div>
-			</div>
-
-			<h3 class="mb-4">Autor</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<input class="form-control" type="text" name="autor"
+				<div class="col-md-6">
+					<label class="col-form-label" for="autor">Autor</label> <input
+						class="form-control" type="text" name="autor"
 						placeholder="Autor..." th:field="*{autor}" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('autor')}" th:errors="*{autor}"></small>
 				</div>
-			</div>
-
-			<h3 class="mb-4">Descripción</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
+				<div class="col-md-6">
+					<label class="col-form-label" for="descripcion">Descripción</label>
 					<textarea class="form-control" rows="3" name="descripcion"
 						placeholder="Descripción..." th:field="*{descripcion}" /></textarea>
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('descripcion')}"
 						th:errors="*{descripcion}"></small>
 				</div>
-			</div>
-
-
-			<h3 class="mb-4">Categoría</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<input type="text" name="buscar_categoria" id="buscar_categoria"
+				<div class="col-md-6">
+					<label class="col-form-label" for="categoria">Categoria</label> <input
+						type="text" name="buscar_categoria" id="buscar_categoria"
 						class="form-control" placeholder="Buscar categoría..."
 						th:field="*{categoria.nombre}" />
-
 				</div>
-				<div class="col-sm-2" hidden>
-					<input type="text" name="id_categoria" id="id_categoria"
+				<div class="col-md-6" hidden>
+					<label class="col-form-label" for="id_categoria">ID
+						Categoría</label> <input type="text" name="id_categoria" id="id_categoria"
 						placeholder="Id Categoria" class="form-control"
 						th:field="*{categoria.id}" readonly />
 				</div>
-			</div>
-
-			<h3 class="mb-4" hidden>Local</h3>
-			<div class="form-group" hidden>
-				<div class="col-sm-6">
-					<select class="form-control" th:field="*{local}"
+				<div class="col-md-6" hidden>
+					<label class="col-form-label" for="local"> Local</label> <select
+						name="local" class="form-control" th:field="*{local}"
 						th:errorclass="'form-control alert-danger'">
 						<option th:each="local :${local}" th:value="${local.id}"
 							th:text="${local.direccion}"></option>
 					</select> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('local')}" th:errors="*{local}"></small>
 				</div>
-			</div>
-
-			<h3 class="mb-4">Fecha Publicación</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<input class="form-control" type="text" name="fechaPublicacion"
-						placeholder="yyyy-mm-dd" th:field="*{fechaPublicacion}" /> <small
+				<div class="col-md-6">
+					<label class="col-form-label" for="fecha_publicacion">Fecha
+						Publicación</label> <input class="form-control" type="text"
+						name="fechaPublicacion" placeholder="yyyy-mm-dd"
+						th:field="*{fechaPublicacion}" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('fechaPublicacion')}"
 						th:errors="*{fechaPublicacion}"></small>
 				</div>
-			</div>
-
-			<h3 class="mb-4">Stock</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<input class="form-control" type="text" name="stock"
+				<div class="col-md-6">
+					<label class="col-form-label" for="stock">Stock</label> <input
+						class="form-control" type="number" name="stock"
 						th:field="*{stock}" placeholder="0" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></small>
@@ -92,28 +78,30 @@
 			</div>
 
 			<h3 class="mb-4">Foto</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<img th:if="${libro.foto_libro!=null && #strings.length(libro.foto_libro) > 0}"
-						class="img-thumbnail rounded float-left" style="max-width: 25%;"
+			<div class="form-group row">
+				<div class="col-md-6 p-3" style="text-align: center;">
+					<img
+						th:if="${libro.foto_libro!=null && #strings.length(libro.foto_libro) > 0}"
+						class="img-thumbnail rounded" style="max-width: 70%;"
 						th:alt="${libro.foto_libro}"
 						th:src="@{'/uploads/'+${libro.foto_libro}}">
 				</div>
-				<div class="col-sm-6">
-					<input class="form-control" type="file" name="foto_li" /> <small
+				<div class="col-sm-6 p-3" style="position: relative;">
+					<input style="position: absolute; bottom: 0;" class="form-control-file"
+						type="file" name="foto_li" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('foto_libro')}"
 						th:errors="*{foto_libro}"></small>
 				</div>
 			</div>
 
-			<div class="form-group row">
-				<div class="col-sm-6">
+			<div class="form-group row py-4">
+				<div class="col-md-6">
 					<a class="btn btn-light btn-block"
 						th:href="@{'/locales/libros/cancelar/'}"><i
 						class="fas fa-shield-alt"></i> Cancelar</a>
 				</div>
-				<div class="col-sm-6">
+				<div class="col-md-6">
 					<input class="btn btn-dark btn-block" type="submit"
 						th:value="${editable}?'Guardar Libro':'Registrar Libro'" />
 				</div>
@@ -208,7 +196,8 @@
 			<h3 class="mb-4">Foto</h3>
 			<div class="form-group">
 				<div class="col-sm-6">
-					<img th:if="${libro.foto_libro!=null && #strings.length(libro.foto_libro) > 0}"
+					<img
+						th:if="${libro.foto_libro!=null && #strings.length(libro.foto_libro) > 0}"
 						class="img-thumbnail rounded float-left" style="max-width: 25%;"
 						th:alt="${libro.foto_libro}"
 						th:src="@{'/uploads/'+${libro.foto_libro}}">

@@ -3,85 +3,100 @@
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <meta charset="UTF-8" />
 <title th:text="'Biblioteca | ' + ${titulo}"></title>
+
 <head th:replace="layout/layout :: head"></head>
-<body>
+
+<body class="bg-light">
+
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container-fluid my-5">
+	<div class="container my-4">
+
 		<h1 class="text-warning" th:text="${titulo}"></h1>
 
 		<div class="container">
-			<h3 class="mb-4">Local</h3>
-			<div class="form-group">
-				<div class="col-sm-12">
-					<input type="text" th:field="${libro.local.id}" name="id_local" id="id_local"
-						class="form-control" readonly />
+
+			<h4 class="my-4">Local</h4>
+			<div class="form-group row">
+				<div class="col-md-6">
+					<label class="text-muted col-form-label" for="id_local">ID</label>
+					<input type="text" th:field="${libro.local.id}" name="id_local"
+						id="id_local" class="form-control" readonly />
 				</div>
-				<div class="col-sm-12">
+				<div class="col-md-6">
+					<label class="text-muted col-form-label" for="direccion">Dirección</label>
 					<input type="text" th:field="${libro.local.direccion}"
 						class="form-control" disabled />
 				</div>
 			</div>
 
-			<h3 class="mb-4">Libro</h3>
-			<div class="form-group">
-				<div class="col-sm-12">
-					<input type="text" th:field="${libro.id}" name="id_libro" id="id_libro"
-						class="form-control" readonly />
+			<h4 class="my-4">Libro</h4>
+			<div class="form-group row">
+				<div class="col-md-4">
+					<label class="text-muted col-form-label" for="id_libro">ID</label>
+					<input type="text" th:field="${libro.id}" name="id_libro"
+						id="id_libro" class="form-control" readonly />
 				</div>
-				<div class="col-sm-12">
+				<div class="col-md-4">
+					<label class="text-muted col-form-label" for="titulo">Titulo</label>
 					<input type="text" th:field="${libro.titulo}" class="form-control"
 						placeholder="Buscar libro por su nombre..." disabled />
 				</div>
-				<div class="col-sm-12">
-					<input type="text" th:field="${libro.autor}"
-						class="form-control" placeholder="Autor" disabled />
+				<div class="col-md-4">
+					<label class="text-muted col-form-label" for="autor">Autor</label>
+					<input type="text" th:field="${libro.autor}" class="form-control"
+						placeholder="Autor" disabled />
 				</div>
 			</div>
 
-			<h3 class="mb-4">Usuario</h3>
-			<div class="form-group">
-				<div class="col-sm-12">
-					<input type="text" th:field="${usuario.id}" name="id_usuario" id="id_usuario"
-						class="form-control" readonly />
+			<h4 class="my-4">Usuario</h4>
+			<div class="form-group row">
+				<div class="col-md-6">
+					<label class="text-muted col-form-label" for="id_usuario">ID</label>
+					<input type="text" th:field="${usuario.id}" name="id_usuario"
+						id="id_usuario" class="form-control" readonly />
 				</div>
-				<div class="col-sm-12">
+				<div class="col-md-6">
+					<label class="text-muted col-form-label" for="nroDocumento">DNI</label>
 					<input type="number" th:field="${usuario.nroDocumento}"
 						class="form-control" placeholder="Escribir DNI" disabled />
 				</div>
-				<div class="col-sm-12">
+				<div class="col-md-6">
+					<label class="text-muted col-form-label" for="nombres">Nombre(s)</label>
 					<input type="text" th:field="${usuario.nombres}"
 						class="form-control" placeholder="Nombres del Usuario" disabled />
 				</div>
-				<div class="col-sm-12">
+				<div class="col-md-6">
+					<label class="text-muted col-form-label" for="apellidos">Apellidos</label>
 					<input type="text" th:field="${usuario.apellidos}"
 						class="form-control" placeholder="Apellidos del Usuario" disabled />
 				</div>
 			</div>
+
+			<form th:action="@{/usuarios/biblioteca/solicitarLibro}"
+				th:object="${prestamo}" method="post">
+
+				<h4 class="my-4">Fecha Devolución</h4>
+				<div class="form-group row">
+					<div class="col-md-6">
+						<input class="form-control" type="date" name="fechaDevolucion" />
+					</div>
+				</div>
+
+				<div class="form-group row py-4">
+					<div class="col-md-6">
+						<a class="btn btn-light btn-block"
+							th:href="@{'/usuarios/biblioteca/ver/'}+${libro.titulo}">Cancelar</a>
+					</div>
+					<div class="col-md-6">
+						<input class="btn btn-dark btn-block" type="submit"
+							th:value="'Solicitar Libro'" />
+					</div>
+				</div>
+			</form>
+
 		</div>
 
-		<form th:action="@{/usuarios/biblioteca/solicitarLibro}"
-			th:object="${prestamo}" method="post">
-			
-			<h3 class="mb-4">Fecha Devolución</h3>
-			<div class="form-group row">
-				<div class="col-sm-6">
-					<input class="form-control" type="date" name="fechaDevolucion" />
-				</div>
-			</div>
-
-			<div class="form-group row mt-5">
-				<div class="col-sm-6">
-					<a class="btn btn-light btn-block"
-						th:href="@{'/usuarios/biblioteca/ver/'}+${libro.titulo}">Cancelar</a>
-				</div>
-				<div class="col-sm-6">
-					<input class="btn btn-outline-dark btn-block" type="submit"
-						th:value="'Solicitar Libro'" />
-				</div>
-			</div>
-		</form>
-		
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>

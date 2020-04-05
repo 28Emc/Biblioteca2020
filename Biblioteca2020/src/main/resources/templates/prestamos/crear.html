@@ -3,87 +3,84 @@
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="layout/layout :: head"></head>
-<body>
+
+<body class="bg-light">
+
 	<header th:replace="layout/layout :: header"></header>
-	<div class="container-fluid my-5">
+
+	<div class="container my-4">
+
 		<h1 class="text-warning" th:text="${titulo}"></h1>
+
 		<form th:action="@{/prestamos/crear}" th:object="${prestamo}"
 			method="post">
 
-			<h3 class="mb-4">Libro</h3>
+			<h4 class="my-3">Libro</h4>
 			<div class="form-group row">
-				<div class="col-sm-6">
-					<input type="text" name="buscar_libro" id="buscar_libro"
+				<div class="col-md-12">
+					<label class="col-form-label" for="buscar_libro">Título</label> <input
+						type="text" name="buscar_libro" id="buscar_libro"
 						class="form-control" placeholder="Buscar libro por su nombre..." />
 				</div>
-				<div class="col-sm-2" id="col_id_libro">
-					<input type="text" name="id_libro" id="id_libro"
-						placeholder="Id Libro" class="form-control" readonly />
+			</div>
+
+			<div class="form-group row">
+				<div class="col-md-4" id="col_id_libro">
+					<label class="text-muted col-form-label" for="id_libro">ID</label> <input
+						type="text" name="id_libro" id="id_libro" placeholder="Id Libro"
+						class="form-control" readonly />
 				</div>
-				<div class="col-sm-3" id="col_autor_libro">
-					<input type="text" name="autor_libro" id="autor_libro"
+				<div class="col-md-4" id="col_autor_libro">
+					<label class="text-muted col-form-label" for="autor_libro">Autor</label> <input
+						type="text" name="autor_libro" id="autor_libro"
 						class="form-control" placeholder="Autor" disabled />
 				</div>
-				<div class="col-sm-1" id="col_stock_libro">
-					<input type="text" name="stock_libro" id="stock_libro"
+				<div class="col-md-4" id="col_stock_libro">
+					<label class="text-muted col-form-label" for="stock_libro">Stock</label> <input
+						type="text" name="stock_libro" id="stock_libro"
 						class="form-control" placeholder="Stock" disabled />
 				</div>
 			</div>
 
-			<h3 class="mb-4">Usuario</h3>
+			<h4 class="my-3">Usuario</h4>
 			<div class="form-group row">
-				<div class="col-sm-3">
+				<div class="col-md-12">
+					<label class="col-form-label" for="buscar_usuario">DNI Usuario</label>
 					<input type="number" name="buscar_usuario" id="buscar_usuario"
 						class="form-control" placeholder="Escribir DNI" />
 				</div>
-				<div class="col-sm-2" id="col_id_usuario">
-					<input type="text" name="id_usuario" id="id_usuario"
-						class="form-control" placeholder="Id Usuario" />
+			</div>
 
+			<div class="form-group row">
+				<div class="col-md-4" id="col_id_usuario">
+					<label class="text-muted col-form-label" for="id_usuario">ID</label> <input
+						type="text" name="id_usuario" id="id_usuario" class="form-control"
+						placeholder="Id Usuario" readonly />
 				</div>
-				<div class="col-sm-3" id="col_nombre_usuario">
-					<input type="text" name="nombre_usuario" id="nombre_usuario"
+				<div class="col-md-8" id="col_nombre_usuario">
+					<label class="text-muted col-form-label" for="nombre_usuario">Nombre</label> <input
+						type="text" name="nombre_usuario" id="nombre_usuario"
 						class="form-control" placeholder="Nombres del Usuario" disabled />
 				</div>
 			</div>
 
-			<!-- h3 class="mb-4">Empleado</h3>
+			<h4 class="my-3">Fecha Devolución</h4>
 			<div class="form-group row">
-				<div class="col-sm-3">
-					<input type="number" name="buscar_empleado" id="buscar_empleado"
-						class="form-control" placeholder="Escribir DNI del Empleado"
-						 />
-				</div>
-				<div class="col-sm-2" id="col_id_empleado">
-					<input type="text" name="id_empleado" id="id_empleado"
-						class="form-control" placeholder="Id Empleado"
-						th:field="*{empleado.id}" readonly /><small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('empleado')}"
-						th:errors="*{empleado.id}"></small>
-
-				</div>
-				<div class="col-sm-3" id="col_nombre_empleado">
-					<input type="text" name="nombre_empleado" id="nombre_empleado"
-						class="form-control" placeholder="Nombres del Empleado" disabled />
-				</div>
-			</div -->
-
-			<h3 class="mb-4">Fecha Devolución</h3>
-			<div class="form-group row">
-				<div class="col-sm-6">
-					<input class="form-control" type="date" name="fecha_devolucion" />
+				<div class="col-md-6">
+					<label class="col-form-label" for="fecha_devolucion">Fecha
+						Devoluciòn</label> <input class="form-control" type="date"
+						name="fecha_devolucion" />
 				</div>
 			</div>
 
-			<div class="form-group row mt-5">
-				<div class="col-sm-6">
+			<div class="form-group row py-4">
+				<div class="col-md-6">
 					<a class="btn btn-light btn-block"
 						th:href="@{'/prestamos/cancelar'}"><i
 						class="fas fa-shield-alt"></i> Cancelar</a>
 				</div>
-				<div class="col-sm-6">
-					<input class="btn btn-outline-dark btn-block" type="submit"
+				<div class="col-md-6">
+					<input class="btn btn-dark btn-block" type="submit"
 						th:value="'Registrar Préstamo'" />
 				</div>
 			</div>

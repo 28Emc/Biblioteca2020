@@ -146,17 +146,19 @@ public class LocalController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
-	public String guardarLocal(@Valid Local local, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Map<String, Object> modelMap, Authentication authentication) {
+	// HAY UN BUG CON LA ANOTACIÓN @VALID EN ESTE CONTROLADOR SOLAMENTE
+	public String guardarLocal(/*@Valid*/ Local local, BindingResult result, Model model, SessionStatus status,
+			RedirectAttributes flash, Authentication authentication) {
+		
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		Empresa empresaLocales = empleado.getLocal().getEmpresa();
-		modelMap.put("empresaLocales", empresaLocales);
+		model.addAttribute("empresaLocales", empresaLocales);
 		if (result.hasErrors()) {
 			model.addAttribute("local", local);
 			model.addAttribute("editable", true);
 			model.addAttribute("titulo", "Modificar Local");
-			return "/locales/editar";
+			return "/locales/crear";
 		}
 		try {
 			localService.update(local);

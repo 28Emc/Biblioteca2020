@@ -2,90 +2,80 @@
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="layout/layout :: head"></head>
-<body>
+<body class="bg-light">
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="p-3">
-		<h1 class="p-5 text-center">INICIO DE BIBLIOTECA</h1>
-		<div sec:authorize="isAuthenticated()" class="container text-center">	
-	
-			<div class="card p-5">
-				<div class="card-body p-5">
-					<th:block th:if="${empleado}!=null">
-						<div th:switch="${rol}">
-							<h1 th:case="'[ROLE_SYSADMIN]'">
-								Usuario: <span class="text-muted" th:text="${empleado.username}"></span>
-								<br> <br> Rol: <span class="badge badge-error"
-									th:text="'ADMINISTRADOR GLOBAL'"></span>
-							</h1>
-							<h1 th:case="'[ROLE_ADMIN]'">
-								Usuario: <span class="text-muted" th:text="${empleado.username}"></span>
-								<br> <br> Rol: <span class="badge badge-danger"
-									th:text="'ADMINISTRADOR LOCAL'"></span>
-							</h1>
-							<h1 th:case="'[ROLE_SUPERVISOR]'">
-								Usuario: <span class="text-muted" th:text="${empleado.username}"></span>
-								<br> <br> Rol: <span class="badge badge-info"
-									th:text="'SUPERVISOR LOCAL'"></span>
-							</h1>
-							<h1 th:case="'[ROLE_EMPLEADO]'">
-								Usuario: <span class="text-muted" th:text="${empleado.username}"></span>
-								<br> <br> Rol: <span class="badge badge-warning"
-									th:text="'EMPLEADO'"></span>
-							</h1>
-							<h1 th:case="'[ROLE_USER]'">
-								Usuario: <span class="text-muted" th:text="${empleado.username}"></span>
-								<br> <br> Rol: <span class="badge badge-success"
-									th:text="'USUARIO'"></span>
-							</h1>
-							<h1 th:case="*">
-								Usuario: <span class="text-muted" th:text="${empleado.username}"></span>
-								<br> <br> Rol: <span class="badge badge-light"
-									th:text="'USUARIO INVITADO'"></span>
-							</h1>
-						</div>
-					</th:block>
+	<h1 class="py-5 text-center">INICIO DE BIBLIOTECA</h1>
+	<div class="container text-center">
 
-					<th:block th:if="${usuario}!=null">
-						<div th:switch="${rol}">
-							<h1 th:case="'[ROLE_SYSADMIN]'">
-								Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-								<br> Rol: <span class="badge badge-error"
-									th:text="'ADMINISTRADOR GLOBAL'"></span>
-							</h1>
-							<h1 th:case="'[ROLE_ADMIN]'">
-								Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-								<br> <br> Rol: <span class="badge badge-danger"
-									th:text="'ADMINISTRADOR LOCAL'"></span>
-							</h1>
-							<h1 th:case="'[ROLE_SUPERVISOR]'">
-								Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-								<br> <br> Rol: <span class="badge badge-info"
-									th:text="'SUPERVISOR LOCAL'"></span>
-							</h1>
-							<h1 th:case="'[ROLE_EMPLEADO]'">
-								Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-								<br> <br> Rol: <span class="badge badge-warning"
-									th:text="'EMPLEADO'"></span>
-							</h1>
-							<h1 th:case="'[ROLE_USER]'">
-								Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-								<br> <br> Rol: <span class="badge badge-success"
-									th:text="'USUARIO'"></span>
-							</h1>
-							<h1 th:case="*">
-								Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-								<br> <br> Rol: <span class="badge badge-light"
-									th:text="'USUARIO INVITADO'"></span>
-							</h1>
-						</div>
-					</th:block>
+		<div class="card bg-light border-0 my-5 py-5">
 
-				</div>
+			<div class="card-body">
+
+				<th:block th:if="${empleado}!=null">
+					<div th:switch="${rol}">
+						<h1 th:case="'[ROLE_SYSADMIN]'">
+							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
+							<br /> <br /> Rol <span class="badge badge-danger"
+								th:text="'SYSADMIN'"></span>
+						</h1>
+						<h1 th:case="'[ROLE_ADMIN]'">
+							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
+							<br /> <br /> Rol <span class="badge badge-warning"
+								th:text="'ADMIN'"></span>
+						</h1>
+						<h1 th:case="'[ROLE_EMPLEADO]'">
+							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
+							<br /> <br /> Rol <span class="badge badge-success"
+								th:text="'EMPLEADO'"></span>
+						</h1>
+						<h1 th:case="'[ROLE_USER]'">
+							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
+							<br /> <br /> Rol <span class="badge badge-primary"
+								th:text="'USUARIO'"></span>
+						</h1>
+						<h1 th:case="*">
+							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
+							<br /> <br /> Rol <span class="badge badge-light"
+								th:text="'USUARIO INVITADO'"></span>
+						</h1>
+					</div>
+				</th:block>
+
+				<th:block th:if="${usuario}!=null">
+					<div th:switch="${rol}">
+						<h1 th:case="'[ROLE_SYSADMIN]'">
+							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
+							<br> Rol <span class="badge badge-danger"
+								th:text="'ADMIN GLOBAL'"></span>
+						</h1>
+						<h1 th:case="'[ROLE_ADMIN]'">
+							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
+							<br> <br> Rol <span class="badge badge-warning"
+								th:text="'ADMIN LOCAL'"></span>
+						</h1>
+						<h1 th:case="'[ROLE_EMPLEADO]'">
+							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
+							<br> <br> Rol <span class="badge badge-success"
+								th:text="'EMPLEADO'"></span>
+						</h1>
+						<h1 th:case="'[ROLE_USER]'">
+							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
+							<br> <br> Rol <span class="badge badge-primary"
+								th:text="'USUARIO'"></span>
+						</h1>
+						<h1 th:case="*">
+							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
+							<br> <br> Rol <span class="badge badge-light"
+								th:text="'USUARIO INVITADO'"></span>
+						</h1>
+					</div>
+				</th:block>
 
 			</div>
 
 		</div>
+
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>

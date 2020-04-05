@@ -221,7 +221,9 @@ public class UsuarioController {
 
 	@PostMapping(value = "/crearPerfil")
 	public String crearPerfil(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
-			SessionStatus status, RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
+			SessionStatus status, RedirectAttributes flash
+			//, @RequestParam("foto_usu") MultipartFile foto
+			) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("roles", roleService.findOnlyUsers());
@@ -235,7 +237,7 @@ public class UsuarioController {
 			return "/usuarios/perfil";
 		} else {
 			/* LÓGICA DE REGISTRO DE USUARIOS */
-			if (!foto.isEmpty()) {
+			/*if (!foto.isEmpty()) {
 				Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
 				String rootPath = directorioRecursos.toFile().getAbsolutePath();
 				try {
@@ -246,16 +248,21 @@ public class UsuarioController {
 				} catch (IOException e) {
 					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
 				}
-			}
+			} */
+			/*else if (usuario.getFoto_usuario() == null || usuario.getFoto_usuario() == "") {
+				usuario.setFoto_usuario("no-image.jpg");
+			}*/
+			
+			usuario.setFoto_usuario("no-image.jpg");
 
 			try {
 				usuarioService.save(usuario);
 				/*
 				 * REGISTRO EL TOKEN DE REGISTRO SEGUN EL CORREO DEL USUARIO, PARA SU VALIDACIÒN
 				 */
-				ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
+				/*ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
 				confirmationTokenRepository.save(confirmationToken);
-				/* ENVÌO DEL CORREO DE VALIDACIÒN */
+				// ENVÌO DEL CORREO DE VALIDACIÒN
 				SimpleMailMessage mailMessage = new SimpleMailMessage();
 				mailMessage.setTo(usuario.getEmail());
 				mailMessage.setSubject("Completar Registro | Biblioteca2020");
@@ -268,7 +275,7 @@ public class UsuarioController {
 				emailSenderService.sendEmail(mailMessage);
 				model.addAttribute("titulo", "Registro exitoso");
 				model.addAttribute("email", usuario.getEmail());
-				return "/usuarios/registro-exitoso";
+				return "/usuarios/registro-exitoso";*/
 			} catch (Exception e) {
 				model.addAttribute("usuario", usuario);
 				model.addAttribute("roles", roleService.findOnlyUsers());
@@ -276,6 +283,26 @@ public class UsuarioController {
 				model.addAttribute("error", e.getMessage());
 				return "/usuarios/perfil";
 			}
+			
+			// ESTÀ FUERA DE LA LÒGICA DE REGITRO PORQUE TENGO QUE VALIDAR QUE EL USUARIO 
+			// ESTÉ REGISTRADO ANTES DE MANDAR EL CORREO DE CONFIRMACIÒN
+			ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
+			confirmationTokenRepository.save(confirmationToken);
+			// ENVÌO DEL CORREO DE VALIDACIÒN
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setTo(usuario.getEmail());
+			mailMessage.setSubject("Completar Registro | Biblioteca2020");
+			mailMessage.setFrom("edmech25@gmail.com");
+			mailMessage.setText(
+					"Buenas noches, hemos recibido tu peticiòn de registro a Biblioteca2020. Para confirmar tu cuenta, entrar aquì: "
+							+ "http://localhost:8080/usuarios/cuenta-verificada?token="
+							+ confirmationToken.getConfirmationToken());
+			flash.addFlashAttribute("success", "El usuario ha sido registrado en la base de datos.");
+			emailSenderService.sendEmail(mailMessage);
+			model.addAttribute("titulo", "Registro exitoso");
+			model.addAttribute("email", usuario.getEmail());
+			return "/usuarios/registro-exitoso";
+			
 		}
 	}
 

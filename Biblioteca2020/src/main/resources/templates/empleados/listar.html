@@ -4,20 +4,23 @@
 
 <head th:replace="layout/layout :: head"></head>
 
-<body>
+<body class="bg-light">
 
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container-fluid my-5">
-		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<th:block
-			sec:authorize="isAuthenticated() && hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')">
-			<p>
-				<a class="btn btn-primary btn-xs" th:href="@{/empleados/crear}"><i
-					class="fas fa-shield-alt"></i> Crear Empleado</a>
-			</p>
-		</th:block>
-		<table class="table table-responsive">
+	<div class="container my-4">
+
+		<h1 class="text-warning py-2" th:text="${titulo}"></h1>
+
+		<p sec:authorize="hasRole('ROLE_ADMIN')">
+			<a class="btn btn-primary btn-xs" th:href="@{/empleados/crear}"><i
+				class="fas fa-shield-alt"></i> Crear Empleado</a>
+		</p>
+
+		<h1 th:if="${#lists.isEmpty(empleados)}">No hay empleados</h1>
+
+		<table class="table table-responsive"
+			th:if="${not #lists.isEmpty(empleados)}">
 			<thead>
 				<tr>
 					<th>Id</th>
@@ -40,27 +43,27 @@
 					<td th:text="${empleado.nombres}"></td>
 					<td th:text="${empleado.apellidos}"></td>
 					<td th:text="${empleado.local.empresa.razonSocial}"></td>
-					
+
 					<th:block th:switch="${empleado.direccion}">
 						<td th:case="null" th:text="'No tiene'"></td>
 						<td th:case="''" th:text="'No tiene'"></td>
 						<td th:case="*" th:text="${empleado.direccion}"></td>
 					</th:block>
-					
+
 					<th:block th:switch="${empleado.email}">
 						<td th:case="null" th:text="'No tiene'"></td>
 						<td th:case="''" th:text="'No tiene'"></td>
 						<td th:case="*" th:text="${empleado.email}"></td>
 					</th:block>
-					
+
 					<td th:text="${empleado.nroDocumento}"></td>
-					
+
 					<th:block th:switch="${empleado.celular}">
 						<td th:case="null" th:text="'No tiene'"></td>
 						<td th:case="''" th:text="'No tiene'"></td>
 						<td th:case="*" th:text="${empleado.celular}"></td>
 					</th:block>
-					
+
 					<td th:text="${empleado.fecha_registro}"></td>
 					<td th:text="${empleado.username}"
 						sec:authorize="hasRole('ROLE_ADMIN')"></td>
@@ -71,8 +74,7 @@
 								<span class="badge badge-success" th:text="'Activo'"></span>
 							</h5>
 						</td>
-						<td th:if="${estado}"
-							sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"><a
+						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
 							class="btn btn-warning btn-xs"
 							th:href="@{/empleados/editar/}+${empleado.id}"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
@@ -88,8 +90,7 @@
 								<span class="badge badge-danger" th:text="'Inactivo'"></span>
 							</h5>
 						</td>
-						<td th:unless="${estado}"
-							sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPERVISOR')"><a
+						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
 							class="disabled btn btn-secondary btn-xs"
 							th:href="@{/empleados/editar/}+${empleado.id}"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
@@ -103,6 +104,7 @@
 				</tr>
 			</tbody>
 		</table>
+
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>

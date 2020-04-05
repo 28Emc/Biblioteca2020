@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html class="h-100" xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head">
 <meta charset="UTF-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title th:text="'Biblioteca | ' + ${titulo}"></title>
 <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
 <link rel="stylesheet" th:href="@{/css/jquery-ui.min.css}" />
 </head>
-<body>
+<body class="d-flex flex-column h-100">
 
 	<header th:fragment="header">
-		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+		<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
 			<a class="navbar-brand" href="#">Biblioteca</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse"
 				data-target="#navbarNav" aria-controls="navbarNav"
@@ -35,8 +37,8 @@
 							Categorias</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_ADMIN')"
-						th:href="@{/locales/libros/listar}"><i
-							class="fas fa-book"></i> Libros</a></li>
+						th:href="@{/locales/libros/listar}"><i class="fas fa-book"></i>
+							Libros</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_ADMIN')"
 						th:href="@{/usuarios/listar}"><i class="fas fa-shield-alt"></i>
@@ -47,12 +49,12 @@
 							Préstamos</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_EMPLEADO')"
-						th:href="@{/locales/libros/listar}"><i
-							class="fas fa-book"></i> Libros</a></li>
+						th:href="@{/locales/libros/listar}"><i class="fas fa-book"></i>
+							Libros</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_EMPLEADO')"
 						th:href="@{/usuarios/listar}"><i class="fas fa-user"></i>
-							Usuarios</a></li>					
+							Usuarios</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_EMPLEADO')"
 						th:href="@{/prestamos/listar}"><i
@@ -68,28 +70,31 @@
 				</ul>
 
 				<ul class="navbar-nav">
-					<li sec:authorize="!isAuthenticated()" class="btn btn-info"><a
+					<li sec:authorize="!isAuthenticated()" class="btn btn-dark"><a
 						class="nav-link" th:href="@{/login}">Iniciar Sesión</a></li>
 					<li sec:authorize="isAuthenticated()" class="dropdown show"><a
-						class="btn btn-outline-dark text-white dropdown-toggle" href="#"
-						role="button" id="dropdownMenuLink" data-toggle="dropdown"
-						aria-haspopup="true" aria-expanded="false"> <span
-							sec:authentication="name"></span>
+						class="btn dropdown-toggle text-white" href="#" role="button"
+						id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
+						aria-expanded="false"> <span sec:authentication="name"></span>
 					</a>
-						<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+						<div class="dropdown-menu bg-light"
+							aria-labelledby="dropdownMenuLink">
 							<a
 								sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
-								class="dropdown-item" th:href="@{/empleados/editarPerfil}">Mi
-								Perfil</a> <a
+								class="dropdown-item bg-light"
+								th:href="@{/empleados/editarPerfil}">Mi Perfil</a> <a
 								sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
-								class="dropdown-item" th:href="@{/empleados/cambioPassword}">Cambiar
-								Password</a> <a sec:authorize="hasRole('ROLE_USER')"
-								class="dropdown-item" th:href="@{/usuarios/editarPerfil}">Mi
-								Perfil (User)</a> <a sec:authorize="hasRole('ROLE_USER')"
-								class="dropdown-item" th:href="@{/usuarios/cambioPassword}">Cambiar
-								Password (User)</a>
+								class="dropdown-item bg-light"
+								th:href="@{/empleados/cambioPassword}">Cambiar Password</a> <a
+								sec:authorize="hasRole('ROLE_USER')"
+								class="dropdown-item bg-light"
+								th:href="@{/usuarios/editarPerfil}">Mi Perfil (User)</a> <a
+								sec:authorize="hasRole('ROLE_USER')"
+								class="dropdown-item bg-light"
+								th:href="@{/usuarios/cambioPassword}">Cambiar Password
+								(User)</a>
 							<form id="logoutForm" th:action="@{/logout}" method="post">
-								<button class="dropdown-item"
+								<button class="dropdown-item bg-light"
 									onclick="documento.getElementById('logoutForm').submit();"
 									type="submit">Cerrar Sesión</button>
 							</form>
@@ -98,45 +103,49 @@
 			</div>
 		</nav>
 
-		<!-- Mensajes flash para indicar el estado de las peticiones -->
-		<div id="alertPers"
-			class="alert alert-success alert-dismissible fade show" role="alert"
-			th:if="${success!=null}" th:text="${success}">
-			<button type="button" class="close" data-dismiss="alert"
-				aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-			</button>
+		<div style="padding-top: 60px;">
+			<!-- Mensajes flash para indicar el estado de las peticiones -->
+			<div id="alertPers"
+				class="alert alert-success alert-dismissible fade show" role="alert"
+				th:if="${success!=null}" th:text="${success}">
+				<button type="button" class="close" data-dismiss="alert"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div id="alertPers"
+				class="alert alert-danger alert-dismissible fade show" role="alert"
+				th:if="${error!=null}" th:text="${error}">
+				<button type="button" class="close" data-dismiss="alert"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div id="alertPers"
+				class="alert alert-warning alert-dismissible fade show" role="alert"
+				th:if="${warning!=null}" th:text="${warning}">
+				<button type="button" class="close" data-dismiss="alert"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div id="alertPers"
+				class="alert alert-info alert-dismissible fade show" role="alert"
+				th:if="${info!=null}" th:text="${info}">
+				<button type="button" class="close" data-dismiss="alert"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
 		</div>
-		<div id="alertPers"
-			class="alert alert-danger alert-dismissible fade show" role="alert"
-			th:if="${error!=null}" th:text="${error}">
-			<button type="button" class="close" data-dismiss="alert"
-				aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-			</button>
-		</div>
-		<div id="alertPers"
-			class="alert alert-warning alert-dismissible fade show" role="alert"
-			th:if="${warning!=null}" th:text="${warning}">
-			<button type="button" class="close" data-dismiss="alert"
-				aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-			</button>
-		</div>
-		<div id="alertPers"
-			class="alert alert-info alert-dismissible fade show" role="alert"
-			th:if="${info!=null}" th:text="${info}">
-			<button type="button" class="close" data-dismiss="alert"
-				aria-label="Close">
-				<span aria-hidden="true">&times;</span>
-			</button>
-		</div>
+
 
 	</header>
 
-	<footer th:fragment="footer" class="container-fluid text-center py-5">
-		<span class="text-muted">Biblioteca ©2020 </span>
+	<footer th:fragment="footer" class="footer mt-auto py-3 text-center">
+		<p class="text-muted">Biblioteca ©2020</p>
 		<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+		<script th:src="@{/js/snbutton.js}"></script>
 		<script th:src="@{/js/popper.min.js}"></script>
 		<script th:src="@{/js/bootstrap.min.js}"></script>
 		<script th:src="@{/js/jquery-ui.min.js}"></script>

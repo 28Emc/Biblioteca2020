@@ -16,15 +16,17 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "locales")
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class Local implements Serializable {
 
 	@Id
@@ -41,8 +43,7 @@ public class Local implements Serializable {
 	private List<Empleado> empleados;
 
 	@NotBlank
-	@Column(length = 100, unique = true, nullable = false)
-	@Size(min = 10, max = 100)
+	@Column(length = 100, nullable = false, unique = true)
 	private String direccion;
 
 	@Column(length = 255)

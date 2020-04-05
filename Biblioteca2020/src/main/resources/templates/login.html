@@ -1,53 +1,81 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html class="h-100" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="layout/layout :: head"></head>
-<body>
-	<div id="alertPers" class="alert alert-success alert-dismissible fade show"
-		role="alert" th:if="${success!=null}" th:text="${success}">
+<body class="d-flex flex-column h-100 bg-light">
+
+	<div id="alertPers"
+		class="alert alert-success alert-dismissible fade show" role="alert"
+		th:if="${success!=null}" th:text="${success}">
 		<button type="button" class="close" data-dismiss="alert"
 			aria-label="Close">
 			<span aria-hidden="true">&times;</span>
 		</button>
 	</div>
-	<div id="alertPers" class="alert alert-info alert-dismissible fade show" role="alert"
+	<div id="alertPers"
+		class="alert alert-info alert-dismissible fade show" role="alert"
 		th:if="${info!=null}" th:text="${info}">
 		<button type="button" class="close" data-dismiss="alert"
 			aria-label="Close">
 			<span aria-hidden="true">&times;</span>
 		</button>
 	</div>
-
-	<div id="alertPers" class="alert alert-danger alert-dismissible fade show"
+	<div id="alertPers"
+		class="alert alert-danger alert-dismissible fade show"
 		th:if="${param.error}"
 		th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}">
 	</div>
 
-	<div class="container p-5">
-		<div class="card border-primary mx-auto" style="width: 60%">
-			<div class="card-header">Inicio Sesión</div>
-			<div class="card-body">
-				<form th:action="@{/login}" method="post">
-					<div class="form-group">
-						<input type="text" name="username" id="username"
-							class="form-control" placeholder="Usuario" required autofocus>
-					</div>
-					<div class="form-group">
-						<input type="password" name="password" id="password"
-							class="form-control" placeholder="Password" required />
-					</div>
-					<div class="form-group">
-						<input type="submit" class="btn btn-lg btn-primary btn-block"
-							value="Entrar" />
-					</div>
+	<div class="container" style="padding-top: 140px;">
+		<div class="col-xl-6 col-lg-7 col-md-8 col-sm-9 col-xs-10 mx-auto">
+			<div class="card rounded-0">
+				<div class="card-header text-info border-0"><h4>Inicio Sesión</h4></div>
+				<div class="card-body bg-light border-0">
+					<form id="form" th:action="@{/login}" method="post">
+						<div class="form-group">
+							<input type="text" name="username" id="username"
+								class="form-control" placeholder="Usuario" required autofocus>
+						</div>
+						<div class="form-group">
+							<input type="password" name="password" id="password"
+								class="form-control" placeholder="Contraseña" required />
+						</div>
+						<div class="form-group">
+							<button id="snbtn" type="button" onclick="javascript: submitform();" 
+							class="btn btn-lg btn-info btn-block">Entrar</button>
+						</div>
+					</form>
+				</div>
+				<div class="card-footer bg-light border-0">
 					<span class="float-right">¿No tienes una cuenta? Registrate
-						<a th:href="@{/usuarios/crearPerfil}">aquí!</a>
+						<a class="text-info" th:href="@{/usuarios/crearPerfil}">aquí</a>!
 					</span>
-				</form>
+				</div>
 			</div>
 		</div>
 
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>
+	<script type="text/javascript">
+		SNButton.init("snbtn", {
+			fields : [ "username", "password" ]
+		});
+		$(document).ready(function submitForm() {				
+			$('#snbtn').on('click',function() {		
+				var $this = $(this);
+				var loadingText = '<div class="spinner-grow text-white" role="status"><span class="sr-only">Cargando...</span></div>';
+				if ($(this).html() !== loadingText) {
+					$this.data('original-text', $(this).html());
+					$this.html(loadingText);
+					$("#snbtn").addClass("disabled");
+				}
+				setTimeout( function() {				
+					$this.html($this.data('original-text'));
+					$("#snbtn").removeClass("disabled");
+					document.forms["form"].submit();								
+				}, 1500);				
+			});
+		})
+	</script>
 </body>
 </html>
