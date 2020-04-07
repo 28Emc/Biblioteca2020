@@ -72,7 +72,7 @@ public class Libro implements Serializable {
 	private String autor;
 
 	/*@Column(length = 255)*/
-	@Size(max = 255)
+	//@Size(max = 255)
 	@Type(type="text")
 	private String descripcion;
 	

@@ -7,57 +7,63 @@
 <body class="bg-light">
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container p-3">
-		
-		<h1 th:text="${titulo}" class="text-warning pt-3"></h1>
+	<div class="container-md container-lg container-xl mx-5">
 
-		<hr class="col-1 bg-secondary my-4">
+		<h1 th:text="${titulo}" class="text-warning py-3"></h1>
 
-		<div class="card-deck my-4">
-			
-			<div th:each="libro: ${libros}" class="card">
+		<hr class="col-1 bg-secondary my-1">
+
+		<div class="card-group mx-3">
+
+			<div th:each="libro: ${libros}" class="col-xs-12 col-md-6 col-lg-4 col-xl-3 my-4">
 				
-				<div class="px-5">
-					<img class="responsive card-img-top px-3" height="500"
-						th:src="${libro.foto_libro}!='' ? @{'/uploads/'}+${libro.foto_libro} : @{'/uploads/no-book.jpg'}"
-						alt="Imagen libro">
-				</div>
-				
-				<div class="card-body">
-					<h4 class="card-title text-right" th:text="${libro.titulo}"></h4>
-					
-					<h5 class="card-title text-right text-muted"
-						th:text="${libro.autor}"></h5>
-					
-					<p class="card-text text-right" id="textArea"
-						th:text="${libro.descripcionMin}"></p>
-
-					<div class="card-footer p-0 pt-2 bg-white">
-						<small class="text-muted"
-							th:text="'Fecha de Publicación: ' + ${libro.fechaPublicacion}"></small><br />
-						<small class="text-muted"
-							th:text="'Género: ' + ${libro.categoria.nombre}"></small>
-
-						<div class="row h-100 mt-2">
-							
-							<div class="col-6 my-auto">
-								<h5>
-									<span class="badge badge-success"
-										th:text="'Stock: ' + ${libro.stock}"></span>
-								</h5>
-							</div>
-							
-							<div class="col-6">
-								<div class="p-0 py-2">
-									<a th:href="@{'/usuarios/biblioteca/ver/'}+${libro.titulo}" class="btn btn-info btn-block text-white" th:text="'Ver Disponibilidad'"></a>
-								</div>
-							</div>
-							
-						</div>
-						
+				<div class="card">
+					<div style="text-align: center;">
+						<img class="responsive rounded-0" height="200px" width="150px"
+							th:src="${libro.foto_libro}!='' ? @{'/uploads/'}+${libro.foto_libro} : @{'/uploads/no-book.jpg'}"
+							alt="Imagen libro">
 					</div>
 
+					<div class="card-body">
+						<h5 class="card-title text-right" th:text="${libro.titulo}"></h5>
+
+						<h6 class="card-title text-right text-muted"
+							th:text="${libro.autor}"></h6>
+
+						<p class="card-text" id="textArea"
+							th:text="${libro.descripcionMin}"></p>
+
+						<div class="card-footer p-0 pt-2 bg-white">
+							<small class="text-muted"
+								th:text="'Fecha de Publicación: ' + ${libro.fechaPublicacion}"></small><br />
+							<small class="text-muted"
+								th:text="'Género: ' + ${libro.categoria.nombre}"></small>
+
+							<div class="row h-100 mt-2">
+
+								<div class="col-4 my-auto">
+									<h6>
+										<span class="badge badge-success"
+											th:text="'Stock: ' + ${libro.stock}"></span>
+									</h6>
+								</div>
+
+								<div class="col-8">
+									<div class="p-0 py-2">
+										<a th:href="@{'/usuarios/biblioteca/ver/'}+${libro.titulo}"
+											class="btn btn-info btn-block text-white"
+											th:text="'Ver Disponibilidad'"></a>
+									</div>
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+					
 				</div>
+
 			</div>
 
 		</div>
@@ -65,6 +71,6 @@
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>
-	
+
 </body>
 </html>
