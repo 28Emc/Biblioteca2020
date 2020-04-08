@@ -20,47 +20,53 @@
 				<div class="col-md-12">
 					<label class="col-form-label" for="buscar_libro">Título</label> <input
 						type="text" name="buscar_libro" id="buscar_libro"
-						class="form-control" placeholder="Buscar libro por su nombre..." />
+						class="form-control" placeholder="Buscar libro por su nombre..." th:field="*{libro.titulo}"
+						autofocus /> 
+					<small class="form-text text-danger"
+						th:if="${#fields.hasErrors('libro.titulo')}" th:errors="*{libro.titulo}"></small>
 				</div>
 			</div>
 
 			<div class="form-group row">
 				<div class="col-md-4" id="col_id_libro">
-					<label class="text-muted col-form-label" for="id_libro">ID</label> <input
-						type="text" name="id_libro" id="id_libro" placeholder="Id Libro"
-						class="form-control" readonly />
+					<label class="text-muted col-form-label" for="id_libro">ID</label>
+					<input type="text" name="id_libro" id="id_libro"
+						placeholder="Id Libro" class="form-control" th:field="*{libro}" readonly />
 				</div>
 				<div class="col-md-4" id="col_autor_libro">
-					<label class="text-muted col-form-label" for="autor_libro">Autor</label> <input
-						type="text" name="autor_libro" id="autor_libro"
-						class="form-control" placeholder="Autor" disabled />
+					<label class="text-muted col-form-label" for="autor_libro">Autor</label>
+					<input type="text" name="autor_libro" id="autor_libro"
+						class="form-control" placeholder="Autor" th:field="*{libro.autor}" disabled />
 				</div>
 				<div class="col-md-4" id="col_stock_libro">
-					<label class="text-muted col-form-label" for="stock_libro">Stock</label> <input
-						type="text" name="stock_libro" id="stock_libro"
-						class="form-control" placeholder="Stock" disabled />
+					<label class="text-muted col-form-label" for="stock_libro">Stock</label>
+					<input type="text" name="stock_libro" id="stock_libro"
+						class="form-control" placeholder="Stock" th:field="*{libro.stock}" disabled />
 				</div>
 			</div>
 
 			<h4 class="my-3">Usuario</h4>
 			<div class="form-group row">
 				<div class="col-md-12">
-					<label class="col-form-label" for="buscar_usuario">DNI Usuario</label>
-					<input type="number" name="buscar_usuario" id="buscar_usuario"
-						class="form-control" placeholder="Escribir DNI" />
+					<label class="col-form-label" for="buscar_usuario">DNI
+						Usuario</label> <input type="number" name="buscar_usuario"
+						id="buscar_usuario" class="form-control"
+						placeholder="Escribir DNI" th:field="*{usuario.nroDocumento}" /> 
+					<small class="form-text text-danger"
+						th:if="${#fields.hasErrors('usuario.nroDocumento')}" th:errors="*{usuario.nroDocumento}"></small>
 				</div>
 			</div>
 
 			<div class="form-group row">
 				<div class="col-md-4" id="col_id_usuario">
-					<label class="text-muted col-form-label" for="id_usuario">ID</label> <input
-						type="text" name="id_usuario" id="id_usuario" class="form-control"
-						placeholder="Id Usuario" readonly />
+					<label class="text-muted col-form-label" for="id_usuario">ID</label>
+					<input type="text" name="id_usuario" id="id_usuario"
+						class="form-control" placeholder="Id Usuario" th:field="*{usuario}" readonly />
 				</div>
 				<div class="col-md-8" id="col_nombre_usuario">
-					<label class="text-muted col-form-label" for="nombre_usuario">Nombre</label> <input
-						type="text" name="nombre_usuario" id="nombre_usuario"
-						class="form-control" placeholder="Nombres del Usuario" disabled />
+					<label class="text-muted col-form-label" for="nombre_usuario">Nombre</label>
+					<input type="text" name="nombre_usuario" id="nombre_usuario"
+						class="form-control" placeholder="Nombres del Usuario" th:field="*{usuario.nombres}" disabled />
 				</div>
 			</div>
 
@@ -69,7 +75,9 @@
 				<div class="col-md-6">
 					<label class="col-form-label" for="fecha_devolucion">Fecha
 						Devoluciòn</label> <input class="form-control" type="date"
-						name="fecha_devolucion" />
+						name="fecha_devolucion" th:field=*{fecha_devolucion} />
+					<small class="form-text text-danger"
+						th:if="${#fields.hasErrors('fecha_devolucion')}" th:errors="*{fecha_devolucion}"></small>
 				</div>
 			</div>
 

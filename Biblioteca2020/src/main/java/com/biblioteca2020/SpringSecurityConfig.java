@@ -33,7 +33,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	// JPA
 	@Autowired
 	private JpaUserDetailsService userDetailsService;
-	
+
 	// INSTANCIA DE CONFIGURACIÓN DE EMPLEADOS Y ROLES CON ENTIDADES CONTROLADAS CON
 	// JPA
 	@Autowired
@@ -52,19 +52,25 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
-		.csrf().disable()
-		.authorizeRequests().antMatchers("/css/**", "/js/**", "/images/**", "/**/crearPerfil", "/**/editarPerfil", "/**/cuenta-verificada/**").permitAll()
-			.and()
-			.formLogin().successHandler(successHandler)
-			// es AQUI que yo realmente gestiono mi LOGIN
-			.loginPage("/login").permitAll()
-			.and()
-			.logout().permitAll()
-			.and()
-			.exceptionHandling()
-			.accessDeniedPage("/error_403")
-			.and()
-			.authorizeRequests().anyRequest().authenticated();
+
+				.csrf().disable()
+
+				.authorizeRequests()
+				.antMatchers("/css/**", "/js/**", "/img/**", "/**/crearPerfil", "/**/editarPerfil",
+						"/**/cuenta-verificada/**")
+				.permitAll()
+
+				.and().formLogin().successHandler(successHandler)
+				// es AQUI que yo realmente gestiono mi LOGIN
+				.loginPage("/login").permitAll()
+
+				.and().logout().permitAll()
+				
+				//.and().rememberMe()
+
+				.and().exceptionHandling().accessDeniedPage("/error_403")
+
+				.and().authorizeRequests().anyRequest().authenticated();
 	}
 
 }

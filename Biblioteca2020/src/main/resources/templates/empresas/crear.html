@@ -22,7 +22,7 @@
 					<label class="col-form-label" for="buscar_empresa">Ruc</label> <input
 						id="buscar_empresa" name="buscar_empresa" class="form-control"
 						type="text" th:field="*{ruc}"
-						th:errorclass="'form-control alert-danger'" /> <small
+						th:errorclass="'form-control'" autofocus /> <small
 						class="form-text text-danger" th:if="${#fields.hasErrors('ruc')}"
 						th:errors="*{ruc}"></small>
 				</div>
@@ -50,8 +50,7 @@
 			<div class="form-group row py-4">
 				<div class="col-md-6">
 					<a class="btn btn-light btn-block"
-						th:href="@{'/empresas/cancelar'}"><i class="fas fa-shield-alt"></i>
-						Cancelar</a>
+						th:href="@{'/empresas/cancelar'}">Cancelar</a>
 				</div>
 				<div class="col-md-6">
 					<input class="btn btn-dark btn-block" type="submit"

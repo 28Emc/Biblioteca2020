@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.biblioteca2020.models.entity.Categoria;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Local;
@@ -222,8 +224,13 @@ public class LibroController {
 	@GetMapping("/locales/libros/crear")
 	public String crearLibro(Map<String, Object> model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		model.put("libro", new Libro());
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());		
+		
+		Categoria categoria = new Categoria();
+		Libro libro = new Libro();
+		libro.setCategoria(categoria);
+		
+		model.put("libro", libro);
 		model.put("titulo", "Registro de Libro");
 		model.put("local", empleado.getLocal());
 		return "/libros/crear";

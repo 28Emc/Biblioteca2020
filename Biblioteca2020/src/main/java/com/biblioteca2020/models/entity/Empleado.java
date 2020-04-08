@@ -76,6 +76,7 @@ public class Empleado implements Serializable {
 	@Column(length = 30, nullable = true, unique = true)
 	@Size(max = 30)
 	@Email
+	@NotBlank
 	private String email;
 
 	@Column(length = 9, nullable = true, unique = true)

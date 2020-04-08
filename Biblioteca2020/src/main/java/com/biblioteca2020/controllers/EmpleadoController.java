@@ -15,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -121,26 +120,35 @@ public class EmpleadoController {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		cambiarPassword.setId(empleado.getId());
-		model.addAttribute("passwordForm", cambiarPassword);
+		model.addAttribute("cambiarPassword", cambiarPassword);
 		model.addAttribute("titulo", "Cambiar Password");
 		return "/empleados/cambio-password";
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
 	@PostMapping("/cambioPassword")
-	public String cambioPasswordEmpleado(@Valid CambiarPassword form, Model model, Errors errors,
+	public String cambioPasswordEmpleado(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
 			RedirectAttributes flash, Authentication authentication) {
-		if (errors.hasErrors()) {
-			String result = errors.getAllErrors().stream().map(x -> x.getDefaultMessage())
+		
+		if (resultForm.hasErrors()) {
+			// CON ESTE BLOQUE SOBREESCRIBO EL ERROR GENÈRICO "NO PUEDE ESTAR VACÍO"
+			if (cambiarPassword.getPasswordActual().equals("") || cambiarPassword.getNuevaPassword().equals("")
+					|| cambiarPassword.getConfirmarPassword().equals("")) {
+				model.addAttribute("cambiarPasswordError", "Todos los campos son obligatorios");
+				model.addAttribute("titulo", "Cambiar Password");
+				return "/empleados/cambio-password";
+			}
+			String result = resultForm.getAllErrors().stream().map(x -> x.getDefaultMessage())
 					.collect(Collectors.joining(", "));
 			model.addAttribute("cambiarPasswordError", result);
 			return "/empleados/cambio-password";
 		}
 		try {
-			empleadoService.cambiarPassword(form);
+			empleadoService.cambiarPassword(cambiarPassword);
 			flash.addFlashAttribute("success", "Password Actualizada");
 			return "redirect:/home";
 		} catch (Exception e) {
-			model.addAttribute("passwordForm", form);
+			model.addAttribute("cambiarPassword", cambiarPassword);
 			model.addAttribute("titulo", "Cambiar Password");
 			model.addAttribute("cambiarPasswordError", e.getMessage());
 			return "/empleados/cambio-password";

@@ -1,24 +1,22 @@
 package com.biblioteca2020.controllers;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
@@ -122,22 +120,34 @@ public class PrestamoController {
 	// 4: EL EMPLEADO QUE REGISTRA EL PRÉSTAMO SE SETEA CON EL EMPLEADO LOGUEADO EN
 	// EL SISTEMA
 	// Y SE ALMACENA SU CODIGO;
+	/*
+	 * ACTUALIZACIÓN 07/04/2020
+	 * AHORA YA PUEDO USAR @VALID PARA CREAR ORDEN DE PRESTAMOS.
+	 * */
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@PostMapping(value = "/crear")
-	public String guardarPrestamo(Prestamo prestamo, @RequestParam(name = "id_libro", required = false) Long id_libro,
+	public String guardarPrestamo(@Valid Prestamo prestamo, BindingResult result,
+			/*@RequestParam(name = "id_libro", required = false) Long id_libro,
 			@RequestParam(name = "id_usuario", required = false) Long id_usuario,
-			@RequestParam(name = "fecha_devolucion", required = false) String fecha_devolucion,
+			@RequestParam(name = "fecha_devolucion", required = false) String fecha_devolucion,*/
 			RedirectAttributes flash, SessionStatus status, Model model, Authentication authentication) {
 
-		if (id_libro == null || id_usuario == null || fecha_devolucion == null) {
+		// EMPLEADO
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleadoPrestamo = empleadoService.findByUsernameAndEstado(userDetails.getUsername(), true);
+		prestamo.setEmpleado(empleadoPrestamo);
+
+		if (/*id_libro == null || id_usuario == null || fecha_devolucion == null || */result.hasErrors()) {
 			model.addAttribute("titulo", "Creación de Préstamo");
-			model.addAttribute("error", "El prestamo necesita un libro, un usuario y una fecha de despacho VÁLIDOS.");
+			model.addAttribute("prestamo", prestamo);
+			//model.addAttribute("error", "El prestamo necesita un libro, un usuario y una fecha de despacho VÁLIDOS.");
 			return "/prestamos/crear";
 		}
+
 		// LIBRO
 		Libro libroPrestamo;
 		try {
-			libroPrestamo = libroService.findOne(id_libro);
+			libroPrestamo = libroService.findOne(/*id_libro*/prestamo.getLibro().getId());
 			prestamo.setLibro(libroPrestamo);
 			// ACTUALIZACIÓN DE STOCK
 			if (libroPrestamo.getStock() <= 0) {
@@ -153,21 +163,17 @@ public class PrestamoController {
 		// USUARIO
 		Usuario usuarioPrestamo;
 		try {
-			usuarioPrestamo = usuarioService.findById(id_usuario);
+			usuarioPrestamo = usuarioService.findById(/*id_usuario*/prestamo.getUsuario().getId());
 			prestamo.setUsuario(usuarioPrestamo);
 		} catch (Exception e1) {
 			model.addAttribute("error", e1.getMessage());
 			return "/prestamos/crear";
 		}
-		// EMPLEADO
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleadoPrestamo = empleadoService.findByUsernameAndEstado(userDetails.getUsername(), true);
-		prestamo.setEmpleado(empleadoPrestamo);
 		// FECHA DESPACHO
 		Date fechaDespacho = new Date();
 		prestamo.setFecha_despacho(fechaDespacho);
 		// FECHA DEVOLUCIÓN
-		try {
+		/*try {
 			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			Date fechaDevolucionPrestamo = null;
 			fechaDevolucionPrestamo = formatter.parse(fecha_devolucion);
@@ -175,7 +181,7 @@ public class PrestamoController {
 		} catch (ParseException pe) {
 			model.addAttribute("error", pe.getMessage());
 			return "/prestamos/crear";
-		}
+		}*/
 		// USO CALENDAR PARA MOSTRAR LA FECHA DE DEVOLUCION
 		Calendar calendar = Calendar.getInstance(new Locale("es", "ES"));
 		calendar.setTime(prestamo.getFecha_devolucion());

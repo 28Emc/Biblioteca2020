@@ -13,13 +13,14 @@
 
 		<hr class="col-1 bg-secondary my-1">
 
-		<div class="card-group mx-3">
+		<div class="row">
 
-			<div th:each="libro: ${libros}" class="col-xs-12 col-md-6 col-lg-4 col-xl-3 my-4">
-				
-				<div class="card">
+			<div th:each="libro: ${libros}"
+				class="col-xs-12 col-md-6 col-lg-4 col-xl-3 my-4">
+
+				<div class="card mx-1" style="max-width: 400px;">
 					<div style="text-align: center;">
-						<img class="responsive rounded-0" height="200px" width="150px"
+						<img class="responsive rounded-0" height="260px" width="210px"
 							th:src="${libro.foto_libro}!='' ? @{'/uploads/'}+${libro.foto_libro} : @{'/uploads/no-book.jpg'}"
 							alt="Imagen libro">
 					</div>
@@ -30,7 +31,7 @@
 						<h6 class="card-title text-right text-muted"
 							th:text="${libro.autor}"></h6>
 
-						<p class="card-text" id="textArea"
+						<p style="height: 150px;" class="card-text text-justify my-auto" id="textArea"
 							th:text="${libro.descripcionMin}"></p>
 
 						<div class="card-footer p-0 pt-2 bg-white">
@@ -41,14 +42,14 @@
 
 							<div class="row h-100 mt-2">
 
-								<div class="col-4 my-auto">
+								<div class="col-sm-12 col-md-12 my-auto">
 									<h6>
 										<span class="badge badge-success"
 											th:text="'Stock: ' + ${libro.stock}"></span>
 									</h6>
 								</div>
 
-								<div class="col-8">
+								<div class="col-sm-12 col-md-12">
 									<div class="p-0 py-2">
 										<a th:href="@{'/usuarios/biblioteca/ver/'}+${libro.titulo}"
 											class="btn btn-info btn-block text-white"
@@ -61,7 +62,7 @@
 						</div>
 
 					</div>
-					
+
 				</div>
 
 			</div>

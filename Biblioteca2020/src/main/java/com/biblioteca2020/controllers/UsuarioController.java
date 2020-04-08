@@ -23,7 +23,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -111,7 +110,7 @@ public class UsuarioController {
 		Libro libro = libroService.findByTituloAndLocalAndEstado(titulo, id_local, true);
 		model.addAttribute("titulo", "Solicitar Libro");
 		model.addAttribute("libro", libro);
-		//model.addAttribute("local", libro.getLocal());
+		// model.addAttribute("local", libro.getLocal());
 		model.addAttribute("usuario", usuario);
 		model.addAttribute("prestamo", new Prestamo());
 		return "/usuarios/biblioteca/solicitarLibro";
@@ -121,7 +120,8 @@ public class UsuarioController {
 	// TE QUEDASTE AQUI - NO FUNCIONE ESTE MÈTODO - 2.04.2020
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
 	@PostMapping("/biblioteca/solicitarLibro")
-	public String solicitarLibro(@Valid Prestamo prestamo, @RequestParam(name = "id_libro", required = false) Long id_libro,
+	public String solicitarLibro(@Valid Prestamo prestamo,
+			@RequestParam(name = "id_libro", required = false) Long id_libro,
 			@RequestParam(name = "id_usuario", required = false) Long id_usuario,
 			@RequestParam(name = "fechaDevolucion", required = false) String fechaDevolucion, RedirectAttributes flash,
 			SessionStatus status, Model model, Authentication authentication) {
@@ -129,9 +129,9 @@ public class UsuarioController {
 		// fechaDevolucion);
 		try {
 			if (id_libro == null || id_usuario == null || fechaDevolucion == null) {
-				//model.addAttribute("libro", libroService.findOne(id_libro));
-				//model.addAttribute("local", libroService.findOne(id_libro).getLocal());
-				//model.addAttribute("usuario", usuarioService.findById(id_usuario));
+				// model.addAttribute("libro", libroService.findOne(id_libro));
+				// model.addAttribute("local", libroService.findOne(id_libro).getLocal());
+				// model.addAttribute("usuario", usuarioService.findById(id_usuario));
 				model.addAttribute("prestamo", prestamo);
 				model.addAttribute("error",
 						"El prestamo necesita un libro, un usuario y una fecha de despacho VÁLIDOS.");
@@ -222,8 +222,8 @@ public class UsuarioController {
 	@PostMapping(value = "/crearPerfil")
 	public String crearPerfil(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
 			SessionStatus status, RedirectAttributes flash
-			//, @RequestParam("foto_usu") MultipartFile foto
-			) {
+	// , @RequestParam("foto_usu") MultipartFile foto
+	) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("roles", roleService.findOnlyUsers());
@@ -237,22 +237,21 @@ public class UsuarioController {
 			return "/usuarios/perfil";
 		} else {
 			/* LÓGICA DE REGISTRO DE USUARIOS */
-			/*if (!foto.isEmpty()) {
-				Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-				String rootPath = directorioRecursos.toFile().getAbsolutePath();
-				try {
-					byte[] bytes = foto.getBytes();
-					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-					Files.write(rutaCompleta, bytes);
-					usuario.setFoto_usuario(foto.getOriginalFilename());
-				} catch (IOException e) {
-					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
-				}
-			} */
-			/*else if (usuario.getFoto_usuario() == null || usuario.getFoto_usuario() == "") {
-				usuario.setFoto_usuario("no-image.jpg");
-			}*/
-			
+			/*
+			 * if (!foto.isEmpty()) { Path directorioRecursos =
+			 * Paths.get("src//main//resources//static/uploads"); String rootPath =
+			 * directorioRecursos.toFile().getAbsolutePath(); try { byte[] bytes =
+			 * foto.getBytes(); Path rutaCompleta = Paths.get(rootPath + "//" +
+			 * foto.getOriginalFilename()); Files.write(rutaCompleta, bytes);
+			 * usuario.setFoto_usuario(foto.getOriginalFilename()); } catch (IOException e)
+			 * { model.addAttribute("error",
+			 * "Lo sentimos, hubo un error a la hora de cargar tu foto"); } }
+			 */
+			/*
+			 * else if (usuario.getFoto_usuario() == null || usuario.getFoto_usuario() ==
+			 * "") { usuario.setFoto_usuario("no-image.jpg"); }
+			 */
+
 			usuario.setFoto_usuario("no-image.jpg");
 
 			try {
@@ -260,22 +259,21 @@ public class UsuarioController {
 				/*
 				 * REGISTRO EL TOKEN DE REGISTRO SEGUN EL CORREO DEL USUARIO, PARA SU VALIDACIÒN
 				 */
-				/*ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
-				confirmationTokenRepository.save(confirmationToken);
-				// ENVÌO DEL CORREO DE VALIDACIÒN
-				SimpleMailMessage mailMessage = new SimpleMailMessage();
-				mailMessage.setTo(usuario.getEmail());
-				mailMessage.setSubject("Completar Registro | Biblioteca2020");
-				mailMessage.setFrom("edmech25@gmail.com");
-				mailMessage.setText(
-						"Buenas noches, hemos recibido tu peticiòn de registro a Biblioteca2020. Para confirmar tu cuenta, entrar aquì: "
-								+ "http://localhost:8080/usuarios/cuenta-verificada?token="
-								+ confirmationToken.getConfirmationToken());
-				flash.addFlashAttribute("success", "El usuario ha sido registrado en la base de datos.");
-				emailSenderService.sendEmail(mailMessage);
-				model.addAttribute("titulo", "Registro exitoso");
-				model.addAttribute("email", usuario.getEmail());
-				return "/usuarios/registro-exitoso";*/
+				/*
+				 * ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
+				 * confirmationTokenRepository.save(confirmationToken); // ENVÌO DEL CORREO DE
+				 * VALIDACIÒN SimpleMailMessage mailMessage = new SimpleMailMessage();
+				 * mailMessage.setTo(usuario.getEmail());
+				 * mailMessage.setSubject("Completar Registro | Biblioteca2020");
+				 * mailMessage.setFrom("edmech25@gmail.com"); mailMessage.setText(
+				 * "Buenas noches, hemos recibido tu peticiòn de registro a Biblioteca2020. Para confirmar tu cuenta, entrar aquì: "
+				 * + "http://localhost:8080/usuarios/cuenta-verificada?token=" +
+				 * confirmationToken.getConfirmationToken()); flash.addFlashAttribute("success",
+				 * "El usuario ha sido registrado en la base de datos.");
+				 * emailSenderService.sendEmail(mailMessage); model.addAttribute("titulo",
+				 * "Registro exitoso"); model.addAttribute("email", usuario.getEmail()); return
+				 * "/usuarios/registro-exitoso";
+				 */
 			} catch (Exception e) {
 				model.addAttribute("usuario", usuario);
 				model.addAttribute("roles", roleService.findOnlyUsers());
@@ -283,8 +281,8 @@ public class UsuarioController {
 				model.addAttribute("error", e.getMessage());
 				return "/usuarios/perfil";
 			}
-			
-			// ESTÀ FUERA DE LA LÒGICA DE REGITRO PORQUE TENGO QUE VALIDAR QUE EL USUARIO 
+
+			// ESTÀ FUERA DE LA LÒGICA DE REGITRO PORQUE TENGO QUE VALIDAR QUE EL USUARIO
 			// ESTÉ REGISTRADO ANTES DE MANDAR EL CORREO DE CONFIRMACIÒN
 			ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
 			confirmationTokenRepository.save(confirmationToken);
@@ -302,7 +300,7 @@ public class UsuarioController {
 			model.addAttribute("titulo", "Registro exitoso");
 			model.addAttribute("email", usuario.getEmail());
 			return "/usuarios/registro-exitoso";
-			
+
 		}
 	}
 
@@ -396,28 +394,38 @@ public class UsuarioController {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
 		cambiarPassword.setId(usuario.getId());
-		model.addAttribute("passwordForm", cambiarPassword);
+		model.addAttribute("cambiarPassword", cambiarPassword);
 		model.addAttribute("titulo", "Cambiar Password");
 		return "/usuarios/cambio-password";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@PostMapping("/cambioPassword")
-	public String cambioPasswordUser(@Valid CambiarPassword form, Model model, Errors errors, RedirectAttributes flash,
-			Authentication authentication) {
-		if (errors.hasErrors()) {
-			String result = errors.getAllErrors().stream().map(x -> x.getDefaultMessage())
+	public String cambioPasswordUser(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
+			RedirectAttributes flash, Authentication authentication) {
+
+		if (resultForm.hasErrors()) {
+			// CON ESTE BLOQUE SOBREESCRIBO EL ERROR GENÈRICO "NO PUEDE ESTAR VACÍO"
+			if (cambiarPassword.getPasswordActual().equals("") || cambiarPassword.getNuevaPassword().equals("")
+					|| cambiarPassword.getConfirmarPassword().equals("")) {
+				model.addAttribute("cambiarPasswordError", "Todos los campos son obligatorios");
+				model.addAttribute("titulo", "Cambiar Password");
+				return "/usuarios/cambio-password";
+			}
+			
+			String result = resultForm.getAllErrors().stream().map(x -> x.getDefaultMessage())
 					.collect(Collectors.joining(", "));
 			model.addAttribute("cambiarPasswordError", result);
+			System.out.println(result);
+			model.addAttribute("titulo", "Cambiar Password");
 			return "/usuarios/cambio-password";
 		}
-
 		try {
-			usuarioService.cambiarPassword(form);
+			usuarioService.cambiarPassword(cambiarPassword);
 			flash.addFlashAttribute("success", "Password Actualizada");
 			return "redirect:/home";
 		} catch (Exception e) {
-			model.addAttribute("passwordForm", form);
+			model.addAttribute("cambiarPassword", cambiarPassword);
 			model.addAttribute("titulo", "Cambiar Password");
 			model.addAttribute("cambiarPasswordError", e.getMessage());
 			return "/usuarios/cambio-password";

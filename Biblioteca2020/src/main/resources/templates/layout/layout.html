@@ -88,22 +88,21 @@
 								th:href="@{/empleados/cambioPassword}">Cambiar Password</a> <a
 								sec:authorize="hasRole('ROLE_USER')"
 								class="dropdown-item bg-light"
-								th:href="@{/usuarios/editarPerfil}">Mi Perfil (User)</a> <a
+								th:href="@{/usuarios/editarPerfil}">Mi Perfil</a> <a
 								sec:authorize="hasRole('ROLE_USER')"
 								class="dropdown-item bg-light"
-								th:href="@{/usuarios/cambioPassword}">Cambiar Password
-								(User)</a>
+								th:href="@{/usuarios/cambioPassword}">Cambiar Password</a>
 							<form id="logoutForm" th:action="@{/logout}" method="post">
 								<button class="dropdown-item bg-light"
-									onclick="documento.getElementById('logoutForm').submit();"
-									type="submit">Cerrar Sesión</button>
+									onclick="javascript: terminarSesion();" type="button">Cerrar
+									Sesión</button>
 							</form>
 						</div></li>
 				</ul>
 			</div>
 		</nav>
 
-		<div style="padding-top: 60px;">
+		<div style="padding-top: 55px;">
 			<!-- Mensajes flash para indicar el estado de las peticiones -->
 			<div id="alertPers"
 				class="alert alert-success alert-dismissible fade show" role="alert"
@@ -158,6 +157,15 @@
 			$(function() {
 				$('[data-toggle="tooltip"]').tooltip()
 			});
+
+			function terminarSesion() {
+				var r = confirm('Desea terminar la sesión?');
+				if (r == true) {
+					document.forms["logoutForm"].submit();
+				} else {
+					return false;
+				}
+			}
 		</script>
 	</footer>
 

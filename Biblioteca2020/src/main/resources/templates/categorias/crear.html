@@ -19,8 +19,8 @@
 				<div class="col-md-6">
 					<label class="col-form-label" for="nombre">Nombre</label> <input
 						class="form-control" type="text" th:field="*{nombre}"
-						th:errorclass="'form-control alert-danger'"
-						placeholder="Nombre de la categoría..." /> <small
+						th:errorclass="'form-control'"
+						placeholder="Nombre de la categoría..." autofocus /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
 				</div>

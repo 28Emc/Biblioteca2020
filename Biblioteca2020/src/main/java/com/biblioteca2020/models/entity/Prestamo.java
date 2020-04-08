@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import lombok.Getter;
@@ -33,16 +34,19 @@ public class Prestamo implements Serializable {
 	// PRESTAMOS(*):USER(1)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "usuario_id", nullable = false)
+	@Valid
 	private Usuario usuario;
 
 	// PRESTAMOS(*):EMPLEADO(1)	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "empleado_id", nullable = false)
+	//@Valid
 	private Empleado empleado;
 
 	// PRESTAMOS(*):LIBRO(1)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "libro_id", nullable = false)
+	@Valid
 	private Libro libro;
 	
 	@Temporal(TemporalType.DATE)

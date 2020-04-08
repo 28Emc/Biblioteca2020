@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -59,6 +60,8 @@ public class Libro implements Serializable {
 	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "categoria_id")
+	// ANOTACIÓN QUE SIRVE PARA VALIDAR CAMPOS DE ESTA ENTIDAD EN OTROS FORMULARIOS (EJM. LIBRO)
+	@Valid
 	private Categoria categoria;
 
 	@NotBlank

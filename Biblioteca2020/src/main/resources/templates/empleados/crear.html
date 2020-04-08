@@ -20,15 +20,15 @@
 				<div class="col-md-6">
 					<label class="col-form-label" for="nombres">Nombre(s)</label> <input
 						class="form-control" type="text" th:field="*{nombres}"
-						th:errorclass="'form-control alert-danger'"
-						placeholder="Nombre Completo..." /> <small
+						th:errorclass="'form-control'"
+						placeholder="Nombre Completo..." autofocus /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}"></small>
 				</div>
 				<div class="col-md-6">
 					<label class="col-form-label" for="apellidos">Apellidos</label> <input
 						class="form-control" type="text" th:field="*{apellidos}"
-						th:errorclass="'form-control alert-danger'"
+						th:errorclass="'form-control'"
 						placeholder="Apellido Paterno y Materno..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></small>
@@ -36,7 +36,7 @@
 				<div class="col-md-6">
 					<label class="col-form-label" for="nroDocumento">DNI</label><input
 						class="form-control" type="number" th:field="*{nroDocumento}"
-						th:errorclass="'form-control alert-danger'" placeholder="00000000" />
+						th:errorclass="'form-control'" placeholder="00000000" />
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('nroDocumento')}"
 						th:errors="*{nroDocumento}"></small>
@@ -44,7 +44,7 @@
 				<div class="col-md-6">
 					<label class="col-form-label" for="direccion">Dirección</label> <input
 						class="form-control" type="text" th:field="*{direccion}"
-						th:errorclass="'form-control alert-danger'"
+						th:errorclass="'form-control'"
 						placeholder="Av/Jr/Calle..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></small>
@@ -52,7 +52,7 @@
 				<div class="col-md-6">
 					<label class="col-form-label" for="celular">Celular</label> <input
 						class="form-control" type="number" th:field="*{celular}"
-						th:errorclass="'form-control alert-danger'" placeholder="99999999" />
+						th:errorclass="'form-control'" placeholder="99999999" />
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('celular')}" th:errors="*{celular}"></small>
 				</div>
@@ -63,14 +63,14 @@
 				<div class="col-md-6">
 					<label class="col-form-label" for="username">Usuario</label> <input
 						class="form-control" type="text" th:field="*{username}"
-						th:errorclass="'form-control alert-danger'"
+						th:errorclass="'form-control'"
 						placeholder="Usuario..." /> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></small>
 				</div>
 				<div class="col-md-6">
 					<label class="col-form-label" for="email">Email</label> <input
 						class="form-control" type="email" th:field="*{email}"
-						th:errorclass="'form-control alert-danger'"
+						th:errorclass="'form-control'"
 						placeholder="test@email.com" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
@@ -82,7 +82,7 @@
 				<div class="col-md-6">
 					<label class="col-form-label" for="password">Contraseña</label> <input
 						class="form-control" type="password" th:field="*{password}"
-						th:errorclass="'form-control alert-danger'"
+						th:errorclass="'form-control'"
 						placeholder="Contraseña..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small>
@@ -91,7 +91,7 @@
 					<label class="col-form-label" for="passwordConfirmacion">Confirmar
 						Contraseña</label> <input class="form-control" type="password"
 						th:field="*{passwordConfirmacion}"
-						th:errorclass="'form-control alert-danger'"
+						th:errorclass="'form-control'"
 						placeholder="Repite nuevamente tu contraseña..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('passwordConfirmacion')}"
@@ -103,7 +103,7 @@
 				<div class="col-md-6" hidden>
 					<label class="col-form-label" for="local">Local</label> <select
 						class="form-control" th:field="${empleado.local}"
-						th:errorclass="'form-control alert-danger'">
+						th:errorclass="'form-control'">
 						<option th:each="local :${localesList}" th:value="${local.id}"
 							th:text="${local.direccion}"></option>
 					</select> <small class="form-text text-danger"
@@ -113,7 +113,7 @@
 					<label class="col-form-label" for="rol">Rol</label> <select
 						multiple="multiple" size="4" class="form-control"
 						th:field="${empleado.roles}"
-						th:errorclass="'form-control alert-danger'">
+						th:errorclass="'form-control'">
 						<option th:each="rol :${roles}" th:value="${rol.id}"
 							th:text="${rol.authority}"></option>
 					</select> <small class="form-text text-danger"
@@ -143,8 +143,7 @@
 			<div class="form-group row py-4">
 				<div class="col-md-6">
 					<a class="btn btn-light btn-block"
-						th:href="@{'/empleados/cancelar'}"><i
-						class="fas fa-shield-alt"></i> Cancelar</a>
+						th:href="@{'/empleados/cancelar'}">Cancelar</a>
 				</div>
 				<div class="col-md-6">
 					<input class="btn btn-dark btn-block" type="submit"

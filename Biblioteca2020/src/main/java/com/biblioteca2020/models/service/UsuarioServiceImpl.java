@@ -15,11 +15,11 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
 	@Autowired
 	private IUsuarioDao usuarioDao;
-	
+
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
 
-	// MÉTODO PARA BUSCAR TODOS LOS USUARIOS 
+	// MÉTODO PARA BUSCAR TODOS LOS USUARIOS
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
@@ -96,11 +96,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
 		}
 		return true;
 	}
-	
+
 	/*
-	 * MÉTODO PARA VERIFICAR EL CAMPO CELULAR EN LA BD. EL CAMPO ES ÚNICO, Y
-	 * CAPTURO SU EXCEPCION ESPECÍFICA PARA MOSTAR UN MENSJAE DE ERROR
-	 * PERSONALIZADO.
+	 * MÉTODO PARA VERIFICAR EL CAMPO CELULAR EN LA BD. EL CAMPO ES ÚNICO, Y CAPTURO
+	 * SU EXCEPCION ESPECÍFICA PARA MOSTAR UN MENSJAE DE ERROR PERSONALIZADO.
 	 */
 	// USADO
 	public boolean verificarCelular(Usuario usuario) throws ConstraintViolationException {
@@ -137,39 +136,43 @@ public class UsuarioServiceImpl implements IUsuarioService {
 		}
 		return true;
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Usuario findByUsernameAndEstado(String username, boolean estado) {
 		return usuarioDao.findByUsernameAndEstado(username, estado);
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Usuario> findByNroDocumentoAndEstado(String term, boolean estado) {
 		return usuarioDao.findByNroDocumentoAndEstado("%" + term + "%", estado);
 	}
+
 	// USADO
 	@Override
-	public Usuario cambiarPassword(CambiarPassword form) throws Exception {	
+	public Usuario cambiarPassword(CambiarPassword form) throws Exception {
 		Usuario usuario = findById(form.getId());
 		
 		if (!passwordEncoder.matches(form.getPasswordActual(), usuario.getPassword())) {
 			throw new Exception("La contraseña actual es incorrecta");
 		}
-		
+
 		if (passwordEncoder.matches(form.getNuevaPassword(), usuario.getPassword())) {
 			throw new Exception("La nueva contraseña debe ser diferente a la actual");
 		}
-		
+
 		if (!form.getNuevaPassword().equals(form.getConfirmarPassword())) {
 			throw new Exception("Las contraseñas no coinciden");
 		}
-		
+
 		String passwordHash = passwordEncoder.encode(form.getNuevaPassword());
 		usuario.setPassword(passwordHash);
 		return usuarioDao.save(usuario);
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
