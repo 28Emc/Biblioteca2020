@@ -39,7 +39,7 @@ public class Prestamo implements Serializable {
 
 	// PRESTAMOS(*):EMPLEADO(1)	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "empleado_id", nullable = false)
+	@JoinColumn(name = "empleado_id")
 	//@Valid
 	private Empleado empleado;
 

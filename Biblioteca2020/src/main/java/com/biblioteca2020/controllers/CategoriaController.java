@@ -36,7 +36,7 @@ public class CategoriaController {
 		return "categorias/listar";
 	}
 
-	@RequestMapping(value = "/cargarCategorias/{term}", produces = { "application/json" })
+	@RequestMapping(value = "/cargar-categorias/{term}", produces = { "application/json" })
 	public @ResponseBody List<Categoria> cargarCategorias(@PathVariable String term) {
 		return categoriaService.findByNombreLikeIgnoreCase(term);
 	}

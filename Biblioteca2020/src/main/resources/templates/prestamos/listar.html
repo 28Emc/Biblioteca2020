@@ -16,9 +16,16 @@
 			<a class="btn btn-primary btn-xs" th:href="@{/prestamos/crear}"><i
 				class="fas fa-shield-alt"></i> Generar Préstamo</a>
 		</p>
-		
-		<h1 th:if="${#lists.isEmpty(prestamos)}">No hay préstamos para mostrar</h1>
-		
+
+		<p sec:authorize="hasRole('ROLE_USER')">
+			<a class="btn btn-primary btn-xs"
+				th:href="@{/prestamos/prestamos-pendientes}">Ver Préstamos
+				Pendientes</a>
+		</p>
+
+		<h1 th:if="${#lists.isEmpty(prestamos)}">No hay préstamos para
+			mostrar</h1>
+
 		<table class="table table-responsive"
 			th:if="${not #lists.isEmpty(prestamos)}">
 			<thead>
@@ -37,48 +44,111 @@
 			</thead>
 			<tbody>
 				<tr th:each="prestamo: ${prestamos}">
-					<td th:text="${prestamo.id}"></td>
-					<td th:text="${prestamo.libro.titulo}+', '+${prestamo.libro.autor}"></td>
-					<td
-						th:text="${prestamo.empleado.nombres}+', '+${prestamo.empleado.apellidos}"></td>
-					<td th:text="${prestamo.empleado.local.direccion}"></td>
-					<td
-						th:text="${prestamo.usuario.nombres}+', '+${prestamo.usuario.apellidos}"></td>
-					<td th:text="${prestamo.fecha_despacho}"></td>
-					<td th:text="${prestamo.fecha_devolucion}"></td>
-					<td data-toggle="tooltip" data-placement="top"
-						th:title="${prestamo.observaciones}" class="text-center"><i
-						class="fas fa-search fa-2x"></i></td>
 
-					<th:block th:with="estado=${prestamo.devolucion}"
-						sec:authorize="!hasRole('ROLE_USER')">
-						<td th:if="${estado}">
-							<h5>
-								<span class="badge badge-success" th:text="'Préstamo Terminado'"></span>
-							</h5>
-						</td>
-						<td th:if="${estado}"><a
-							class="disabled btn btn-secondary btn-xs" href="#"> <i
-								class="fas fa-shield-alt"></i> Devolver Libro
-						</a></td>
-						<td th:if="${estado}"><a
-							class="disabled btn btn-secondary btn-xs" href="#"><i
-								class="fas fa-shield-alt"></i> Anular Préstamo</a></td>
-						<td th:unless="${estado}">
-							<h5>
-								<span class="badge badge-danger text-light"
-									th:text="'Libro Sin devolver'"></span>
-							</h5>
-						</td>
-						<td th:unless="${estado}"><a class="btn btn-info btn-xs"
-							th:href="@{/prestamos/devolverLibro/}+${prestamo.id}"
-							onclick="return confirm('¿Seguro de querer validar la devolución del libro?');"><i
-								class="fas fa-shield-alt"></i> Devolver Libro</a></td>
-						<td th:unless="${estado}"><a class="btn btn-warning btn-xs"
-							th:href="@{/prestamos/anularPrestamo/}+${prestamo.id}"
-							onclick="return confirm('Seguro de querer anular el préstamo?');"><i
-								class="fas fa-shield-alt"></i> Anular Préstamo</a></td>
+					<th:block th:if="${prestamo.empleado.username}=='Prueba'">
+						<td th:text="${prestamo.id}"></td>
+						<td
+							th:text="${prestamo.libro.titulo}+', '+${prestamo.libro.autor}"></td>
+						<td th:text="'--'"></td>
+						<td th:text="${prestamo.empleado.local.direccion}"></td>
+						<td
+							th:text="${prestamo.usuario.nombres}+', '+${prestamo.usuario.apellidos}"></td>
+						<td th:text="${prestamo.fecha_despacho}"></td>
+						<td th:text="${prestamo.fecha_devolucion}"></td>
+						<td data-toggle="tooltip" data-placement="top"
+							th:title="${prestamo.observaciones}" class="text-center"><i
+							class="fas fa-search fa-2x"></i></td>
 					</th:block>
+
+					<th:block th:unless="${prestamo.empleado.username}=='Prueba'">
+						<td th:text="${prestamo.id}"></td>
+						<td
+							th:text="${prestamo.libro.titulo}+', '+${prestamo.libro.autor}"></td>
+						<td
+							th:text="${prestamo.empleado.nombres}+', '+${prestamo.empleado.apellidos}"></td>
+						<td th:text="${prestamo.empleado.local.direccion}"></td>
+						<td
+							th:text="${prestamo.usuario.nombres}+', '+${prestamo.usuario.apellidos}"></td>
+						<td th:text="${prestamo.fecha_despacho}"></td>
+						<td th:text="${prestamo.fecha_devolucion}"></td>
+						<td data-toggle="tooltip" data-placement="top"
+							th:title="${prestamo.observaciones}" class="text-center"><i
+							class="fas fa-search fa-2x"></i></td>
+					</th:block>
+
+					<td th:if="${prestamo.devolucion}"
+						sec:authorize="!hasRole('ROLE_USER')">
+						<h5>
+							<span class="badge badge-success" th:text="'Préstamo Terminado'"></span>
+						</h5>
+					</td>
+
+					<td th:unless="${prestamo.devolucion}"
+						sec:authorize="!hasRole('ROLE_USER')">
+						<h5>
+							<span class="badge badge-danger text-light"
+								th:text="'Libro Sin devolver'"></span>
+						</h5>
+					</td>
+					<!-- BLOQUE DE CÒDIGO PARA HABILITAR Y DESHABILITAR BOTONES DE ACUERDO AL TIPO DE REGISTRO -->
+					<!-- 1. ORDEN ANULADA O TERMINADA POR EMPLEADO (COLOR VERDE) -->
+					<th:block th:if="${prestamo.devolucion}">
+
+						<!-- 1.1. ORDEN CONFIRMADA POR USUARIO -->
+						<th:block th:if="${confirma}"
+							sec:authorize="!hasRole('ROLE_USER')">
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Orden
+									Confirmada</a></td>
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Devolver
+									Libro</a></td>
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Anular
+									Orden</a></td>
+						</th:block>
+
+						<!-- 1.2. ORDEN SIN CONFIRMAR POR USUARIO-->
+						<th:block th:unless="${confirma}"
+							sec:authorize="!hasRole('ROLE_USER')">
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Confirmar
+									Orden</a></td>
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Devolver
+									Libro</a></td>
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Anular
+									Orden</a></td>
+						</th:block>
+
+					</th:block>
+
+					<!-- 2. ORDEN SIN DEVOLVER POR EMPLEADO (COLOR ROJO) -->
+					<th:block th:unless="${prestamo.devolucion}">				
+
+						<!-- 2.1. ORDEN CONFIRMADA POR USUARIO -->
+						<th:block th:if="${confirma}" sec:authorize="!hasRole('ROLE_USER')">
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Confirmar
+									Orden</a></td>
+							<td><a class="btn btn-info btn-xs"
+								th:href="@{/prestamos/devolver-libro/}+${prestamo.id}"
+								onclick="return confirm('¿Seguro de querer validar la devolución del libro?');">Devolver
+									Libro</a></td>
+							<td><a class="btn btn-warning btn-xs"
+								th:href="@{/prestamos/anular-prestamo/}+${prestamo.id}"
+								onclick="return confirm('Seguro de querer anular el préstamo?');">Anular
+									Préstamo</a></td>
+						</th:block>
+
+						<!-- 2.2. ORDEN SIN CONFIRMAR -->
+						<th:block th:unless="${confirma}" sec:authorize="!hasRole('ROLE_USER')">
+							<td><a class="btn btn-success btn-xs"
+								th:href="@{/prestamos/confirmar-orden/}+${prestamo.id}"
+								onclick="return confirm('¿Confirmar la orden de este libro?');">Confirmar
+									Orden</a></td>
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Devolver
+									Libro</a></td>
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Anular
+									Préstamo</a></td>
+						</th:block>
+
+					</th:block>
+
 				</tr>
 			</tbody>
 		</table>

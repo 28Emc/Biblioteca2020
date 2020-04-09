@@ -46,7 +46,7 @@ public class EmpleadoController {
 
 	// ############################## ROLE EMPLEADO, ROLE ADMIN
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
-	@GetMapping("/editarPerfil")
+	@GetMapping("/editar-perfil")
 	public String editarPerfil(Map<String, Object> modelMap, RedirectAttributes flash, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
@@ -64,7 +64,7 @@ public class EmpleadoController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
-	@PostMapping(value = "/editarPerfil")
+	@PostMapping(value = "/editar-perfil")
 	public String guardarPerfil(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_emp") MultipartFile foto) {
 		if (result.hasErrors()) {
@@ -108,13 +108,13 @@ public class EmpleadoController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
-	@GetMapping("/cancelarPerfil")
+	@GetMapping("/cancelar-perfil")
 	public String cancelarPerfil() {
 		return "redirect:/home";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
-	@GetMapping("/cambioPassword")
+	@GetMapping("/cambio-password")
 	public String cambioPasswordEmpleado(Model model, Authentication authentication) {
 		CambiarPassword cambiarPassword = new CambiarPassword();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -126,7 +126,7 @@ public class EmpleadoController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
-	@PostMapping("/cambioPassword")
+	@PostMapping("/cambio-password")
 	public String cambioPasswordEmpleado(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
 			RedirectAttributes flash, Authentication authentication) {
 		
@@ -156,7 +156,7 @@ public class EmpleadoController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
-	@GetMapping(value = "/deshabilitarPerfil")
+	@GetMapping(value = "/deshabilitar-perfil")
 	public String deshabilitarPerfil(RedirectAttributes flash, Authentication authentication) {
 		try {
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -387,14 +387,14 @@ public class EmpleadoController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	@GetMapping("/perfilAdmin")
+	@GetMapping("/perfil-admin")
 	public String perfilAdmin() {
-		return "/empleados/perfilAdmin";
+		return "/empleados/perfil-admin";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO')")
-	@GetMapping("/perfilEmpleado")
+	@GetMapping("/perfil-empleado")
 	public String perfilEmpleado() {
-		return "/empleados/perfilEmpleado";
+		return "/empleados/perfil-empleado";
 	}
 }

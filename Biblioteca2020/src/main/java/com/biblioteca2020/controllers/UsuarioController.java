@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,7 +15,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
+import org.springframework.expression.ParseException;
+import org.springframework.mail.MailException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,6 +40,7 @@ import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Prestamo;
 import com.biblioteca2020.models.entity.Usuario;
 import com.biblioteca2020.models.service.EmailSenderService;
+import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.IPrestamoService;
 import com.biblioteca2020.models.service.IRoleService;
@@ -67,6 +68,9 @@ public class UsuarioController {
 
 	@Autowired
 	private ILibroService libroService;
+
+	@Autowired
+	private IEmpleadoService empleadoService;
 
 	// ############################ ROLE USER ############################
 	// CATÁLOGO DE LIBROS PARA EL USUARIO
@@ -102,7 +106,7 @@ public class UsuarioController {
 
 	// CARGAR FORMULARIO DE ORDEN DE PRÉSTAMO
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
-	@GetMapping("/biblioteca/solicitarLibro/{id}/{titulo}")
+	@GetMapping("/biblioteca/solicitar-libro/{id}/{titulo}")
 	public String solicitarLibroForm(@PathVariable("titulo") String titulo, @PathVariable("id") Long id_local,
 			Model model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -110,29 +114,25 @@ public class UsuarioController {
 		Libro libro = libroService.findByTituloAndLocalAndEstado(titulo, id_local, true);
 		model.addAttribute("titulo", "Solicitar Libro");
 		model.addAttribute("libro", libro);
-		// model.addAttribute("local", libro.getLocal());
+		model.addAttribute("titulo_libro", titulo);
+		model.addAttribute("id_local", id_local);
 		model.addAttribute("usuario", usuario);
 		model.addAttribute("prestamo", new Prestamo());
 		return "/usuarios/biblioteca/solicitarLibro";
 	}
 
 	// GENERAR ORDEN DE PRÉSTAMO
-	// TE QUEDASTE AQUI - NO FUNCIONE ESTE MÈTODO - 2.04.2020
+	// TE QUEDASTE AQUI - NO FUNCIONE ESTE MÈTODO - 8.04.2020
+	// SETEANDO MANUALMENTE LOS DATOS SI REGISTRA LA ORDEN
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
-	@PostMapping("/biblioteca/solicitarLibro")
-	public String solicitarLibro(@Valid Prestamo prestamo,
-			@RequestParam(name = "id_libro", required = false) Long id_libro,
-			@RequestParam(name = "id_usuario", required = false) Long id_usuario,
-			@RequestParam(name = "fechaDevolucion", required = false) String fechaDevolucion, RedirectAttributes flash,
+	@PostMapping("/biblioteca/solicitar-libro")
+	public String solicitarLibro(@Valid Prestamo prestamo, BindingResult result, RedirectAttributes flash,
 			SessionStatus status, Model model, Authentication authentication) {
-		// System.out.println(libro.getId() + ", " + usuario.getId() + ", " +
-		// fechaDevolucion);
+
 		try {
-			if (id_libro == null || id_usuario == null || fechaDevolucion == null) {
-				// model.addAttribute("libro", libroService.findOne(id_libro));
-				// model.addAttribute("local", libroService.findOne(id_libro).getLocal());
-				// model.addAttribute("usuario", usuarioService.findById(id_usuario));
+			if (result.hasErrors()) {
 				model.addAttribute("prestamo", prestamo);
+				model.addAttribute("titulo", "Solicitar Libro");
 				model.addAttribute("error",
 						"El prestamo necesita un libro, un usuario y una fecha de despacho VÁLIDOS.");
 				return "/usuarios/biblioteca/solicitarLibro";
@@ -142,33 +142,39 @@ public class UsuarioController {
 			// LA ORDEN DE PRÈSTAMO VALIDA ID_LIBRO, ID_USUARIO,
 			// FECHA_DESPACHO, FECHA_DEVOLUCIÒN Y OBSERVACIONES.
 			// LIBRO
-			Libro libroAPrestar = libroService.findByTituloAndLocalAndEstado(libroService.findOne(id_libro).getTitulo(),
-					libroService.findOne(id_libro).getLocal().getId(), true);
+			// ------------------- SETEADO MANUALMENTE ---------------------------
+			Libro libroAPrestar = libroService.findByTituloAndLocalAndEstado(
+					libroService.findOne(/* id_libro *//* prestamo.getLibro().getId() */1L).getTitulo(),
+					libroService.findOne(/* id_libro *//* prestamo.getLibro().getId() */1L).getLocal().getId(), true);
 			prestamo.setLibro(libroAPrestar);
 			// ACTUALIZAR STOCK LIBRO
 			if (libroAPrestar.getStock() <= 0) {
 				model.addAttribute("error", "Lo sentimos, no hay stock suficiente del libro seleccionado ("
 						+ libroAPrestar.getTitulo() + ")");
-				return "/usuarios/biblioteca/solicitarLibro";
+				return "/usuarios/biblioteca/solicitar-libro";
 			} else {
 				libroAPrestar.setStock(libroAPrestar.getStock() - 1);
 			}
 			// USUARIO
-			prestamo.setUsuario(usuarioService.findById(id_usuario));
+			// ------------------- SETEADO MANUALMENTE ---------------------------
+			prestamo.setUsuario(usuarioService.findById(/* id_usuario *//* prestamo.getUsuario().getId() */3L));
 			// EMPLEADO
-			prestamo.setEmpleado(null);
+			// EL EMPLEADO SE SETEA CON EL USUARIO DE PRUEBA (CODIGO 1) POR PARTE DEL
+			// USUARIO
+			prestamo.setEmpleado(empleadoService.findById(1L));
 			// FECHA_DESPACHO
 			Date fechaDespacho = new Date();
 			prestamo.setFecha_despacho(fechaDespacho);
 			// FECHA DEVOLUCIÓN
+			// ------------------- SETEADO MANUALMENTE ---------------------------
 			try {
 				DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 				Date fechaDevolucionPrestamo = null;
-				fechaDevolucionPrestamo = formatter.parse(fechaDevolucion);
+				fechaDevolucionPrestamo = formatter.parse("2020-02-10");
 				prestamo.setFecha_devolucion(fechaDevolucionPrestamo);
 			} catch (ParseException pe) {
 				model.addAttribute("error", pe.getMessage());
-				return "/usuarios/biblioteca/solicitarLibro";
+				return "/usuarios/biblioteca/solicitar-libro";
 			}
 			// USO CALENDAR PARA MOSTRAR LA FECHA DE DEVOLUCION
 			Calendar calendar = Calendar.getInstance(new Locale("es", "ES"));
@@ -179,33 +185,26 @@ public class UsuarioController {
 			String dia = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
 			String fechaPrestamoHoy = dia + " de " + mes + " " + anio;
 			// OBSERVACIONES
-			prestamo.setObservaciones("El usuario: " + prestamo.getUsuario().getNombres() + ", "
-					+ prestamo.getUsuario().getApellidos() + "(DNI " + prestamo.getUsuario().getNroDocumento()
-					+ ") ha solicitado el libro: " + prestamo.getLibro().getTitulo() + " para el dìa "
-					+ fechaPrestamoHoy + ", hasta el dìa " + prestamo.getFecha_devolucion() + ".");
+			prestamo.setObservaciones(
+					"El usuario: " + prestamo.getUsuario().getNombres() + ", " + prestamo.getUsuario().getApellidos()
+							+ "(DNI " + prestamo.getUsuario().getNroDocumento() + ") ha solicitado el libro: "
+							+ prestamo.getLibro().getTitulo() + " para el dìa " + fechaPrestamoHoy + ", hasta el dìa "
+							+ prestamo.getFecha_devolucion() + ". A la espera de confirmación.");
 			// DEVOLUCION
 			prestamo.setDevolucion(false);
 			prestamoService.save(prestamo);
+			flash.addFlashAttribute("success", "Su orden ha sido registrada!");
+			flash.addFlashAttribute("confirma", false);
+			model.addAttribute("prestamos", prestamoService
+					.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(prestamo.getUsuario().getId()));
 		} catch (Exception e) {
 			model.addAttribute("error", e.getMessage());
+			model.addAttribute("titulo", "Solicitar Libro");
 		}
-		return "/usuarios/biblioteca/solicitarLibro";
+		return "redirect:/prestamos/prestamos-pendientes";
 	}
 
-	/*
-	 * QUERY SIMPLE PARA MOSTRAR EN LA TABLA DE DISPONIBILIDAD LIBRO SELECT
-	 * lo.direccion AS LOCAL, li.estado AS DISPONIBLE, li.stock AS STOCK FROM
-	 * biblioteca2020.libros li INNER JOIN biblioteca2020.locales lo ON li.local_id
-	 * = lo.id WHERE li.titulo like 'Las noches Blancas';
-	 */
-	/*
-	 * QUERY COMPLETA PARA LLAMAR DESDE LA BD SELECT
-	 *
-	 * FROM biblioteca2020.libros li INNER JOIN biblioteca2020.locales lo ON
-	 * li.local_id = lo.id WHERE li.titulo like 'Las noches Blancas';
-	 */
-
-	@GetMapping("/crearPerfil")
+	@GetMapping("/crear-perfil")
 	public String perfil(Model model) {
 		model.addAttribute("usuario", new Usuario());
 		model.addAttribute("roles", roleService.findOnlyUsers());
@@ -214,16 +213,14 @@ public class UsuarioController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
-	@GetMapping("/cancelarPerfil")
+	@GetMapping("/cancelar-perfil")
 	public String cancelarPerfil() {
 		return "redirect:/home";
 	}
 
-	@PostMapping(value = "/crearPerfil")
+	@PostMapping(value = "/crear-perfil")
 	public String crearPerfil(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
-			SessionStatus status, RedirectAttributes flash
-	// , @RequestParam("foto_usu") MultipartFile foto
-	) {
+			SessionStatus status, RedirectAttributes flash) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("roles", roleService.findOnlyUsers());
@@ -233,47 +230,14 @@ public class UsuarioController {
 		/* VALIDACIÓN EMAIL */
 		Usuario usuarioExistente = usuarioService.findByEmailIgnoreCase(usuario.getEmail());
 		if (usuarioExistente != null) {
-			model.addAttribute("error", "El correo ya está asociado a otro usuario!");
-			return "/usuarios/perfil";
+			flash.addFlashAttribute("error", "El correo ya está asociado a otro usuario!");
+			flash.addFlashAttribute("titulo", "Registro de Usuario");
+			return "redirect:/usuarios/perfil";
 		} else {
-			/* LÓGICA DE REGISTRO DE USUARIOS */
-			/*
-			 * if (!foto.isEmpty()) { Path directorioRecursos =
-			 * Paths.get("src//main//resources//static/uploads"); String rootPath =
-			 * directorioRecursos.toFile().getAbsolutePath(); try { byte[] bytes =
-			 * foto.getBytes(); Path rutaCompleta = Paths.get(rootPath + "//" +
-			 * foto.getOriginalFilename()); Files.write(rutaCompleta, bytes);
-			 * usuario.setFoto_usuario(foto.getOriginalFilename()); } catch (IOException e)
-			 * { model.addAttribute("error",
-			 * "Lo sentimos, hubo un error a la hora de cargar tu foto"); } }
-			 */
-			/*
-			 * else if (usuario.getFoto_usuario() == null || usuario.getFoto_usuario() ==
-			 * "") { usuario.setFoto_usuario("no-image.jpg"); }
-			 */
-
 			usuario.setFoto_usuario("no-image.jpg");
 
 			try {
 				usuarioService.save(usuario);
-				/*
-				 * REGISTRO EL TOKEN DE REGISTRO SEGUN EL CORREO DEL USUARIO, PARA SU VALIDACIÒN
-				 */
-				/*
-				 * ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
-				 * confirmationTokenRepository.save(confirmationToken); // ENVÌO DEL CORREO DE
-				 * VALIDACIÒN SimpleMailMessage mailMessage = new SimpleMailMessage();
-				 * mailMessage.setTo(usuario.getEmail());
-				 * mailMessage.setSubject("Completar Registro | Biblioteca2020");
-				 * mailMessage.setFrom("edmech25@gmail.com"); mailMessage.setText(
-				 * "Buenas noches, hemos recibido tu peticiòn de registro a Biblioteca2020. Para confirmar tu cuenta, entrar aquì: "
-				 * + "http://localhost:8080/usuarios/cuenta-verificada?token=" +
-				 * confirmationToken.getConfirmationToken()); flash.addFlashAttribute("success",
-				 * "El usuario ha sido registrado en la base de datos.");
-				 * emailSenderService.sendEmail(mailMessage); model.addAttribute("titulo",
-				 * "Registro exitoso"); model.addAttribute("email", usuario.getEmail()); return
-				 * "/usuarios/registro-exitoso";
-				 */
 			} catch (Exception e) {
 				model.addAttribute("usuario", usuario);
 				model.addAttribute("roles", roleService.findOnlyUsers());
@@ -286,21 +250,41 @@ public class UsuarioController {
 			// ESTÉ REGISTRADO ANTES DE MANDAR EL CORREO DE CONFIRMACIÒN
 			ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
 			confirmationTokenRepository.save(confirmationToken);
-			// ENVÌO DEL CORREO DE VALIDACIÒN
-			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setTo(usuario.getEmail());
-			mailMessage.setSubject("Completar Registro | Biblioteca2020");
-			mailMessage.setFrom("edmech25@gmail.com");
-			mailMessage.setText(
-					"Buenas noches, hemos recibido tu peticiòn de registro a Biblioteca2020. Para confirmar tu cuenta, entrar aquì: "
-							+ "http://localhost:8080/usuarios/cuenta-verificada?token="
-							+ confirmationToken.getConfirmationToken());
-			flash.addFlashAttribute("success", "El usuario ha sido registrado en la base de datos.");
-			emailSenderService.sendEmail(mailMessage);
-			model.addAttribute("titulo", "Registro exitoso");
-			model.addAttribute("email", usuario.getEmail());
-			return "/usuarios/registro-exitoso";
 
+			// ENVIO DE MAIL CON MIMEMESSAGE
+			try {
+				String message = "<html><head>"+
+						"<meta charset='UTF-8' />"+ 
+						"<meta name='viewport' content='width=device-width, initial-scale=1.0' />"+ 
+						"<title>Completar Registro | Biblioteca2020</title>"+ 
+						"</head>"+ 
+						"<body>"+ 
+						"<div class='container' style='padding-top: 3rem;'>"+ 
+						"<img style='padding-top: 3rem;' src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"+ 
+						"<div class='container' style='padding-top: 3rem;'>"+ 
+						"<p>Buenas noches, hemos recibido tu peticiòn de registro a Biblioteca2020.</p><br/>"+
+						"<p style='padding-top: 1rem;'>Para confirmar tu cuenta, entrar aquì: "+ 
+						"<a class='text-info' href='http://localhost:8080/usuarios/cuenta-verificada?token=" + confirmationToken.getConfirmationToken()+
+						"'>http://localhost:8080/usuarios/cuenta-verificada?token=" + confirmationToken.getConfirmationToken() + "</a>"+ 
+						"</p>"+  
+						"</div>"+ 
+						"</div>"+ 
+						"</body>"+ 
+						"<div class='footer' style='padding-top: 3rem;'>Biblioteca ©2020</div>"+ 
+						"</html>";
+				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
+						"Completar Registro | Biblioteca2020", message);
+				model.addAttribute("titulo", "Registro exitoso");
+				model.addAttribute("email", usuario.getEmail());
+				return "/usuarios/registro-exitoso";
+			} catch (MailException ex) {
+				model.addAttribute("usuario", usuario);
+				model.addAttribute("roles", roleService.findOnlyUsers());
+				model.addAttribute("titulo", "Registro de Usuario");
+				model.addAttribute("error", ex.getMessage());
+				System.out.println(ex.getMostSpecificCause());
+				return "/usuarios/perfil";
+			}
 		}
 	}
 
@@ -320,13 +304,14 @@ public class UsuarioController {
 				return "/usuarios/error-registro";
 			}
 		} else {
-			model.addAttribute("error", "El enlace es invàlido!");
+			model.addAttribute("error", "Lo sentimos, el enlace es invàlido o ya caducó!");
+			model.addAttribute("titulo", "Error al Registrar");
 			return "/usuarios/error-registro";
 		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
-	@GetMapping("/editarPerfil")
+	@GetMapping("/editar-perfil")
 	public String editarPerfil(Map<String, Object> modelMap, RedirectAttributes flash, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Usuario usuario = usuarioService.findByUsernameAndEstado(userDetails.getUsername(), true);
@@ -344,7 +329,7 @@ public class UsuarioController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
-	@PostMapping(value = "/editarPerfil")
+	@PostMapping(value = "/editar-perfil")
 	public String guardarPerfil(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_usu") MultipartFile foto) {
 		if (result.hasErrors()) {
@@ -388,7 +373,7 @@ public class UsuarioController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
-	@GetMapping("/cambioPassword")
+	@GetMapping("/cambio-password")
 	public String cambioPasswordUser(Model model, Authentication authentication) {
 		CambiarPassword cambiarPassword = new CambiarPassword();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -400,7 +385,7 @@ public class UsuarioController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
-	@PostMapping("/cambioPassword")
+	@PostMapping("/cambio-password")
 	public String cambioPasswordUser(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
 			RedirectAttributes flash, Authentication authentication) {
 
@@ -412,7 +397,7 @@ public class UsuarioController {
 				model.addAttribute("titulo", "Cambiar Password");
 				return "/usuarios/cambio-password";
 			}
-			
+
 			String result = resultForm.getAllErrors().stream().map(x -> x.getDefaultMessage())
 					.collect(Collectors.joining(", "));
 			model.addAttribute("cambiarPasswordError", result);
@@ -433,7 +418,7 @@ public class UsuarioController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
-	@GetMapping(value = "/deshabilitarPerfil")
+	@GetMapping(value = "/deshabilitar-perfil")
 	public String deshabilitarPerfil(RedirectAttributes flash, Authentication authentication) {
 		try {
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();

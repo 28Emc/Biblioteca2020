@@ -61,10 +61,10 @@
 
 					<th:block sec:authorize="hasRole('ROLE_SYSADMIN')">
 						<td><a class="btn btn-warning btn-xs"
-							th:href="@{/empresas/editarSysAdmin/}+${empresa.id}"><i
+							th:href="@{/empresas/editar-sys-admin/}+${empresa.id}"><i
 								class="fas fa-shield-alt"></i> Editar</a></td>
 						<td><a class="btn btn-info btn-xs"
-							th:href="@{/empresas/deshabilitarSysAdmin/}+${empresa.id}"
+							th:href="@{/empresas/deshabilitar-sys-admin/}+${empresa.id}"
 							onclick="return confirm('Seguro de querer deshabilitar la empresa?');"><i
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 					</th:block>

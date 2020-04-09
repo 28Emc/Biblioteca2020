@@ -20,7 +20,7 @@
 	<div class="container my-4">
 		<h2 class="text-warning" th:text="${titulo}"></h2>
 		<form
-			th:action="${editable} ?@{/usuarios/editarPerfil} :@{/usuarios/crearPerfil}"
+			th:action="${editable} ?@{/usuarios/editar-perfil} :@{/usuarios/crear-perfil}"
 			th:object="${usuario}" method="post" enctype="multipart/form-data">
 			
 			<h4 class="my-4" th:text="'Datos personales'"></h4>

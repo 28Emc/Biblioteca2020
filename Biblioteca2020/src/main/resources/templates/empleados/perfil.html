@@ -18,7 +18,7 @@
 
 	<div class="container my-4">
 		<h1 class="text-warning" th:text="${titulo}"></h1>
-		<form th:action="@{/empleados/editarPerfil}" th:object="${empleado}"
+		<form th:action="@{/empleados/editar-perfil}" th:object="${empleado}"
 			method="post" enctype="multipart/form-data">
 
 			<h4 th:text="'Datos personales'"></h4>

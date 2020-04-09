@@ -65,7 +65,7 @@
 							Ver libros</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_USER')"
-						th:href="@{/prestamos/historialUser}"><i
+						th:href="@{/prestamos/historial-user}"><i
 							class="fas fa-clipboard-list"></i> Historial Préstamos</a></li>
 				</ul>
 
@@ -82,16 +82,16 @@
 							<a
 								sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
 								class="dropdown-item bg-light"
-								th:href="@{/empleados/editarPerfil}">Mi Perfil</a> <a
+								th:href="@{/empleados/editar-perfil}">Mi Perfil</a> <a
 								sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
 								class="dropdown-item bg-light"
-								th:href="@{/empleados/cambioPassword}">Cambiar Password</a> <a
+								th:href="@{/empleados/cambio-password}">Cambiar Password</a> <a
 								sec:authorize="hasRole('ROLE_USER')"
 								class="dropdown-item bg-light"
-								th:href="@{/usuarios/editarPerfil}">Mi Perfil</a> <a
+								th:href="@{/usuarios/editar-perfil}">Mi Perfil</a> <a
 								sec:authorize="hasRole('ROLE_USER')"
 								class="dropdown-item bg-light"
-								th:href="@{/usuarios/cambioPassword}">Cambiar Password</a>
+								th:href="@{/usuarios/cambio-password}">Cambiar Password</a>
 							<form id="logoutForm" th:action="@{/logout}" method="post">
 								<button class="dropdown-item bg-light"
 									onclick="javascript: terminarSesion();" type="button">Cerrar

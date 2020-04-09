@@ -19,10 +19,14 @@ public interface IPrestamoService {
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(Long idEmpleado);
 	// USADO
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerUser(Long id);
+	// USADO
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(Long id);
 
 	public void save(Prestamo prestamo);
 		
 	public void update(Prestamo prestamo);
+	
+	public void delete(Long id);
 	// USADO
 	public String mostrarFechaAmigable();	
 }

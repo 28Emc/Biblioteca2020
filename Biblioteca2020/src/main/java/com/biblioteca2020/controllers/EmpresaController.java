@@ -52,7 +52,7 @@ public class EmpresaController {
 
 	// MÉTODO PARA REALIZAR LA BUSQUEDA DE EMPRESAS MEDIANTE AUTOCOMPLETADO
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	@RequestMapping(value = "/cargarEmpresas/{term}", produces = { "application/json" })
+	@RequestMapping(value = "/cargar-empresas/{term}", produces = { "application/json" })
 	public @ResponseBody Empresa cargarEmpresas(@PathVariable String term) {
 		return empresaService.findByRucAndEstado(term, true);
 	}
