@@ -2,9 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <meta charset="UTF-8" />
-<title th:text="'Biblioteca'"></title>
+<title th:text="'Biblioteca | ' + ${titulo}"></title>
+
 <head th:replace="layout/layout :: head"></head>
+
 <body class="bg-light">
+	
 	<header th:replace="layout/layout :: header"></header>
 
 	<div class="container-md container-lg container-xl mx-5">

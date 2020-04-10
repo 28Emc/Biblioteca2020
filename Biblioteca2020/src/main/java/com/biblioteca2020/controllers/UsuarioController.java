@@ -118,46 +118,69 @@ public class UsuarioController {
 		model.addAttribute("id_local", id_local);
 		model.addAttribute("usuario", usuario);
 		model.addAttribute("prestamo", new Prestamo());
-		return "/usuarios/biblioteca/solicitarLibro";
+		return "/usuarios/biblioteca/solicitar-libro";
 	}
 
 	// GENERAR ORDEN DE PRÉSTAMO
-	// TE QUEDASTE AQUI - NO FUNCIONE ESTE MÈTODO - 8.04.2020
-	// SETEANDO MANUALMENTE LOS DATOS SI REGISTRA LA ORDEN
+	// PROBLEMA RESUELTO 9.04.2020
+	// SE AGREGÓ EN LA VISTA CON th:attr="value=${objeto.valor}"
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
-	@PostMapping("/biblioteca/solicitar-libro")
-	public String solicitarLibro(@Valid Prestamo prestamo, BindingResult result, RedirectAttributes flash,
-			SessionStatus status, Model model, Authentication authentication) {
+	@PostMapping(value = "/biblioteca/solicitar-libro")
+	public String solicitarLibro(Prestamo prestamo, @RequestParam(name = "id_libro", required = false) Long id_libro,
+			@RequestParam(name = "id_usuario", required = false) Long id_usuario,
+			@RequestParam(name = "fecha_devolucion", required = false) String fecha_devolucion,
+			RedirectAttributes flash, SessionStatus status, Model model, Authentication authentication) {
 
 		try {
-			if (result.hasErrors()) {
+			if (id_libro == null || id_usuario == null || fecha_devolucion == null) {
 				model.addAttribute("prestamo", prestamo);
-				model.addAttribute("titulo", "Solicitar Libro");
+				// IR A BIBLIOTECA PORQUE LOS DATOS SON INCORRECTOS O NO VÀLIDOS
+				model.addAttribute("titulo", "Catálogo de libros");
+				List<Libro> libros = libroService.findByTituloGroup();
+				for (int i = 0; i < libros.size(); i++) {
+					String descripcionMin = libros.get(i).getDescripcion().substring(0, 150);
+					String descripcionFull = libros.get(i).getDescripcion().substring(150,
+							libros.get(i).getDescripcion().length());
+					libros.get(i).setDescripcionMin(descripcionMin + " ...");
+					libros.get(i).setDescripcion(descripcionFull);
+					model.addAttribute("libros", libros);
+				}
+
 				model.addAttribute("error",
-						"El prestamo necesita un libro, un usuario y una fecha de despacho VÁLIDOS.");
-				return "/usuarios/biblioteca/solicitarLibro";
+						"Lo sentimos, hubo un error a la hora de guardar su orden. Intentelo mas tarde.");
+				System.out.println(id_libro + ", " + id_usuario + ", " + fecha_devolucion);
+				return "/usuarios/biblioteca";
 			}
 
 			/* LÓGICA DE REGISTRO DE ORDEN DE LIBRO */
 			// LA ORDEN DE PRÈSTAMO VALIDA ID_LIBRO, ID_USUARIO,
 			// FECHA_DESPACHO, FECHA_DEVOLUCIÒN Y OBSERVACIONES.
 			// LIBRO
-			// ------------------- SETEADO MANUALMENTE ---------------------------
-			Libro libroAPrestar = libroService.findByTituloAndLocalAndEstado(
-					libroService.findOne(/* id_libro *//* prestamo.getLibro().getId() */1L).getTitulo(),
-					libroService.findOne(/* id_libro *//* prestamo.getLibro().getId() */1L).getLocal().getId(), true);
+			Libro libroAPrestar = libroService.findByTituloAndLocalAndEstado(libroService.findOne(id_libro).getTitulo(),
+					libroService.findOne(id_libro).getLocal().getId(), true);
 			prestamo.setLibro(libroAPrestar);
 			// ACTUALIZAR STOCK LIBRO
 			if (libroAPrestar.getStock() <= 0) {
 				model.addAttribute("error", "Lo sentimos, no hay stock suficiente del libro seleccionado ("
 						+ libroAPrestar.getTitulo() + ")");
-				return "/usuarios/biblioteca/solicitar-libro";
+				
+				model.addAttribute("titulo", "Catálogo de libros");
+				List<Libro> libros = libroService.findByTituloGroup();
+				for (int i = 0; i < libros.size(); i++) {
+					String descripcionMin = libros.get(i).getDescripcion().substring(0, 150);
+					String descripcionFull = libros.get(i).getDescripcion().substring(150,
+							libros.get(i).getDescripcion().length());
+					libros.get(i).setDescripcionMin(descripcionMin + " ...");
+					libros.get(i).setDescripcion(descripcionFull);
+					model.addAttribute("libros", libros);
+				}
+				
+				return "/usuarios/biblioteca";
 			} else {
 				libroAPrestar.setStock(libroAPrestar.getStock() - 1);
 			}
 			// USUARIO
-			// ------------------- SETEADO MANUALMENTE ---------------------------
-			prestamo.setUsuario(usuarioService.findById(/* id_usuario *//* prestamo.getUsuario().getId() */3L));
+			prestamo.setUsuario(usuarioService.findById(id_usuario));
 			// EMPLEADO
 			// EL EMPLEADO SE SETEA CON EL USUARIO DE PRUEBA (CODIGO 1) POR PARTE DEL
 			// USUARIO
@@ -166,11 +189,10 @@ public class UsuarioController {
 			Date fechaDespacho = new Date();
 			prestamo.setFecha_despacho(fechaDespacho);
 			// FECHA DEVOLUCIÓN
-			// ------------------- SETEADO MANUALMENTE ---------------------------
 			try {
 				DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 				Date fechaDevolucionPrestamo = null;
-				fechaDevolucionPrestamo = formatter.parse("2020-02-10");
+				fechaDevolucionPrestamo = formatter.parse(fecha_devolucion);
 				prestamo.setFecha_devolucion(fechaDevolucionPrestamo);
 			} catch (ParseException pe) {
 				model.addAttribute("error", pe.getMessage());
@@ -184,7 +206,7 @@ public class UsuarioController {
 			String mes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, new Locale("es", "ES"));
 			String dia = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
 			String fechaPrestamoHoy = dia + " de " + mes + " " + anio;
-			// OBSERVACIONES
+			// OBSERVACIONES			
 			prestamo.setObservaciones(
 					"El usuario: " + prestamo.getUsuario().getNombres() + ", " + prestamo.getUsuario().getApellidos()
 							+ "(DNI " + prestamo.getUsuario().getNroDocumento() + ") ha solicitado el libro: "
@@ -193,15 +215,29 @@ public class UsuarioController {
 			// DEVOLUCION
 			prestamo.setDevolucion(false);
 			prestamoService.save(prestamo);
-			flash.addFlashAttribute("success", "Su orden ha sido registrada!");
+			flash.addFlashAttribute("success", "Excelente! Su orden ha sido registrada!");
 			flash.addFlashAttribute("confirma", false);
-			model.addAttribute("prestamos", prestamoService
+			// IR A PRESTAMOS PENDIENTES
+			flash.addFlashAttribute("titulo", "Préstamos Pendientes");
+			flash.addFlashAttribute("prestamosPendientes", prestamoService
 					.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(prestamo.getUsuario().getId()));
+			return "redirect:/prestamos/prestamos-pendientes";
 		} catch (Exception e) {
-			model.addAttribute("error", e.getMessage());
-			model.addAttribute("titulo", "Solicitar Libro");
+			System.out.println(e.getMessage());
+			flash.addFlashAttribute("error", e.getMessage());
+			// IR A BIBLIOTECA YA QUE HUBO UN ERROR A LA HORA DE GUARDAR LA ORDEN
+			model.addAttribute("titulo", "Catálogo de libros");
+			List<Libro> libros = libroService.findByTituloGroup();
+			for (int i = 0; i < libros.size(); i++) {
+				String descripcionMin = libros.get(i).getDescripcion().substring(0, 150);
+				String descripcionFull = libros.get(i).getDescripcion().substring(150,
+						libros.get(i).getDescripcion().length());
+				libros.get(i).setDescripcionMin(descripcionMin + " ...");
+				libros.get(i).setDescripcion(descripcionFull);
+				model.addAttribute("libros", libros);
+			}
+			return "/usuarios/biblioteca";
 		}
-		return "redirect:/prestamos/prestamos-pendientes";
 	}
 
 	@GetMapping("/crear-perfil")
@@ -253,25 +289,19 @@ public class UsuarioController {
 
 			// ENVIO DE MAIL CON MIMEMESSAGE
 			try {
-				String message = "<html><head>"+
-						"<meta charset='UTF-8' />"+ 
-						"<meta name='viewport' content='width=device-width, initial-scale=1.0' />"+ 
-						"<title>Completar Registro | Biblioteca2020</title>"+ 
-						"</head>"+ 
-						"<body>"+ 
-						"<div class='container' style='padding-top: 3rem;'>"+ 
-						"<img style='padding-top: 3rem;' src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"+ 
-						"<div class='container' style='padding-top: 3rem;'>"+ 
-						"<p>Buenas noches, hemos recibido tu peticiòn de registro a Biblioteca2020.</p><br/>"+
-						"<p style='padding-top: 1rem;'>Para confirmar tu cuenta, entrar aquì: "+ 
-						"<a class='text-info' href='http://localhost:8080/usuarios/cuenta-verificada?token=" + confirmationToken.getConfirmationToken()+
-						"'>http://localhost:8080/usuarios/cuenta-verificada?token=" + confirmationToken.getConfirmationToken() + "</a>"+ 
-						"</p>"+  
-						"</div>"+ 
-						"</div>"+ 
-						"</body>"+ 
-						"<div class='footer' style='padding-top: 3rem;'>Biblioteca ©2020</div>"+ 
-						"</html>";
+				String message = "<html><head>" + "<meta charset='UTF-8' />"
+						+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+						+ "<title>Completar Registro | Biblioteca2020</title>" + "</head>" + "<body>"
+						+ "<div class='container' style='padding-top: 3rem;'>"
+						+ "<img style='padding-top: 3rem;' src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+						+ "<div class='container' style='padding-top: 3rem;'>"
+						+ "<p>Buenas noches, hemos recibido tu peticiòn de registro a Biblioteca2020.</p><br/>"
+						+ "<p style='padding-top: 1rem;'>Para confirmar tu cuenta, entrar aquì: "
+						+ "<a class='text-info' href='http://localhost:8080/usuarios/cuenta-verificada?token="
+						+ confirmationToken.getConfirmationToken()
+						+ "'>http://localhost:8080/usuarios/cuenta-verificada?token="
+						+ confirmationToken.getConfirmationToken() + "</a>" + "</p>" + "</div>" + "</div>" + "</body>"
+						+ "<div class='footer' style='padding-top: 3rem;'>Biblioteca ©2020</div>" + "</html>";
 				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
 						"Completar Registro | Biblioteca2020", message);
 				model.addAttribute("titulo", "Registro exitoso");
