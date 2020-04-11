@@ -22,15 +22,14 @@
 		<form
 			th:action="${editable} ?@{/usuarios/editar-perfil} :@{/usuarios/crear-perfil}"
 			th:object="${usuario}" method="post" enctype="multipart/form-data">
-			
+
 			<h4 class="my-4" th:text="'Datos personales'"></h4>
 			<div class="form-group row">
 				<div class="col-md-6">
 					<label class="col-form-label">Nombre(s)</label> <input
 						class="form-control" type="text" th:field="${usuario.nombres}"
-						th:errorclass="'form-control'"
-						placeholder="Nombre Completo..." autofocus /> <small
-						class="form-text text-danger"
+						th:errorclass="'form-control'" placeholder="Nombre Completo..."
+						autofocus /> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('nombres')}"
 						th:errors="${usuario.nombres}"></small>
 				</div>
@@ -46,17 +45,15 @@
 				<div class="col-md-6">
 					<label class="col-form-label">DNI</label> <input
 						class="form-control" type="number"
-						th:field="${usuario.nroDocumento}"
-						th:errorclass="'form-control'" placeholder="00000000" />
-					<small class="form-text text-danger"
+						th:field="${usuario.nroDocumento}" th:errorclass="'form-control'"
+						placeholder="00000000" /> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('nroDocumento')}"
 						th:errors="${usuario.nroDocumento}"></small>
 				</div>
 				<div class="col-md-6">
 					<label class="col-form-label">Dirección</label> <input
 						class="form-control" type="text" th:field="${usuario.direccion}"
-						th:errorclass="'form-control'"
-						placeholder="Av/Jr/Calle..." /> <small
+						th:errorclass="'form-control'" placeholder="Av/Jr/Calle..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('direccion')}"
 						th:errors="${usuario.direccion}"></small>
@@ -64,8 +61,8 @@
 				<div class="col-md-6">
 					<label class="col-form-label">Celular</label> <input
 						class="form-control" type="number" th:field="${usuario.celular}"
-						th:errorclass="'form-control'"
-						placeholder="999999999" /> <small class="form-text text-danger"
+						th:errorclass="'form-control'" placeholder="999999999" /> <small
+						class="form-text text-danger"
 						th:if="${#fields.hasErrors('celular')}"
 						th:errors="${usuario.celular}"></small>
 				</div>
@@ -76,28 +73,26 @@
 				<div class="col-md-6">
 					<label class="col-form-label">Usuario</label> <input
 						class="form-control" type="text" th:field="${usuario.username}"
-						th:errorclass="'form-control'"
-						placeholder="Usuario..." /> <small class="form-text text-danger"
+						th:errorclass="'form-control'" placeholder="Usuario..." /> <small
+						class="form-text text-danger"
 						th:if="${#fields.hasErrors('username')}"
 						th:errors="${usuario.username}"></small>
 				</div>
 				<div class="col-md-6">
 					<label class="col-form-label">Email</label> <input
 						class="form-control" type="email" th:field="${usuario.email}"
-						th:errorclass="'form-control'"
-						placeholder="test@email.com" /> <small
+						th:errorclass="'form-control'" placeholder="test@email.com" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('email')}" th:errors="${usuario.email}"></small>
 				</div>
 			</div>
-			
+
 			<div class="form-group row"
 				th:if="${editable==null or editable==false}">
 				<div class="col-md-6">
 					<label class="col-form-label">Contraseña</label> <input
 						class="form-control" type="password"
-						th:field="${usuario.password}"
-						th:errorclass="'form-control'"
+						th:field="${usuario.password}" th:errorclass="'form-control'"
 						placeholder="Contraseña..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('password')}"
@@ -114,7 +109,7 @@
 						th:errors="${usuario.passwordConfirmacion}"></small>
 				</div>
 			</div>
-			
+
 			<div class="form-group row" hidden>
 				<div class="col-md-6">
 					<label class="col-form-label">Rol</label> <select
@@ -126,10 +121,11 @@
 						th:if="${#fields.hasErrors('roles')}" th:errors="${usuario.roles}"></small>
 				</div>
 			</div>
-			
+
 			<h4 class="mb-4" th:if="${editable}">Foto</h4>
 			<div class="form-group row" th:if="${editable}">
-				<div class="col-md-6 p-3" style="text-align: center;" th:if="${editable}">
+				<div class="col-md-6 p-3" style="text-align: center;"
+					th:if="${editable}">
 					<img
 						th:if="${usuario.foto_usuario!=null && #strings.length(usuario.foto_usuario) > 0}"
 						class="img-thumbnail rounded" style="max-width: 70%;"
@@ -138,29 +134,44 @@
 				</div>
 				<div class="col-md-6 p-3" style="position: relative;">
 					<th:block th:if="${editable}">
-						<input style="position: absolute; bottom: 0;" class="form-control-file" type="file" name="foto_usu" />
+						<input style="position: absolute; bottom: 0;"
+							class="form-control-file" type="file" name="foto_usu" />
 						<small class="form-text text-danger"
 							th:if="${#fields.hasErrors('foto_usuario')}"
 							th:errors="*{foto_usuario}"></small>
 					</th:block>
 				</div>
 			</div>
-			
+
 			<div class="form-group row py-4">
-				<div class="col-md-6">
-					<th:block th:if="${editable}" sec:authorize="isAuthenticated()">
+
+				<th:block th:if="${editable}" sec:authorize="isAuthenticated()">
+					<div class="col-md-4">
 						<a class="btn btn-light btn-block" th:href="@{'/home'}">Cancelar</a>
-					</th:block>
-					<th:block th:else sec:authorize="!isAuthenticated()">
+					</div>
+					<div class="col-md-4">
+						<a class="btn btn-danger btn-block"
+							th:href="@{'/usuarios/deshabilitar-perfil'}"
+							onclick="return confirm('¿Seguro de querer deshabilitar tu cuenta? ESTA ACCIÒN NO SE PUEDE DESHACER!');">Deshabilitar
+							Cuenta</a>
+					</div>
+					<div class="col-md-4">
+						<input class="btn btn-dark btn-block" type="submit"
+							th:value="'Guardar Usuario'" />
+					</div>
+				</th:block>
+				<th:block th:else sec:authorize="!isAuthenticated()">
+					<div class="col-md-6">
 						<a class="btn btn-light btn-block" th:href="@{'/login'}">Cancelar</a>
-					</th:block>
-				</div>
-				<div class="col-md-6">
-					<input class="btn btn-dark btn-block" type="submit"
-						th:value="${editable} ? 'Guardar Usuario' : 'Crear Usuario'" />
-				</div>
+					</div>
+					<div class="col-md-6">
+						<input class="btn btn-dark btn-block" type="submit"
+							th:value="'Crear Usuario'" />
+					</div>
+				</th:block>
+
 			</div>
-			
+
 		</form>
 	</div>
 

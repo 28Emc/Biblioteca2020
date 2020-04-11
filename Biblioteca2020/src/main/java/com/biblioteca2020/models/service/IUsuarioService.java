@@ -13,8 +13,10 @@ public interface IUsuarioService {
 	public Usuario findByUsername(String username);
 	// USADO
 	public Usuario findByUsernameAndEstado(String username, boolean estado);
-	
+	// USADO
 	public Usuario findByNroDocumento(String nroDocumento);
+	// USADO
+	public Usuario findByNroDocumentoAndEmailAndEstado(String nroDocumento, String email, boolean estado);
 	// USADO
 	public List<Usuario> findByNroDocumentoAndEstado(String term, boolean estado);	
 	// USADO	

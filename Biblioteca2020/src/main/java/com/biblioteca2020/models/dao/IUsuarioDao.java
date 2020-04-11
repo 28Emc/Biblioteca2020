@@ -8,8 +8,10 @@ import com.biblioteca2020.models.entity.Usuario;
 public interface IUsuarioDao extends CrudRepository<Usuario, Long> {
 	// USADO
 	public Usuario findByUsername(String username);
-
+	// USADO
 	public Usuario findByNroDocumento(String nroDocumento);
+	// USADO
+	public Usuario findByNroDocumentoAndEmailAndEstado(String nroDocumento, String email, boolean estado);
 	// USADO
 	@Query("select u from Usuario u where u.nroDocumento like ?1 and u.estado = ?2")
 	public List<Usuario> findByNroDocumentoAndEstado(String term, Boolean estado);	
@@ -20,7 +22,6 @@ public interface IUsuarioDao extends CrudRepository<Usuario, Long> {
 	public List<Usuario> findByAnotherUsername(String username);
 
 	public Usuario findByCelular(String celular);
-	
 	// VALIDACIÓN EMAIL
 	// USADO
 	public Usuario findByEmailIgnoreCase(String email);

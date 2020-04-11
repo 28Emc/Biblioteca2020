@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html class="h-100" xmlns:th="http://www.thymeleaf.org">
-
 <head th:replace="layout/layout :: head"></head>
 
-<body class="d-flex flex-column h-100 bg-light">
+<body
+	th:style="'background:url(' + @{/img/body_bg_biblioteca2020.jpg} +') no-repeat fixed center;'">
 
 	<div id="alertPers"
 		class="alert alert-success alert-dismissible fade show" role="alert"
@@ -34,26 +34,30 @@
 		</div>
 		<!-- WEB -->
 		<div class="d-none d-sm-block pt-4">
-			<img alt="logo" th:src="@{'/img/logo.jpg'}" style="width: 250px;" />
+			<img alt="logo" th:src="@{'/img/logo.jpg'}" style="width: 240px;" />
 		</div>
 	</div>
 
 	<div class="container">
-		<div class="col-xl-6 col-lg-7 col-md-8 col-sm-9 col-xs-10 mx-auto">
-			<div class="card rounded-0">
-				<div class="card-header text-info border-0">
-					<h4 class="py-2">Inicio Sesión</h4>
+		<div class="col-xl-6 col-lg-7 col-md-8 col-sm-10 col-xs-10 mx-auto">
+			<div class="card rounded-0 border-0 bg-transparent">
+				<div class="card-header text-light border-0"
+					style="background-color: rgba(0, 0, 0, .5);">
+					<h4 class="p-3 font-weight-normal">Inicio Sesión</h4>
 				</div>
-				<div class="card-body bg-light border-0">
+				<div class="card-body rounded-0 border-0"
+					style="background-color: rgba(0, 0, 0, .5);">
 
 					<form id="form" th:action="@{/login}" method="post">
-						<div class="form-group">
+						<div class="form-group px-3">
 							<input type="text" name="username" id="username"
-								class="form-control" placeholder="Usuario" required autofocus>
+								class="form-control rounded-0 border-0" placeholder="Usuario"
+								required autofocus>
 						</div>
-						<div class="form-group">
+						<div class="form-group px-3">
 							<input type="password" name="password" id="password"
-								class="form-control" placeholder="Contraseña" required />
+								class="form-control rounded-0 border-0" placeholder="Contraseña"
+								required />
 						</div>
 						<!-- REMEMBER ME -->
 						<!-- <div class="custom-control custom-checkbox form-group float-right">
@@ -61,65 +65,59 @@
 								name="remember-me" id="remember" value="true" /> <label
 								class="custom-control-label text-muted" for="remember">Recordar</label>
 						</div> -->
-						<div class="form-group">
-							<button id="snbtn" type="button"
-								onclick="javascript: submitform();"
-								class="btn btn-lg btn-info btn-block">Entrar</button>
+						<div class="form-group px-3">
+							<button id="snbtn" type="submit"
+								class="btn btn-lg btn-info btn-block rounded-0">Entrar</button>
 						</div>
 					</form>
 
 				</div>
-				<div class="card-footer bg-light border-0 p-4">
+				<div class="card-footer rounded-0 border-0 py-4"
+					style="background-color: rgba(0, 0, 0, .5);">
 					<!-- MOVIL -->
-					<span class="d-block d-sm-none text-center">¿No tienes una
-						cuenta? <br /> Registrate <a class="text-info"
+					<span
+						class="px-3 d-block d-sm-none text-center text-light font-weight-light">¿No
+						tienes una cuenta? <br /> Registrate <a
+						class="text-reset font-weight-bold"
 						th:href="@{/usuarios/crear-perfil}">aquí</a>!
+					</span> <br/> <span
+						class="px-3 d-block d-sm-none text-center text-light font-weight-light">Recupera tu <a
+						class="text-reset font-weight-bold"
+						th:href="@{/usuarios/reactivar-cuenta}">cuenta</a> 
 					</span>
 					<!-- WEB -->
-					<span class="d-none d-sm-block float-right">¿No tienes una
-						cuenta? Registrate <a class="text-info"
+					<span
+						class="px-3 d-none d-sm-block float-right text-light font-weight-light">¿No
+						tienes una cuenta? Registrate <a
+						class="text-reset font-weight-bold"
 						th:href="@{/usuarios/crear-perfil}">aquí</a>!
-					</span> 					
+					</span> <br/> <span
+						class="px-3 d-none d-sm-block float-right text-light font-weight-light">Recupera tu <a
+						class="text-reset font-weight-bold"
+						th:href="@{/usuarios/recuperar-cuenta}">cuenta</a></span>
 				</div>
 			</div>
 		</div>
 
 	</div>
 
-	<footer th:replace="layout/layout :: footer"></footer>
-	<script type="text/javascript">
-		SNButton.init("snbtn", {
-			fields : [ "username", "password" ]
-		});
-		$(document)
-				.ready(
-						function submitForm() {
-							$('#snbtn')
-									.on(
-											'click',
-											function() {
-												var $this = $(this);
-												var loadingText = '<div class="spinner-grow text-white" role="status"><span class="sr-only">Cargando...</span></div>';
-												if ($(this).html() !== loadingText) {
-													$this.data('original-text',
-															$(this).html());
-													$this.html(loadingText);
-													$("#snbtn").addClass(
-															"disabled");
-												}
-												setTimeout(
-														function() {
-															$this
-																	.html($this
-																			.data('original-text'));
-															$("#snbtn")
-																	.removeClass(
-																			"disabled");
-															document.forms["form"]
-																	.submit();
-														}, 1500);
-											});
-						})
-	</script>
+	<footer class="footer mt-auto py-5 text-center">
+		<p class="text-light">Biblioteca ©2020</p>
+		<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+		<script th:src="@{/js/snbutton.js}"></script>
+		<script th:src="@{/js/popper.min.js}"></script>
+		<script th:src="@{/js/bootstrap.min.js}"></script>
+		<script th:src="@{/js/jquery-ui.min.js}"></script>
+		<script th:src="@{/js/font-awesome.js}"></script>
+		<script type="text/javascript">
+			SNButton.init("snbtn", {
+				fields : [ "username", "password" ]
+			});
+
+			setTimeout(function() {
+				$("#alertPers").alert('close');
+			}, 3000);
+		</script>
+	</footer>
 </body>
 </html>

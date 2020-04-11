@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.dao.IConfirmationTokenDao;
 import com.biblioteca2020.models.dto.CambiarPassword;
+import com.biblioteca2020.models.dto.RecuperarCuenta;
 import com.biblioteca2020.models.entity.ConfirmationToken;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Prestamo;
@@ -163,7 +164,7 @@ public class UsuarioController {
 			if (libroAPrestar.getStock() <= 0) {
 				model.addAttribute("error", "Lo sentimos, no hay stock suficiente del libro seleccionado ("
 						+ libroAPrestar.getTitulo() + ")");
-				
+
 				model.addAttribute("titulo", "Catálogo de libros");
 				List<Libro> libros = libroService.findByTituloGroup();
 				for (int i = 0; i < libros.size(); i++) {
@@ -174,7 +175,7 @@ public class UsuarioController {
 					libros.get(i).setDescripcion(descripcionFull);
 					model.addAttribute("libros", libros);
 				}
-				
+
 				return "/usuarios/biblioteca";
 			} else {
 				libroAPrestar.setStock(libroAPrestar.getStock() - 1);
@@ -206,7 +207,7 @@ public class UsuarioController {
 			String mes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, new Locale("es", "ES"));
 			String dia = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
 			String fechaPrestamoHoy = dia + " de " + mes + " " + anio;
-			// OBSERVACIONES			
+			// OBSERVACIONES
 			prestamo.setObservaciones(
 					"El usuario: " + prestamo.getUsuario().getNombres() + ", " + prestamo.getUsuario().getApellidos()
 							+ "(DNI " + prestamo.getUsuario().getNroDocumento() + ") ha solicitado el libro: "
@@ -295,7 +296,7 @@ public class UsuarioController {
 						+ "<div class='container' style='padding-top: 3rem;'>"
 						+ "<img style='padding-top: 3rem;' src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
 						+ "<div class='container' style='padding-top: 3rem;'>"
-						+ "<p>Buenas noches, hemos recibido tu peticiòn de registro a Biblioteca2020.</p><br/>"
+						+ "<p>Saludos, hemos recibido tu peticiòn de registro a Biblioteca2020.</p><br/>"
 						+ "<p style='padding-top: 1rem;'>Para confirmar tu cuenta, entrar aquì: "
 						+ "<a class='text-info' href='http://localhost:8080/usuarios/cuenta-verificada?token="
 						+ confirmationToken.getConfirmationToken()
@@ -330,12 +331,12 @@ public class UsuarioController {
 				return "/usuarios/cuenta-verificada";
 			} catch (Exception e) {
 				model.addAttribute("error", "Error: " + e.getMessage());
-				model.addAttribute("titulo", "Error al Registrar");
+				model.addAttribute("titulo", "Error");
 				return "/usuarios/error-registro";
 			}
 		} else {
 			model.addAttribute("error", "Lo sentimos, el enlace es invàlido o ya caducó!");
-			model.addAttribute("titulo", "Error al Registrar");
+			model.addAttribute("titulo", "Error");
 			return "/usuarios/error-registro";
 		}
 	}
@@ -371,8 +372,14 @@ public class UsuarioController {
 			return "/usuarios/perfil";
 		}
 		if (!foto.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
+			/*
+			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			 */
+			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
+			// VEAN SIEMPRE
+			String rootPath = "C://Temp//uploads";
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -466,6 +473,74 @@ public class UsuarioController {
 		}
 	}
 
+	@GetMapping(value = "/recuperar-cuenta")
+	public String habilitarPerfilForm(RedirectAttributes flash, Authentication authentication, Model model) {
+		model.addAttribute("titulo", "Recupera tu cuenta");
+		model.addAttribute("recuperarCuenta", new RecuperarCuenta());
+		return "/usuarios/recuperar-cuenta";
+	}
+
+	/*
+	 * LÒGICA DE REACTIVACIÒN DE CUENTA: - EN LOGIN, DOY CLICK EN "RECUPERAR CUENTA"
+	 * - EN EL FORMULARIO ESCRIBO LA EMAIL DE REGISTRO DE LA CUENTA Y EL DNI PARA
+	 * VALIDAR EL USUARIO - SI VALIDA, MANDA UN CORREO DE SOLICITUD DE REACTIVACION
+	 * DE MI CUENTA (PARECIDO AL REGISTRO POR 1RA VEZ) - VEO EL CORREO Y DOY CLIC EN
+	 * EL ENLACE - ME REDIRECCIONA A LA PANTALLA DE CONFIRMACIÓN DEL ENLACE, QUE A
+	 * SU VEZ, ME DIRECCIONA AL LOGIN
+	 */
+	@PostMapping(value = "/recuperar-cuenta")
+	public String habilitarPerfil(@Valid RecuperarCuenta recuperarCuenta, BindingResult result,
+			@RequestParam(name = "nroDocumento", required = false) String nroDocumento,
+			@RequestParam(name = "email", required = false) String email, RedirectAttributes flash,
+			Authentication authentication, Model model) {
+
+		if (result.hasErrors()) {
+			model.addAttribute("titulo", "Recupera tu cuenta");
+			model.addAttribute("recuperarCuenta", recuperarCuenta);
+			return "/usuarios/recuperar-cuenta";
+		}
+
+		try {
+			Usuario usuario = usuarioService.findByNroDocumentoAndEmailAndEstado(recuperarCuenta.getNroDocumento(),
+					recuperarCuenta.getEmail(), false);
+
+			// LÒGICA DE GENERACIÓN DE TOKEN DE CONFIRMACION CORREO
+			ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
+			confirmationTokenRepository.save(confirmationToken);
+
+			// LÒGICA DE ENVIO CORREO, Y VALIDACIÓN CON MÈTODO EN COMÚN AL REGISTRO DE
+			// USUARIOS NUEVOS
+			try {
+				String message = "<html><head>" + "<meta charset='UTF-8' />"
+						+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+						+ "<title>Recuperar Cuenta | Biblioteca2020</title>" + "</head>" + "<body>"
+						+ "<div class='container' style='padding-top: 3rem;'>"
+						+ "<img style='padding-top: 3rem;' src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+						+ "<div class='container' style='padding-top: 3rem;'>"
+						+ "<p>Saludos, hemos recibido tu peticiòn de recuperación de tu cuenta.</p><br/>"
+						+ "<p style='padding-top: 1rem;'>Para reactivar tu cuenta, entrar aquì: "
+						+ "<a class='text-info' href='http://localhost:8080/usuarios/cuenta-verificada?token="
+						+ confirmationToken.getConfirmationToken()
+						+ "'>http://localhost:8080/usuarios/cuenta-verificada?token="
+						+ confirmationToken.getConfirmationToken() + "</a>" + "</p>" + "</div>" + "</div>" + "</body>"
+						+ "<div class='footer' style='padding-top: 3rem;'>Biblioteca ©2020</div>" + "</html>";
+				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
+						"Recuperar Cuenta | Biblioteca2020", message);
+				model.addAttribute("titulo", "Recupera tu Cuenta");
+				model.addAttribute("email", usuario.getEmail());
+				return "/usuarios/registro-exitoso";
+			} catch (MailException ex) {
+				flash.addFlashAttribute("error", ex.getMessage());
+				return "redirect:/login";
+			}
+		} catch (Exception e) {
+			model.addAttribute("error",
+					"Lo sentimos, el DNI y/o correo ingresados son incorrectos, o tu cuenta no necesita reactivarse.");
+			model.addAttribute("titulo", "Recupera tu cuenta");
+			return "/usuarios/recuperar-cuenta";
+		}
+	}
+
 	// ############################ ROLE ADMIN, EMPLEADO
 	// ############################
 	// LISTADO DE USUARIOS
@@ -505,8 +580,14 @@ public class UsuarioController {
 		}
 
 		if (!foto.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
+			/*
+			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			 */
+			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
+			// VEAN SIEMPRE
+			String rootPath = "C://Temp//uploads";
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -565,8 +646,14 @@ public class UsuarioController {
 		}
 
 		if (!foto.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
+			/*
+			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			 */
+			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
+			// VEAN SIEMPRE
+			String rootPath = "C://Temp//uploads";
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());

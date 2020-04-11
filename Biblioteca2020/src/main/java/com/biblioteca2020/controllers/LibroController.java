@@ -88,8 +88,14 @@ public class LibroController {
 		}
 
 		if (!foto.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
+			/*
+			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			 */
+			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
+			// VEAN SIEMPRE
+			String rootPath = "C://Temp//uploads";
 
 			try {
 				byte[] bytes = foto.getBytes();
@@ -146,12 +152,18 @@ public class LibroController {
 			model.addAttribute("locales", locales);
 			model.addAttribute("editable", true);
 			model.addAttribute("titulo", "Modificar Libro");
-			return "/libros/editar";
+			return "/libros/crear";
 		}
 
 		if (!foto_libro.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
+			/*
+			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			 */
+			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
+			// VEAN SIEMPRE
+			String rootPath = "C://Temp//uploads";
 			byte[] bytes;
 			try {
 				bytes = foto_libro.getBytes();
@@ -224,12 +236,12 @@ public class LibroController {
 	@GetMapping("/locales/libros/crear")
 	public String crearLibro(Map<String, Object> model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());		
-		
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+
 		Categoria categoria = new Categoria();
 		Libro libro = new Libro();
 		libro.setCategoria(categoria);
-		
+
 		model.put("libro", libro);
 		model.put("titulo", "Registro de Libro");
 		model.put("local", empleado.getLocal());
@@ -256,8 +268,14 @@ public class LibroController {
 			}
 		}
 		if (!foto.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
+			/*
+			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			 */
+			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
+			// VEAN SIEMPRE
+			String rootPath = "C://Temp//uploads";
 
 			try {
 				byte[] bytes = foto.getBytes();
@@ -306,7 +324,7 @@ public class LibroController {
 			modelMap.put("local", local);
 		} catch (Exception e1) {
 			modelMap.put("error", e1.getMessage());
-			return "redirect:/locales/libros/listar";
+			return "/locales/libros/listar";
 		}
 		try {
 			libro = libroService.findOne(idlibro);
@@ -314,13 +332,14 @@ public class LibroController {
 			return "/libros/crear";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
-			return "redirect:/locales/libros/listar";
+			return "/locales/libros/listar";
 		}
 	}
 
+	//BUG CON @VALID
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping("/locales/libros/editar")
-	public String guardarLibro(@Valid Libro libro, BindingResult result, Model model, SessionStatus status,
+	public String guardarLibro(Libro libro, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, @RequestParam("foto_li") MultipartFile foto, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
@@ -331,15 +350,21 @@ public class LibroController {
 				model.addAttribute("titulo", "Registro de Libro");
 				model.addAttribute("libro", libro);
 				model.addAttribute("local", local);
-				return "/libros/editar";
+				return "/libros/crear";
 			} catch (Exception e) {
 				model.addAttribute("error", e.getMessage());
-				return "redirect:/locales/libros/listar";
+				return "/locales/libros/editar";
 			}
 		}
 		if (!foto.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
+			/*
+			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			 */
+			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
+			// VEAN SIEMPRE
+			String rootPath = "C://Temp//uploads";
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -367,7 +392,7 @@ public class LibroController {
 				return "/libros/crear";
 			} catch (Exception e1) {
 				model.addAttribute("error", e1.getMessage());
-				return "redirect:/locales/libros/listar";
+				return "/locales/libros/listar";
 			}
 		}
 	}

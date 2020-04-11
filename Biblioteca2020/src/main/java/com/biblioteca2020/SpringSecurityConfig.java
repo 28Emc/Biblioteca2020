@@ -57,7 +57,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
 				.authorizeRequests()
 				.antMatchers("/css/**", "/js/**", "/img/**", "/**/crear-perfil", "/**/editar-perfil",
-						"/**/cuenta-verificada/**")
+						"/**/cuenta-verificada/**", "/**/recuperar-cuenta/")
 				.permitAll()
 
 				.and().formLogin().successHandler(successHandler)

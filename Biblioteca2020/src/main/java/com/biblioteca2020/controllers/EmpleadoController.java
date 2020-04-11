@@ -76,8 +76,14 @@ public class EmpleadoController {
 			return "/empleados/perfil";
 		}
 		if (!foto.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
+			/*
+			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			 */
+			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
+			// VEAN SIEMPRE
+			String rootPath = "C://Temp//uploads";
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -129,7 +135,7 @@ public class EmpleadoController {
 	@PostMapping("/cambio-password")
 	public String cambioPasswordEmpleado(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
 			RedirectAttributes flash, Authentication authentication) {
-		
+
 		if (resultForm.hasErrors()) {
 			// CON ESTE BLOQUE SOBREESCRIBO EL ERROR GENÈRICO "NO PUEDE ESTAR VACÍO"
 			if (cambiarPassword.getPasswordActual().equals("") || cambiarPassword.getNuevaPassword().equals("")
@@ -242,8 +248,14 @@ public class EmpleadoController {
 			return "/empleados/crear";
 		}
 		if (!foto.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
+			/*
+			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			 */
+			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
+			// VEAN SIEMPRE
+			String rootPath = "C://Temp//uploads";
 
 			try {
 				byte[] bytes = foto.getBytes();
@@ -335,8 +347,14 @@ public class EmpleadoController {
 			return "/empleados/editar";
 		}
 		if (!foto.isEmpty()) {
-			Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
+			/*
+			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
+			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
+			 */
+			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
+			// VEAN SIEMPRE
+			String rootPath = "C://Temp//uploads";
 
 			try {
 				byte[] bytes = foto.getBytes();

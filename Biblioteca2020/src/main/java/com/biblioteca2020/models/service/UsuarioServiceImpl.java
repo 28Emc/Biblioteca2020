@@ -155,7 +155,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	@Override
 	public Usuario cambiarPassword(CambiarPassword form) throws Exception {
 		Usuario usuario = findById(form.getId());
-		
+
 		if (!passwordEncoder.matches(form.getPasswordActual(), usuario.getPassword())) {
 			throw new Exception("La contraseña actual es incorrecta");
 		}
@@ -178,5 +178,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	@Transactional(readOnly = true)
 	public Usuario findByEmailIgnoreCase(String email) {
 		return usuarioDao.findByEmailIgnoreCase(email);
+	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public Usuario findByNroDocumentoAndEmailAndEstado(String nroDocumento, String email, boolean estado){
+		return usuarioDao.findByNroDocumentoAndEmailAndEstado(nroDocumento, email, estado);
 	}
 }
