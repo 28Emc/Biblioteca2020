@@ -379,11 +379,17 @@ public class UsuarioController {
 			 */
 			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
 			// VEAN SIEMPRE
-			String rootPath = "C://Temp//uploads";
+			//String rootPath = "C://Temp//uploads";
+			// AHORA USO LA LIBRERIA PATHS
+			Path rootPath = Paths.get("uploads").resolve(foto.getOriginalFilename());
+			Path rootAbsolutePath = rootPath.toAbsolutePath();
 			try {
-				byte[] bytes = foto.getBytes();
+				/*byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
+				Files.write(rutaCompleta, bytes);*/
+				
+				Files.copy(foto.getInputStream(), rootAbsolutePath);
+				
 				usuario.setFoto_usuario(foto.getOriginalFilename());
 			} catch (IOException e) {
 				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");

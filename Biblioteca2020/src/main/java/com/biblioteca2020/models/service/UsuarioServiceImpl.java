@@ -170,6 +170,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
 		String passwordHash = passwordEncoder.encode(form.getNuevaPassword());
 		usuario.setPassword(passwordHash);
+		// ASEGURARME QUE TODOS LOS CAMPOS ESTEN CORRECTAMENTE SETEADOS (USUARIOS DE PRUEBA)
 		return usuarioDao.save(usuario);
 	}
 

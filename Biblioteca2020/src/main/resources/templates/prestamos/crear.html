@@ -75,7 +75,7 @@
 				<div class="col-md-6">
 					<label class="col-form-label" for="fecha_devolucion">Fecha
 						Devoluciòn</label> <input class="form-control" type="date"
-						name="fecha_devolucion" th:field=*{fecha_devolucion} />
+						name="fecha_devolucion" th:field=*{fecha_devolucion} required />
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('fecha_devolucion')}" th:errors="*{fecha_devolucion}"></small>
 				</div>

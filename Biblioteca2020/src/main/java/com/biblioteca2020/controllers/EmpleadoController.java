@@ -43,7 +43,7 @@ public class EmpleadoController {
 
 	@Autowired
 	private IRoleService roleService;
-
+	
 	// ############################## ROLE EMPLEADO, ROLE ADMIN
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
 	@GetMapping("/editar-perfil")
@@ -135,7 +135,7 @@ public class EmpleadoController {
 	@PostMapping("/cambio-password")
 	public String cambioPasswordEmpleado(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
 			RedirectAttributes flash, Authentication authentication) {
-
+	
 		if (resultForm.hasErrors()) {
 			// CON ESTE BLOQUE SOBREESCRIBO EL ERROR GENÈRICO "NO PUEDE ESTAR VACÍO"
 			if (cambiarPassword.getPasswordActual().equals("") || cambiarPassword.getNuevaPassword().equals("")
@@ -144,19 +144,29 @@ public class EmpleadoController {
 				model.addAttribute("titulo", "Cambiar Password");
 				return "/empleados/cambio-password";
 			}
+			
+			/*if (!cambiarPassword.getNuevaPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{5,}$")) {
+				model.addAttribute("cambiarPasswordError", "La contraseña actual no tiene el patrón especificado");
+				model.addAttribute("titulo", "Cambiar Password");
+				return "/empleados/cambio-password";
+			}*/
+			
 			String result = resultForm.getAllErrors().stream().map(x -> x.getDefaultMessage())
 					.collect(Collectors.joining(", "));
 			model.addAttribute("cambiarPasswordError", result);
 			return "/empleados/cambio-password";
 		}
 		try {
+			
 			empleadoService.cambiarPassword(cambiarPassword);
+						
 			flash.addFlashAttribute("success", "Password Actualizada");
 			return "redirect:/home";
 		} catch (Exception e) {
 			model.addAttribute("cambiarPassword", cambiarPassword);
 			model.addAttribute("titulo", "Cambiar Password");
 			model.addAttribute("cambiarPasswordError", e.getMessage());
+			System.out.println(e.getMessage());
 			return "/empleados/cambio-password";
 		}
 	}

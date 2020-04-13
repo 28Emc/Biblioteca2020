@@ -15,11 +15,11 @@
 		<form th:action="${editable} ? @{/locales/editar} : @{/locales/crear}"
 			th:object="${local}" method="post">
 
-			<div class="form-group row">
+			<div class="form-group row" hidden>
 				<div class="col-md-6">
 					<label class="col-form-label" for="empresa">Empresa</label> <select
 						name="empresa" id="empresa" class="form-control" th:field="${local.empresa}"
-						th:errorclass="'form-control alert-danger'">
+						th:errorclass="'form-control alert-danger'" readonly>
 						<option th:each="empresa : ${empresaLocales}"
 							th:value="${empresa.id}" th:text="${empresa.razonSocial}">
 						</option>

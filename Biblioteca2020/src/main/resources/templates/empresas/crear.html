@@ -21,7 +21,7 @@
 				<div class="col-md-6">
 					<label class="col-form-label" for="buscar_empresa">Ruc</label> <input
 						id="buscar_empresa" name="buscar_empresa" class="form-control"
-						type="text" th:field="*{ruc}"
+						type="number" th:field="*{ruc}"
 						th:errorclass="'form-control'" autofocus /> <small
 						class="form-text text-danger" th:if="${#fields.hasErrors('ruc')}"
 						th:errors="*{ruc}"></small>

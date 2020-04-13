@@ -74,8 +74,8 @@ public class Usuario implements Serializable {
 	@NotBlank
 	private String email;
 
+	@Pattern(regexp = "^\\d{9}$")
 	@Column(length = 9, nullable = true, unique = true)
-	@Size(max = 9)
 	private String celular;
 
 	@Column(name = "fecha_registro")
@@ -87,6 +87,7 @@ public class Usuario implements Serializable {
 	@Column(length = 30, unique = true)
 	private String username;
 
+	@Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{5,}$")
 	@NotBlank
 	@Column(length = 60)
 	private String password;

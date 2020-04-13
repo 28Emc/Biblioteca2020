@@ -8,10 +8,10 @@ import com.biblioteca2020.models.entity.Prestamo;
 public interface IPrestamoDao extends CrudRepository<Prestamo, Long> {
 
 	public List<Prestamo> findByDevolucion(String devolucion);
-	// TODOS LOS PRESTAMOS CON LIBROS, USUARIOS Y EMPLEADOS
+	// TODOS LOS PRESTAMOS CON LIBROS, USUARIOS Y EMPLEADOS FILTRADOS POR LOCAL DEL ADMIN
 	// USADO
-	@Query("select p from Prestamo p join fetch p.usuario pe join fetch p.libro li join fetch p.empleado em")
-	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado();
+	@Query("select p from Prestamo p join fetch p.usuario pe join fetch p.libro li join fetch p.empleado em where em.local.id = ?1")
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado(Long id_local);
 	// PRESTAMOS CON LIBROS, USUARIOS Y EMPLEADOS FILTRADOS POR ID_EMPLEADO
 	// USADO
 	@Query("select p from Prestamo p join fetch p.usuario pe join fetch p.libro li join fetch p.empleado em where em.id like ?1 or em.id = 1")

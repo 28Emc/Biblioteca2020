@@ -80,7 +80,7 @@ public class Empleado implements Serializable {
 	private String email;
 
 	@Column(length = 9, nullable = true, unique = true)
-	@Size(max = 9)
+	@Pattern(regexp = "^\\d{9}$")
 	private String celular;
 
 	@Column(name = "fecha_registro")
@@ -94,6 +94,16 @@ public class Empleado implements Serializable {
 
 	@NotBlank
 	@Column(length = 60)
+	/* Patron de contraseña:
+	^                 # inicio cadena
+	(?=.*[0-9])       # mínimo 1 dígito
+	(?=.*[a-z])       # mínimo 1 letra minúscula
+	(?=.*[A-Z])       # mínimo 1 letra mayúscula
+	(?=\S+$)          # sin espacios
+	.{5,}             # mínimo 5 caracteres
+	$                 # fin cadena
+	*/
+	@Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{5,}$")
 	private String password;
 
 	@Transient

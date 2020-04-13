@@ -54,15 +54,16 @@ public class PrestamoController {
 	public String listarPrestamosPorRol(Model model, Authentication authentication) {
 		// OBTENER USUARIO LOGUEADO ACTUALMENTE
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		// MOSTRAR LISTADO DE ACUERDO A ROL
 		switch (userDetails.getAuthorities().toString()) {
 		// ADMIN: VE PRESTAMOS DEL LOCAL ENTERO
 		case "[ROLE_ADMIN]":
-			model.addAttribute("prestamos", prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado());
+			model.addAttribute("prestamos",
+					prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId()));
 			break;
 		// EMPLEADO: VE PRESTAMOS REALIZADOS A SU NOMBRE
 		case "[ROLE_EMPLEADO]":
-			Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 			model.addAttribute("prestamos",
 					prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId()));
 			break;
@@ -235,6 +236,9 @@ public class PrestamoController {
 		Empleado empleado = empleadoService.findByUsernameAndEstado(userDetails.getUsername().toString(), true);
 		if (id > 0) {
 			prestamo = prestamoService.findById(id);
+			// EMPLEADO
+			prestamo.setEmpleado(empleado);
+			// ESTADO DEVOLUCION
 			prestamo.setDevolucion(true);
 			// ACTUALIZACIÓN DE STOCK
 			int stockNuevo = prestamo.getLibro().getStock();
@@ -246,6 +250,7 @@ public class PrestamoController {
 				model.addAttribute("error", e.getMessage());
 				return "redirect:/prestamos/listar";
 			}
+			// FECHA DEVOLUCION
 			prestamo.setFecha_devolucion(fechaDevolución);
 			prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo() + ", ha sido devuelto el día "
 					+ prestamoService.mostrarFechaAmigable() + ", por el empleado: "
@@ -258,8 +263,8 @@ public class PrestamoController {
 		return "redirect:/prestamos/listar";
 	}
 
-	// ANULACIÒN DE PRÉSTAMO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// ANULACIÒN DE PRÉSTAMO, AUN PRESENTE EN LA BD
+	/*@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/anular-prestamo/{id}")
 	public String anularPrestamo(@PathVariable(value = "id") Long id, RedirectAttributes flash,
 			Authentication authentication, Model model) {
@@ -269,6 +274,9 @@ public class PrestamoController {
 		Empleado empleado = empleadoService.findByUsernameAndEstado(userDetails.getUsername().toString(), true);
 		if (id > 0) {
 			prestamo = prestamoService.findById(id);
+			// EMPLEADO
+			prestamo.setEmpleado(empleado);
+			// ESTADO DEVOLUCION
 			prestamo.setDevolucion(true);
 			// ACTUALIZACIÓN DE STOCK
 			int stockNuevo = prestamo.getLibro().getStock();
@@ -280,6 +288,7 @@ public class PrestamoController {
 				model.addAttribute("error", e.getMessage());
 				return "redirect:/prestamos/listar";
 			}
+			// FECHA DEVOLUCION
 			prestamo.setFecha_devolucion(fechaDevolución);
 			prestamo.setObservaciones("El préstamo del libro: " + prestamo.getLibro().getTitulo() + " (código " + id
 					+ "), ha sido anulado el día " + prestamoService.mostrarFechaAmigable() + ", por el empleado: "
@@ -288,6 +297,36 @@ public class PrestamoController {
 			prestamoService.save(prestamo);
 			flash.addFlashAttribute("warning",
 					"El préstamo del libro '" + prestamo.getLibro().getTitulo() + "' ha sido anulado.");
+			flash.addFlashAttribute("confirma", true);
+		}
+		return "redirect:/prestamos/listar";
+	}*/
+
+	// ANULACIÒN DE PRÉSTAMO, ELIMINACION DE LA BD
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@GetMapping(value = "/anular-prestamo/{id}")
+	public String anularPrestamoDelete(@PathVariable(value = "id") Long id, RedirectAttributes flash,
+			Model model) {
+		Prestamo prestamo = null;
+
+		if (id > 0) {
+			prestamo = prestamoService.findById(id);
+			// ACTUALIZACIÓN DE STOCK
+			int stockNuevo = prestamo.getLibro().getStock();
+			Libro libro;
+			try {
+				libro = libroService.findOne(prestamo.getLibro().getId());
+				libro.setStock(stockNuevo + 1);
+			} catch (Exception e) {
+				model.addAttribute("error", e.getMessage());
+				return "redirect:/prestamos/listar";
+			}
+						
+			flash.addFlashAttribute("warning",
+					"El préstamo del libro '" + prestamo.getLibro().getTitulo() + "' ha sido anulado.");
+			
+			prestamoService.delete(id);
+			
 			flash.addFlashAttribute("confirma", true);
 		}
 		return "redirect:/prestamos/listar";

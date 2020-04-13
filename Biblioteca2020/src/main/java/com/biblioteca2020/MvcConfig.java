@@ -16,9 +16,14 @@ public class MvcConfig implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		WebMvcConfigurer.super.addResourceHandlers(registry);
+		
 		// REGISTRO LA CARPETA EXTERNA PARA GUARDAR LAS FOTOS
 		registry.addResourceHandler("/uploads/**")
 		.addResourceLocations("file:/C:/Temp/uploads/");
+		
+		/*String resourcePath = Paths.get("uploads").toAbsolutePath().toUri().toString();
+		registry.addResourceHandler("/uploads/**")
+		.addResourceLocations(resourcePath);*/
 	}
 		
 }

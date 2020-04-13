@@ -15,7 +15,7 @@ import com.biblioteca2020.models.entity.Empleado;
 
 @Service
 public class EmpleadoServiceImpl implements IEmpleadoService {
-
+	
 	@Autowired
 	private IEmpleadoDao empleadoDao;
 
@@ -187,6 +187,7 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		
 		String passwordHash = passwordEncoder.encode(form.getNuevaPassword());
 		empleado.setPassword(passwordHash);
+		
 		return empleadoDao.save(empleado);
 	}
 }

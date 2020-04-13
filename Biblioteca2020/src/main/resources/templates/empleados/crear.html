@@ -42,20 +42,20 @@
 						th:errors="*{nroDocumento}"></small>
 				</div>
 				<div class="col-md-6">
-					<label class="col-form-label" for="direccion">Dirección</label> <input
-						class="form-control" type="text" th:field="*{direccion}"
-						th:errorclass="'form-control'"
-						placeholder="Av/Jr/Calle..." /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></small>
-				</div>
-				<div class="col-md-6">
 					<label class="col-form-label" for="celular">Celular</label> <input
 						class="form-control" type="number" th:field="*{celular}"
 						th:errorclass="'form-control'" placeholder="99999999" />
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('celular')}" th:errors="*{celular}"></small>
 				</div>
+				<div class="col-md-12">
+					<label class="col-form-label" for="direccion">Dirección</label> <input
+						class="form-control" type="text" th:field="*{direccion}"
+						th:errorclass="'form-control'"
+						placeholder="Av/Jr/Calle..." /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></small>
+				</div>			
 			</div>
 
 			<h4 th:text="'Datos de usuario'"></h4>
@@ -79,20 +79,20 @@
 
 			<div class="form-group row"
 				th:if="${editable==null or editable==false}">
-				<div class="col-md-6">
+				<div class="col-md-12">
 					<label class="col-form-label" for="password">Contraseña</label> <input
 						class="form-control" type="password" th:field="*{password}"
 						th:errorclass="'form-control'"
-						placeholder="Contraseña..." /> <small
+						placeholder="Mínimo 8 caracteres/1 dígito/1 letra mayúscula/1 letra minúscula/sin espacios" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small>
 				</div>
-				<div class="col-md-6">
+				<div class="col-md-12">
 					<label class="col-form-label" for="passwordConfirmacion">Confirmar
 						Contraseña</label> <input class="form-control" type="password"
 						th:field="*{passwordConfirmacion}"
 						th:errorclass="'form-control'"
-						placeholder="Repite nuevamente tu contraseña..." /> <small
+						placeholder="Escribir nuevamente la contraseña..." /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('passwordConfirmacion')}"
 						th:errors="*{passwordConfirmacion}"></small>
