@@ -65,7 +65,7 @@
 				</div>
 				<div class="col-md-6">
 					<label class="col-form-label" for="fecha_publicacion">Fecha
-						Publicación</label> <input class="form-control" type="text"
+						Publicación</label> <input class="form-control datepicker" type="text"
 						name="fechaPublicacion" placeholder="yyyy-mm-dd"
 						th:field="*{fechaPublicacion}" /> <small
 						class="form-text text-danger"
@@ -179,13 +179,22 @@
 			<h3 class="mb-4">Fecha Publicación</h3>
 			<div class="form-group">
 				<div class="col-sm-6">
-					<input class="form-control" type="text" name="fecha_publicacion"
+					<input class="form-control datepicker" type="text" name="fecha_publicacion"
 						placeholder="yyyy-mm-dd" th:field="*{fecha_publicacion}" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('fecha_publicacion')}"
 						th:errors="*{fecha_publicacion}"></small>
 				</div>
 			</div>
+			
+			<h4 class="my-4">Fecha Devolución</h4>
+				<div class="form-group row">
+					<div class="col-md-6">
+						<input class="form-control datepicker" type="text"
+							name="fecha_devolucion" id="fecha_devolucion"
+							placeholder="Escojer fecha (1 día - 3 meses)" required autofocus />
+					</div>
+				</div>
 
 			<h3 class="mb-4">Stock</h3>
 			<div class="form-group">
@@ -206,12 +215,6 @@
 						th:alt="${libro.foto_libro}"
 						th:src="@{'/uploads/'+${libro.foto_libro}}">
 				</div>
-				<div class="col-sm-6">
-					<input class="form-control" type="file" name="foto_li" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('foto_libro')}"
-						th:errors="*{foto_libro}"></small>
-				</div>
 			</div>
 
 			<div class="form-group row">
@@ -230,5 +233,21 @@
 	<footer th:replace="layout/layout :: footer"></footer>
 	<script th:replace="layout/autocomplete-categorias :: javascript"></script>
 	<script th:replace="layout/autocomplete-locales :: javascript"></script>
+	
+	<script type="text/javascript">
+		// COMPONENTE DE FECHA ESPECIFICO PARA EL FORMULARIO
+		$('.datepicker').datepicker({
+			format : 'yyyy-mm-dd', // FORMATO DE FECHA
+			//startDate : '+2d', // MUESTRA FECHA DESDE MAÑANA
+			//endDate : '+2m', // MUESTRA FECHA HASTA UN MAXIMO DE 3 MESES
+			autoclose : true, // OCULTAR AUTOMATICAMENTE COMPONENTE AL ESCOJER FECHA
+			todayHighlight : true, // ENFASIS EN EL DIA ACTUAL 
+			language : 'es', // LENGUAJE DEL COMPONENTE
+			templates : { // ELEMENTOS PERSONALIZADOS DEL COMPONENTE
+				leftArrow : '<i class="fa fa-angle-left"></i>',
+				rightArrow : '<i class="fa fa-angle-right"></i>'
+			}
+		});
+	</script>
 </body>
 </html>

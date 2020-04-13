@@ -223,17 +223,17 @@
 
 					<div class="form-group row"
 						th:if="${editable==null or editable==false}">
-						<div class="col-md-6">
+						<div class="col-md-12">
 							<label class="col-form-label" for="password">Contraseña</label> <input
 								class="form-control" type="password"
 								th:field="${usuario.password}"
 								th:errorclass="'form-control'"
-								placeholder="Contraseña..." /> <small
+								placeholder="Mínimo 8 caracteres/1 dígito/1 letra mayúscula/1 letra minúscula/sin espacios" /> <small
 								class="form-text text-danger"
 								th:if="${#fields.hasErrors('password')}"
 								th:errors="${usuario.password}"></small>
 						</div>
-						<div class="col-md-6">
+						<div class="col-md-12">
 							<label class="col-form-label" for="passwordConfirmacion">Confirmar
 								Contraseña</label> <input class="form-control" type="password"
 								th:field="${usuario.passwordConfirmacion}"

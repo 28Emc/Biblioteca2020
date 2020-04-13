@@ -8,6 +8,8 @@
 <title th:text="'Biblioteca | ' + ${titulo}"></title>
 <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
 <link rel="stylesheet" th:href="@{/css/jquery-ui.min.css}" />
+<link rel="stylesheet"
+	th:href="@{/date-picker/css/bootstrap-datepicker.standalone.css}" />
 </head>
 <body class="d-flex flex-column h-100">
 
@@ -149,6 +151,11 @@
 		<script th:src="@{/js/bootstrap.min.js}"></script>
 		<script th:src="@{/js/jquery-ui.min.js}"></script>
 		<script th:src="@{/js/font-awesome.js}"></script>
+		<script th:src="@{/date-picker/js/bootstrap-datepicker.js}"></script>
+		<script th:src="@{/date-picker/js/bootstrap-datepicker.min.js}"></script>
+		<script
+			th:src="@{/date-picker/locales/bootstrap-datepicker.es.min.js}"
+			charset="UTF-8"></script>
 		<script type="text/javascript">
 			setTimeout(function() {
 				$("#alertPers").alert('close');
@@ -166,6 +173,21 @@
 					return false;
 				}
 			}
+			// COMPONENTE DE FECHA GENERICO PARA TODA LA APP
+			/*$('.datepicker').datepicker({
+				format : 'yyyy-mm-dd', // FORMATO DE FECHA
+				//startDate : '0d', // MUESTRA FECHA DESDE HOY
+				endDate: '+2m', // MUESTRA FECHA HASTA UN MAXIMO DE 3 MESES
+				autoclose: true, // OCULTAR AUTOMATICAMENTE COMPONENTE AL ESCOJER FECHA
+				todayHighlight: true, // ENFASIS EN EL DIA ACTUAL 
+				language: 'es', // LENGUAJE DEL COMPONENTE
+				templates: { // ELEMENTOS PERSONALIZADOS DEL COMPONENTE
+				    leftArrow: '<i class="fa fa-angle-left"></i>',
+				    rightArrow: '<i class="fa fa-angle-right"></i>'
+				}
+			});*/
+			var datepicker = $.fn.datepicker.noConflict(); // return $.fn.datepicker to previously assigned value
+			$.fn.bootstrapDP = datepicker; // give $().bootstrapDP the bootstrap-datepicker functionality
 		</script>
 	</footer>
 

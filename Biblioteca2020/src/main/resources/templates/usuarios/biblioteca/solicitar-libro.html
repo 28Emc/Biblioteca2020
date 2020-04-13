@@ -16,15 +16,15 @@
 
 		<div class="container">
 
-			<form th:action="@{/usuarios/biblioteca/solicitar-libro}" method="post">
+			<form th:action="@{/usuarios/biblioteca/solicitar-libro}"
+				method="post">
 
 				<h4 class="my-4">Libro</h4>
 				<div class="form-group row">
 					<div class="col-md-4">
-						<label class="text-muted col-form-label" for="libro">ID</label> 
+						<label class="text-muted col-form-label" for="libro">ID</label>
 						<!-- TH:ATTR SIRVE PARA RELLENAR EL FORMULARIO CON OTRA FUENTE DE DATOS -->
-						<input
-							class="form-control" name="id_libro" id="id_libro"
+						<input class="form-control" name="id_libro" id="id_libro"
 							th:attr="value=${libro.id}" readonly />
 					</div>
 					<div class="col-md-4">
@@ -83,8 +83,9 @@
 				<h4 class="my-4">Fecha Devolución</h4>
 				<div class="form-group row">
 					<div class="col-md-6">
-						<input class="form-control" type="date" name="fecha_devolucion"
-							id="fecha_devolucion" required />
+						<input class="form-control datepicker" type="text"
+							name="fecha_devolucion" id="fecha_devolucion"
+							placeholder="Escojer fecha (1 día - 3 meses)" required autofocus />
 					</div>
 				</div>
 
@@ -105,5 +106,22 @@
 	</div>
 
 	<footer th:replace="layout/layout :: footer"></footer>
+	
+	<script type="text/javascript">
+		// COMPONENTE DE FECHA ESPECIFICO PARA EL FORMULARIO
+		$('.datepicker').datepicker({
+			format : 'yyyy-mm-dd', // FORMATO DE FECHA
+			startDate : '+2d', // MUESTRA FECHA DESDE MAÑANA
+			endDate : '+2m', // MUESTRA FECHA HASTA UN MAXIMO DE 3 MESES
+			autoclose : true, // OCULTAR AUTOMATICAMENTE COMPONENTE AL ESCOJER FECHA
+			todayHighlight : true, // ENFASIS EN EL DIA ACTUAL 
+			language : 'es', // LENGUAJE DEL COMPONENTE
+			templates : { // ELEMENTOS PERSONALIZADOS DEL COMPONENTE
+				leftArrow : '<i class="fa fa-angle-left"></i>',
+				rightArrow : '<i class="fa fa-angle-right"></i>'
+			}
+		});
+	</script>
+
 </body>
 </html>

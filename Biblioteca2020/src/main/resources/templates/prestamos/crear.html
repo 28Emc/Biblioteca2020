@@ -74,7 +74,7 @@
 			<div class="form-group row">
 				<div class="col-md-6">
 					<label class="col-form-label" for="fecha_devolucion">Fecha
-						Devoluciòn</label> <input class="form-control" type="date"
+						Devoluciòn</label> <input class="form-control datepicker" type="text"
 						name="fecha_devolucion" th:field=*{fecha_devolucion} required />
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('fecha_devolucion')}" th:errors="*{fecha_devolucion}"></small>
@@ -99,5 +99,21 @@
 	<script th:replace="layout/autocomplete-libros :: javascript"></script>
 	<script th:replace="layout/autocomplete-usuarios :: javascript"></script>
 	<script th:replace="layout/autocomplete-empleados :: javascript"></script>
+	
+	<script type="text/javascript">
+		// COMPONENTE DE FECHA ESPECIFICO PARA EL FORMULARIO
+		$('.datepicker').datepicker({
+			format : 'yyyy-mm-dd', // FORMATO DE FECHA
+			startDate : '+2d', // MUESTRA FECHA DESDE MAÑANA
+			endDate : '+2m', // MUESTRA FECHA HASTA UN MAXIMO DE 3 MESES
+			autoclose : true, // OCULTAR AUTOMATICAMENTE COMPONENTE AL ESCOJER FECHA
+			todayHighlight : true, // ENFASIS EN EL DIA ACTUAL 
+			language : 'es', // LENGUAJE DEL COMPONENTE
+			templates : { // ELEMENTOS PERSONALIZADOS DEL COMPONENTE
+				leftArrow : '<i class="fa fa-angle-left"></i>',
+				rightArrow : '<i class="fa fa-angle-right"></i>'
+			}
+		});
+	</script>
 </body>
 </html>
