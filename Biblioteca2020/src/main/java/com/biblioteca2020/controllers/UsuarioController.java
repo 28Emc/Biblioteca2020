@@ -183,9 +183,9 @@ public class UsuarioController {
 			// USUARIO
 			prestamo.setUsuario(usuarioService.findById(id_usuario));
 			// EMPLEADO
-			// EL EMPLEADO SE SETEA CON EL USUARIO DE PRUEBA (CODIGO 1) POR PARTE DEL
+			// EL EMPLEADO SE SETEA CON EL USUARIO DE PRUEBA DEL LOCAL DEL LIBRO POR PARTE DEL
 			// USUARIO
-			prestamo.setEmpleado(empleadoService.findById(1L));
+			prestamo.setEmpleado(empleadoService.findByUsernameAndLocal("Prueba", libroAPrestar.getLocal().getId()));
 			// FECHA_DESPACHO
 			Date fechaDespacho = new Date();
 			prestamo.setFecha_despacho(fechaDespacho);
@@ -614,74 +614,6 @@ public class UsuarioController {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Registro de Usuario");
-			model.addAttribute("error", e.getMessage());
-			return "/usuarios/crear";
-		}
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	@GetMapping("/editar/{id}")
-	public String editarFormUsuario(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
-			RedirectAttributes flash) {
-		Usuario usuario = null;
-		modelMap.put("editable", true);
-		modelMap.put("passwordForm", new CambiarPassword(id));
-		modelMap.put("roles", roleService.findOnlyUsers());
-		modelMap.put("titulo", "Modificar Usuario");
-		try {
-			usuario = usuarioService.findById(id);
-			modelMap.put("usuario", usuario);
-			return "/usuarios/crear";
-		} catch (Exception e) {
-			flash.addFlashAttribute("error", e.getMessage());
-			return "redirect:/usuarios/listar";
-		}
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	@PostMapping(value = "/editar")
-	public String guardarUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_usu") MultipartFile foto) {
-		if (result.hasErrors()) {
-			model.addAttribute("usuario", usuario);
-			model.addAttribute("editable", true);
-			modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
-			model.addAttribute("roles", roleService.findOnlyUsers());
-			model.addAttribute("titulo", "Modificar Usuario");
-			return "/usuarios/editar";
-		}
-
-		if (!foto.isEmpty()) {
-			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
-			/*
-			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
-			 */
-			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
-			// VEAN SIEMPRE
-			String rootPath = "C://Temp//uploads";
-			try {
-				byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
-				usuario.setFoto_usuario(foto.getOriginalFilename());
-			} catch (IOException e) {
-				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
-			}
-		}
-
-		try {
-			usuarioService.update(usuario);
-			flash.addFlashAttribute("warning",
-					"El usuario con código " + usuario.getId() + " ha sido actualizado en la base de datos.");
-			status.setComplete();
-			return "redirect:/usuarios/listar";
-		} catch (Exception e) {
-			model.addAttribute("usuario", usuario);
-			model.addAttribute("editable", true);
-			modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
-			model.addAttribute("roles", roleService.findOnlyUsers());
-			model.addAttribute("titulo", "Modificar Usuario");
 			model.addAttribute("error", e.getMessage());
 			return "/usuarios/crear";
 		}

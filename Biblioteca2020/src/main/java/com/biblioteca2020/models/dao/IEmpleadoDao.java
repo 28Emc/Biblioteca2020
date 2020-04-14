@@ -20,6 +20,9 @@ public interface IEmpleadoDao extends CrudRepository<Empleado, Long> {
 	// USADO
 	public Empleado findByUsernameAndEstado(String username, boolean estado);
 	// USADO
+	@Query("select e from Empleado e where e.username like ?1 and e.local.id=?2")
+	public Empleado findByUsernameAndLocal(String username, Long id_local);
+	// USADO
 	@Query("select e from Empleado e join fetch e.local l join fetch l.empresa em where em.id=?1")
 	public List<Empleado> fetchByIdWithLocalWithEmpresa(Long id);
 	// USADO

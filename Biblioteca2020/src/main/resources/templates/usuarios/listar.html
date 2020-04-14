@@ -33,7 +33,7 @@
 					<th sec:authorize="!hasRole('ROLE_USER')">Username</th>
 					<th sec:authorize="!hasRole('ROLE_USER')">Estado</th>
 					<th:block sec:authorize="hasRole('ROLE_ADMIN')">
-						<th colspan="2">Opciones</th>
+						<th colspan="1">Opciones</th>
 					</th:block>
 				</tr>
 			</thead>
@@ -63,11 +63,7 @@
 								<span class="badge badge-success" th:text="'Activo'"></span>
 							</h5>
 						</td>
-						<td th:if="${estado}" sec:authorize="!hasRole('ROLE_EMPLEADO')"><a
-							class="btn btn-warning btn-xs"
-							th:href="@{/usuarios/editar/}+${usuario.id}"><i
-								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td th:if="${estado}" sec:authorize="!hasRole('ROLE_EMPLEADO')"><a
+						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
 							class="btn btn-info btn-xs text-white"
 							th:onclick="'javascript:confirmDeshabilitar(\''+ ${usuario.id} +'\');'"><i
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
@@ -77,11 +73,7 @@
 							</h5>
 						</td>
 						<td th:unless="${estado}"
-							sec:authorize="!hasRole('ROLE_EMPLEADO')"><a
-							class="disabled btn btn-secondary btn-xs"><i
-								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td th:unless="${estado}"
-							sec:authorize="!hasRole('ROLE_EMPLEADO')"><a
+							sec:authorize="hasRole('ROLE_ADMIN')"><a
 							class="disabled btn btn-secondary btn-xs text-white"><i
 								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 					</th:block>

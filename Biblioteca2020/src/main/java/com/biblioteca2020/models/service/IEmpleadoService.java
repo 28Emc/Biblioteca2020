@@ -22,6 +22,8 @@ public interface IEmpleadoService {
 	// USADO
 	public Empleado findByUsername(String username);
 	// USADO
+	public Empleado findByUsernameAndLocal(String username, Long id_local);
+	// USADO
 	public Empleado findByUsernameAndEstado(String username, boolean estado);
 	
 	public Empleado findByNroDocumento(String nroDocumento);

@@ -26,7 +26,6 @@
 				<tr>
 					<th>Id</th>
 					<th>Libro</th>
-					<!-- <th>Nombre Empleado</th> -->
 					<th>Local</th>
 					<th>Suscriptor</th>
 					<th>Fecha Despacho</th>
@@ -39,11 +38,10 @@
 				<tr th:each="prestamoPendiente: ${prestamosPendientes}">
 
 					<th:block
-						th:if="${prestamoPendiente.empleado.username}=='Prueba'">
+						th:if="${#strings.contains(prestamoPendiente.empleado.username, 'Prueba')}">
 						<td th:text="${prestamoPendiente.id}"></td>
 						<td
 							th:text="${prestamoPendiente.libro.titulo}+', '+${prestamoPendiente.libro.autor}"></td>
-						<!-- <td th:text="'--'"></td> -->
 						<td th:text="${prestamoPendiente.empleado.local.direccion}"></td>
 						<td
 							th:text="${prestamoPendiente.usuario.nombres}+', '+${prestamoPendiente.usuario.apellidos}"></td>
@@ -58,7 +56,7 @@
 					</th:block>
 
 					<th:block
-						th:unless="${prestamoPendiente.empleado.username}=='Prueba'">
+						th:unless="${not #lists.contains(prestamoPendiente.empleado.username, 'Prueba')}">
 						<td th:text="${prestamoPendiente.id}"></td>
 						<td
 							th:text="${prestamoPendiente.libro.titulo}+', '+${prestamoPendiente.libro.autor}"></td>

@@ -15,15 +15,16 @@ import com.biblioteca2020.models.entity.Empleado;
 
 @Service
 public class EmpleadoServiceImpl implements IEmpleadoService {
-	
+
 	@Autowired
 	private IEmpleadoDao empleadoDao;
 
 	@Autowired
 	private IRoleService roleService;
-	
+
 	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
@@ -36,24 +37,28 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	public List<Empleado> findAll() {
 		return (List<Empleado>) empleadoDao.findAll();
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Empleado findById(Long id) throws Exception {
 		return empleadoDao.findById(id).orElseThrow(() -> new Exception("El empleado no existe."));
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Empleado findByUsername(String username) {
 		return empleadoDao.findByUsername(username);
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Empleado> findAllByNroDocumentoAndEstado(String term, boolean estado) {
 		return empleadoDao.findAllByNroDocumentoAndEstado("%" + term + "%", estado);
 	}
+
 	// USADO
 	@Override
 	@Transactional
@@ -64,6 +69,7 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 			empleadoDao.save(empleado);
 		}
 	}
+
 	// USADO
 	@Override
 	@Transactional
@@ -84,7 +90,6 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	public List<Empleado> fetchByIdWithRoles() {
 		return empleadoDao.fetchByIdWithRoles();
 	}
-	
 
 	@Override
 	@Transactional(readOnly = true)
@@ -100,7 +105,7 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		}
 		return true;
 	}
-	
+
 	public boolean verificarCelular(Empleado empleado) throws ConstraintViolationException {
 		Empleado empleadoEncontrado = empleadoDao.findByCelular(empleado.getCelular());
 		if (empleadoEncontrado != null) {
@@ -108,6 +113,7 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		}
 		return true;
 	}
+
 	// USADO
 	public boolean verificarDNI(Empleado empleado) throws ConstraintViolationException {
 		Empleado empleadoEncontrado = empleadoDao.findByNroDocumento(empleado.getNroDocumento());
@@ -116,6 +122,7 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		}
 		return true;
 	}
+
 	// USADO
 	public boolean verificarPassword(Empleado empleado) throws Exception {
 		if (empleado.getPasswordConfirmacion() == null || empleado.getPasswordConfirmacion().isEmpty()) {
@@ -142,7 +149,7 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 
 	@Override
 	public void isAdminEditar(Map<String, Object> model, Principal principal) {
-		Empleado empleado= findByUsername(principal.getName());
+		Empleado empleado = findByUsername(principal.getName());
 		Boolean isAdmin = empleado.getRoles().toString().contains("ROLE_EMPLEADO");
 		if (isAdmin) {
 			model.put("roles", roleService.findAll());
@@ -150,12 +157,14 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 			model.put("roles", roleService.findOnlyUsers());
 		}
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Empleado> fetchByIdWithLocalWithEmpresaNotAdmin(Long id) {
 		return empleadoDao.fetchByIdWithLocalWithEmpresaNotAdmin(id);
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
@@ -168,26 +177,33 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	public Empleado findByNroDocumento(String nroDocumento) {
 		return empleadoDao.findByNroDocumento(nroDocumento);
 	}
+
 	// USADO
 	@Override
 	public Empleado cambiarPassword(CambiarPassword form) throws Exception {
 		Empleado empleado = findById(form.getId());
-		
+
 		if (!passwordEncoder.matches(form.getPasswordActual(), empleado.getPassword())) {
 			throw new Exception("La contraseña actual es incorrecta");
 		}
-		
+
 		if (passwordEncoder.matches(form.getNuevaPassword(), empleado.getPassword())) {
 			throw new Exception("La nueva contraseña debe ser diferente a la actual");
 		}
-		
+
 		if (!form.getNuevaPassword().equals(form.getConfirmarPassword())) {
 			throw new Exception("Las contraseñas no coinciden");
 		}
-		
+
 		String passwordHash = passwordEncoder.encode(form.getNuevaPassword());
 		empleado.setPassword(passwordHash);
-		
+
 		return empleadoDao.save(empleado);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Empleado findByUsernameAndLocal(String username, Long id_local) {
+		return empleadoDao.findByUsernameAndLocal("%" + username + "%", id_local);
 	}
 }

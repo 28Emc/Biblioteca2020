@@ -33,23 +33,24 @@
 					<th>Id</th>
 					<th>Libro</th>
 					<th>Nombre Empleado</th>
-					<th>Local Empleado</th>
+					<th sec:authorize="!hasRole('ROLE_USER')">Local Empleado</th>
 					<th>Nombre Suscriptor</th>
 					<th>Fecha Despacho</th>
 					<th>Fecha Devolución/Anulación</th>
 					<th>Observaciones</th>
 					<th sec:authorize="!hasRole('ROLE_USER')">Estado</th>
-					<th colspan="3" sec:authorize="!hasRole('ROLE_USER')">Opciones</th>
+					<th colspan="3" sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr th:each="prestamo: ${prestamos}">
 
-					<th:block th:if="${prestamo.empleado.username}=='Prueba'">
+					<th:block
+						th:if="${#strings.contains(prestamo.empleado.username, 'Prueba')}">
 						<td th:text="${prestamo.id}"></td>
 						<td
 							th:text="${prestamo.libro.titulo}+', '+${prestamo.libro.autor}"></td>
-						<td th:text="'--'"></td>
+						<td th:text="'En espera de confirmación'"></td>
 						<td th:text="${prestamo.empleado.local.direccion}"></td>
 						<td
 							th:text="${prestamo.usuario.nombres}+', '+${prestamo.usuario.apellidos}"></td>
@@ -58,85 +59,34 @@
 						<td data-toggle="tooltip" data-placement="top"
 							th:title="${prestamo.observaciones}" class="text-center"><i
 							class="fas fa-search fa-2x"></i></td>
-					</th:block>
 
-					<th:block th:unless="${prestamo.empleado.username}=='Prueba'">
-						<td th:text="${prestamo.id}"></td>
-						<td
-							th:text="${prestamo.libro.titulo}+', '+${prestamo.libro.autor}"></td>
-						<td
-							th:text="${prestamo.empleado.nombres}+', '+${prestamo.empleado.apellidos}"></td>
-						<td th:text="${prestamo.empleado.local.direccion}"></td>
-						<td
-							th:text="${prestamo.usuario.nombres}+', '+${prestamo.usuario.apellidos}"></td>
-						<td th:text="${prestamo.fecha_despacho}"></td>
-						<td th:text="${prestamo.fecha_devolucion}"></td>
-						<td data-toggle="tooltip" data-placement="top"
-							th:title="${prestamo.observaciones}" class="text-center"><i
-							class="fas fa-search fa-2x"></i></td>
-					</th:block>
+						<th:block th:if="${prestamo.devolucion}"
+							sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')">
+							<td>
+								<h5>
+									<span class="badge badge-success"
+										th:text="'Préstamo Terminado'"></span>
+								</h5>
+							</td>
 
-					<td th:if="${prestamo.devolucion}"
-						sec:authorize="!hasRole('ROLE_USER')">
-						<h5>
-							<span class="badge badge-success" th:text="'Préstamo Terminado'"></span>
-						</h5>
-					</td>
-
-					<td th:unless="${prestamo.devolucion}"
-						sec:authorize="!hasRole('ROLE_USER')">
-						<h5>
-							<span class="badge badge-danger text-light"
-								th:text="'Libro Sin devolver'"></span>
-						</h5>
-					</td>
-					<!-- BLOQUE DE CÒDIGO PARA HABILITAR Y DESHABILITAR BOTONES DE ACUERDO AL TIPO DE REGISTRO -->
-					<!-- 1. ORDEN ANULADA O TERMINADA POR EMPLEADO (COLOR VERDE) -->
-					<th:block th:if="${prestamo.devolucion}">
-
-						<!-- 1.1. ORDEN CONFIRMADA POR USUARIO -->
-						<th:block th:if="${confirma}"
-							sec:authorize="!hasRole('ROLE_USER')">
 							<td><a class="disabled btn btn-secondary btn-xs" href="#">Orden
 									Confirmada</a></td>
 							<td><a class="disabled btn btn-secondary btn-xs" href="#">Devolver
 									Libro</a></td>
 							<td><a class="disabled btn btn-secondary btn-xs" href="#">Anular
-									Orden</a></td>
-						</th:block>
-
-						<!-- 1.2. ORDEN SIN CONFIRMAR POR USUARIO-->
-						<th:block th:unless="${confirma}"
-							sec:authorize="!hasRole('ROLE_USER')">
-							<td><a class="disabled btn btn-secondary btn-xs" href="#">Confirmar
-									Orden</a></td>
-							<td><a class="disabled btn btn-secondary btn-xs" href="#">Devolver
-									Libro</a></td>
-							<td><a class="disabled btn btn-secondary btn-xs" href="#">Anular
-									Orden</a></td>
-						</th:block>
-
-					</th:block>
-
-					<!-- 2. ORDEN SIN DEVOLVER POR EMPLEADO (COLOR ROJO) -->
-					<th:block th:unless="${prestamo.devolucion}">				
-
-						<!-- 2.1. ORDEN CONFIRMADA POR USUARIO -->
-						<th:block th:if="${confirma}" sec:authorize="!hasRole('ROLE_USER')">
-							<td><a class="disabled btn btn-secondary btn-xs" href="#">Confirmar
-									Orden</a></td>
-							<td><a class="btn btn-info btn-xs"
-								th:href="@{/prestamos/devolver-libro/}+${prestamo.id}"
-								onclick="return confirm('¿Seguro de querer validar la devolución del libro?');">Devolver
-									Libro</a></td>
-							<td><a class="btn btn-warning btn-xs"
-								th:href="@{/prestamos/anular-prestamo/}+${prestamo.id}"
-								onclick="return confirm('Seguro de querer anular el préstamo?');">Anular
 									Préstamo</a></td>
 						</th:block>
 
-						<!-- 2.2. ORDEN SIN CONFIRMAR -->
-						<th:block th:unless="${confirma}" sec:authorize="!hasRole('ROLE_USER')">
+						<th:block th:unless="${prestamo.devolucion}"
+							sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')">
+							<td>
+								<h5>
+									<span class="badge badge-danger text-light"
+										th:text="'Libro Sin devolver'"></span>
+								</h5>
+							</td>
+
+							<!-- 1. ORDEN SIN CONFIRMAR -->
 							<td><a class="btn btn-success btn-xs"
 								th:href="@{/prestamos/confirmar-orden/}+${prestamo.id}"
 								onclick="return confirm('¿Confirmar la orden de este libro?');">Confirmar
@@ -147,8 +97,66 @@
 									Préstamo</a></td>
 						</th:block>
 
+
 					</th:block>
 
+					<th:block
+						th:unless="${#strings.contains(prestamo.empleado.username, 'Prueba')}">
+						<td th:text="${prestamo.id}"></td>
+						<td
+							th:text="${prestamo.libro.titulo}+', '+${prestamo.libro.autor}"></td>
+						<td sec:authorize="!hasRole('ROLE_USER')"
+							th:text="${prestamo.empleado.nombres}+', '+${prestamo.empleado.apellidos}"></td>
+						<td th:text="${prestamo.empleado.local.direccion}"></td>
+						<td
+							th:text="${prestamo.usuario.nombres}+', '+${prestamo.usuario.apellidos}"></td>
+						<td th:text="${prestamo.fecha_despacho}"></td>
+						<td th:text="${prestamo.fecha_devolucion}"></td>
+						<td data-toggle="tooltip" data-placement="top"
+							th:title="${prestamo.observaciones}" class="text-center"><i
+							class="fas fa-search fa-2x"></i></td>
+
+						<th:block th:if="${prestamo.devolucion}"
+							sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')">
+							<td>
+								<h5>
+									<span class="badge badge-success"
+										th:text="'Préstamo Terminado'"></span>
+								</h5>
+							</td>
+
+							<!-- 2. ORDEN CONFIRMADA POR USUARIO O GENERADA POR ADMIN O EMPLEADO -->
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Orden
+									Confirmada</a></td>
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Devolver
+									Libro</a></td>
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Anular
+									Préstamo</a></td>
+						</th:block>
+
+						<th:block th:unless="${prestamo.devolucion}"
+							sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')">
+							<td>
+								<h5>
+									<span class="badge badge-danger text-light"
+										th:text="'Libro Sin devolver'"></span>
+								</h5>
+							</td>
+
+							<!-- 2. ORDEN CONFIRMADA POR USUARIO O GENERADA POR ADMIN O EMPLEADO -->
+							<td><a class="disabled btn btn-secondary btn-xs" href="#">Orden
+									Confirmada</a></td>
+							<td><a class="btn btn-info btn-xs"
+								th:href="@{/prestamos/devolver-libro/}+${prestamo.id}"
+								onclick="return confirm('¿Seguro de querer validar la devolución del libro?');">Devolver
+									Libro</a></td>
+							<td><a class="btn btn-warning btn-xs"
+								th:href="@{/prestamos/anular-prestamo/}+${prestamo.id}"
+								onclick="return confirm('Seguro de querer anular el préstamo?');">Anular
+									Préstamo</a></td>
+						</th:block>
+
+					</th:block>
 				</tr>
 			</tbody>
 		</table>

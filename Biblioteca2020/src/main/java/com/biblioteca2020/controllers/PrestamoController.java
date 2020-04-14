@@ -206,7 +206,7 @@ public class PrestamoController {
 			// ACTUALIZO EL ID EMPLEADO CON EL LOGUEADO, ANTES DE ESO, TENGO QUE ASEGURARME
 			// QUE ESTE USUARIO SEA EL DEL EMPLEADO DE PRUEBAS PARA NO "ROBAR" EL ORDEN DE
 			// OTRO EMPLEADO
-			if (prestamo.getEmpleado().getUsername().equals("Prueba")) {
+			if (prestamo.getEmpleado().getUsername().contains("Prueba")) {
 				prestamo.setEmpleado(empleado);
 				prestamo.setDevolucion(false);
 				prestamo.setObservaciones("La orden del libro: " + prestamo.getLibro().getTitulo()
