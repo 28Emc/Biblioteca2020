@@ -7,37 +7,39 @@ import org.springframework.data.repository.CrudRepository;
 import com.biblioteca2020.models.entity.Empleado;
 
 public interface IEmpleadoDao extends CrudRepository<Empleado, Long> {
-
+	// USADO
 	public Optional<Empleado> findById(Long id);
+
 	// USADO
 	public Empleado findByUsername(String username);
-	
+
+	// USADO
 	public Empleado findByNroDocumento(String nroDocumento);
 
 	// USADO
 	@Query("select e from Empleado e where e.nroDocumento like ?1 and e.estado = ?2")
 	public List<Empleado> findAllByNroDocumentoAndEstado(String term, boolean estado);
+
 	// USADO
 	public Empleado findByUsernameAndEstado(String username, boolean estado);
+
 	// USADO
 	@Query("select e from Empleado e where e.username like ?1 and e.local.id=?2")
 	public Empleado findByUsernameAndLocal(String username, Long id_local);
+
 	// USADO
-	@Query("select e from Empleado e join fetch e.local l join fetch l.empresa em where em.id=?1")
+	@Query("select e from Empleado e join fetch e.roles r join fetch e.local l join fetch l.empresa em where em.id=?1 and r.authority not in ('ROLE_PRUEBA')")
 	public List<Empleado> fetchByIdWithLocalWithEmpresa(Long id);
+
 	// USADO
 	@Query("select e from Empleado e join fetch e.roles r join fetch e.local l join fetch l.empresa em where em.id=?1 and r.authority not like 'ROLE_ADMIN'")
 	public List<Empleado> fetchByIdWithLocalWithEmpresaNotAdmin(Long id);
 
+	// USADO
 	@Query("select e from Empleado e join fetch e.roles r where r.authority='ROLE_EMPLEADO'")
 	public List<Empleado> fetchByIdWithRoles();
-	
-	@Query("select e from Empleado e join fetch e.roles r where r.authority in ('ROLE_EMPLEADO', 'ROLE_SUPERVISOR')")
-	public List<Empleado> fetchByIdWithRolesSupervisor();
 
-	@Query("select e from Empleado e where e.username not in ?1")
-	public List<Empleado> findByAnotherUsername(String username);
-
+	// USADO
 	public Empleado findByCelular(String celular);
 
 }

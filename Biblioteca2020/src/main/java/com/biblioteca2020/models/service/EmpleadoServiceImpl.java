@@ -32,6 +32,7 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		return empleadoDao.findByUsernameAndEstado(username, estado);
 	}
 
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Empleado> findAll() {
@@ -74,27 +75,14 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	@Override
 	@Transactional
 	public void update(Empleado empleado) throws Exception {
-		empleado = empleadoDao.save(empleado);
+		empleadoDao.save(empleado);
 	}
 
-	@Override
-	@Transactional
-	public void borrarEmpleado(Long id) throws Exception {
-		Empleado empleado = empleadoDao.findById(id)
-				.orElseThrow(() -> new Exception("El empleado no existe en el método de borrar usuarios."));
-		empleadoDao.deleteById(empleado.getId());
-	}
-
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Empleado> fetchByIdWithRoles() {
 		return empleadoDao.fetchByIdWithRoles();
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<Empleado> fetchByIdWithRolesSupervisor() {
-		return empleadoDao.fetchByIdWithRolesSupervisor();
 	}
 
 	// USADO
@@ -106,13 +94,14 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		return true;
 	}
 
-	public boolean verificarCelular(Empleado empleado) throws ConstraintViolationException {
-		Empleado empleadoEncontrado = empleadoDao.findByCelular(empleado.getCelular());
-		if (empleadoEncontrado != null) {
-			throw new ConstraintViolationException("El numero de celular ya está en uso.", null);
-		}
-		return true;
-	}
+	/*
+	 * public boolean verificarCelular(Empleado empleado) throws
+	 * ConstraintViolationException { Empleado empleadoEncontrado =
+	 * empleadoDao.findByCelular(empleado.getCelular()); if (empleadoEncontrado !=
+	 * null) { throw new
+	 * ConstraintViolationException("El numero de celular ya está en uso.", null); }
+	 * return true; }
+	 */
 
 	// USADO
 	public boolean verificarDNI(Empleado empleado) throws ConstraintViolationException {
@@ -135,6 +124,7 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		return true;
 	}
 
+	// USADO
 	@Override
 	public void isAdminListar(Model model, Principal principal) {
 		Empleado empleado = findByUsername(principal.getName());
@@ -147,12 +137,13 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		}
 	}
 
+	// USADO
 	@Override
 	public void isAdminEditar(Map<String, Object> model, Principal principal) {
 		Empleado empleado = findByUsername(principal.getName());
 		Boolean isAdmin = empleado.getRoles().toString().contains("ROLE_EMPLEADO");
 		if (isAdmin) {
-			model.put("roles", roleService.findAll());
+			model.put("roles", roleService.findForEmpleadosAndAdmin());
 		} else {
 			model.put("roles", roleService.findOnlyUsers());
 		}
@@ -172,6 +163,7 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		return empleadoDao.fetchByIdWithLocalWithEmpresa(id);
 	}
 
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Empleado findByNroDocumento(String nroDocumento) {
@@ -194,13 +186,12 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 		if (!form.getNuevaPassword().equals(form.getConfirmarPassword())) {
 			throw new Exception("Las contraseñas no coinciden");
 		}
-
 		String passwordHash = passwordEncoder.encode(form.getNuevaPassword());
 		empleado.setPassword(passwordHash);
-
 		return empleadoDao.save(empleado);
 	}
 
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Empleado findByUsernameAndLocal(String username, Long id_local) {

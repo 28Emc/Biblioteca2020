@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.Principal;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -43,46 +42,55 @@ public class EmpleadoController {
 
 	@Autowired
 	private IRoleService roleService;
-	
+
 	// ############################## ROLE EMPLEADO, ROLE ADMIN
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
 	@GetMapping("/editar-perfil")
-	public String editarPerfil(Map<String, Object> modelMap, RedirectAttributes flash, Authentication authentication) {
+	public String editarPerfil(Model model, RedirectAttributes flash, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		modelMap.put("editable", true);
-		modelMap.put("passwordForm", new CambiarPassword(empleado.getId()));
-		modelMap.put("roles", roleService.findEmpleadoAndSupervisor());
-		modelMap.put("titulo", "Modificar Perfil");
-		try {
-			modelMap.put("empleado", empleado);
-			return "/empleados/perfil";
-		} catch (Exception e) {
-			flash.addFlashAttribute("error", e.getMessage());
-			return "redirect:/empleados/perfil";
+		model.addAttribute("titulo", "Modificar Perfil");
+		model.addAttribute("editable", true);
+		model.addAttribute("empleado", empleado);
+		// AQUÍ PREGUNTO QUE ROL TIENE EL USUARIO REGISTRADO
+		switch (userDetails.getAuthorities().toString()) {
+		case "[ROLE_ADMIN]":
+			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+			break;
+		case "[ROLE_EMPLEADO]":
+			model.addAttribute("roles", roleService.findOnlyEmpleados());
+			break;
+		case "[ROLE_SYSADMIN]":
+			model.addAttribute("roles", roleService.findForSysadmin());
+			break;
 		}
+		return "/empleados/perfil";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
 	@PostMapping(value = "/editar-perfil")
 	public String guardarPerfil(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_emp") MultipartFile foto) {
+			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_emp") MultipartFile foto,
+			Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		if (result.hasErrors()) {
+			model.addAttribute("titulo", "Modificar Perfil");
 			model.addAttribute("empleado", empleado);
 			model.addAttribute("editable", true);
-			modelMap.put("passwordForm", new CambiarPassword(empleado.getId()));
-			model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
-			model.addAttribute("titulo", "Modificar Perfil");
+			switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+				break;
+			case "[ROLE_EMPLEADO]":
+				model.addAttribute("roles", roleService.findOnlyEmpleados());
+				break;
+			case "[ROLE_SYSADMIN]":
+				model.addAttribute("roles", roleService.findForSysadmin());
+				break;
+			}
 			return "/empleados/perfil";
 		}
 		if (!foto.isEmpty()) {
-			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
-			/*
-			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
-			 */
-			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
-			// VEAN SIEMPRE
 			String rootPath = "C://Temp//uploads";
 			try {
 				byte[] bytes = foto.getBytes();
@@ -98,17 +106,25 @@ public class EmpleadoController {
 
 		try {
 			empleadoService.update(empleado);
-			flash.addFlashAttribute("warning",
-					"La información de su perfil han sido actualizados en la base de datos.");
+			flash.addFlashAttribute("warning", "Perfil actualizado.");
 			status.setComplete();
 			return "redirect:/home";
 		} catch (Exception e) {
-			model.addAttribute("empleado", empleado);
-			model.addAttribute("editable", true);
-			modelMap.put("passwordForm", new CambiarPassword(empleado.getId()));
-			model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
 			model.addAttribute("titulo", "Modificar Perfil");
+			model.addAttribute("editable", true);
+			model.addAttribute("empleado", empleado);
 			model.addAttribute("error", e.getMessage());
+			switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+				break;
+			case "[ROLE_EMPLEADO]":
+				model.addAttribute("roles", roleService.findOnlyEmpleados());
+				break;
+			case "[ROLE_SYSADMIN]":
+				model.addAttribute("roles", roleService.findForSysadmin());
+				break;
+			}
 			return "/empleados/perfil";
 		}
 	}
@@ -135,7 +151,6 @@ public class EmpleadoController {
 	@PostMapping("/cambio-password")
 	public String cambioPasswordEmpleado(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
 			RedirectAttributes flash, Authentication authentication) {
-	
 		if (resultForm.hasErrors()) {
 			// CON ESTE BLOQUE SOBREESCRIBO EL ERROR GENÈRICO "NO PUEDE ESTAR VACÍO"
 			if (cambiarPassword.getPasswordActual().equals("") || cambiarPassword.getNuevaPassword().equals("")
@@ -144,29 +159,19 @@ public class EmpleadoController {
 				model.addAttribute("titulo", "Cambiar Password");
 				return "/empleados/cambio-password";
 			}
-			
-			/*if (!cambiarPassword.getNuevaPassword().matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{5,}$")) {
-				model.addAttribute("cambiarPasswordError", "La contraseña actual no tiene el patrón especificado");
-				model.addAttribute("titulo", "Cambiar Password");
-				return "/empleados/cambio-password";
-			}*/
-			
 			String result = resultForm.getAllErrors().stream().map(x -> x.getDefaultMessage())
 					.collect(Collectors.joining(", "));
 			model.addAttribute("cambiarPasswordError", result);
 			return "/empleados/cambio-password";
 		}
 		try {
-			
 			empleadoService.cambiarPassword(cambiarPassword);
-						
 			flash.addFlashAttribute("success", "Password Actualizada");
 			return "redirect:/home";
 		} catch (Exception e) {
-			model.addAttribute("cambiarPassword", cambiarPassword);
 			model.addAttribute("titulo", "Cambiar Password");
+			model.addAttribute("cambiarPassword", cambiarPassword);
 			model.addAttribute("cambiarPasswordError", e.getMessage());
-			System.out.println(e.getMessage());
 			return "/empleados/cambio-password";
 		}
 	}
@@ -194,28 +199,17 @@ public class EmpleadoController {
 	// LISTADO DE EMPLEADOS
 	// SI SOY ADMIN, VEO MI REGISTRO
 	// SI NO, LO OCULTO
-	// MÉTODO TEMPORAL, YA QUE EL ADMIN NO VA A PERTENECER A LOS 'EMPLEADOS'
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/listar")
-	public String listarEmpleados(Model model, Authentication authentication, Principal principal) {
+	public String listarEmpleados(Model model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-
-		switch (userDetails.getAuthorities().toString()) {
-		case "[ROLE_ADMIN]":
-			model.addAttribute("empleados",
-					empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getEmpresa().getId()));
-			break;
-		case "[ROLE_SUPERVISOR]":
-			model.addAttribute("empleados",
-					empleadoService.fetchByIdWithLocalWithEmpresaNotAdmin(empleado.getLocal().getEmpresa().getId()));
-			break;
-		}
-
+		model.addAttribute("empleados",
+				empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getEmpresa().getId()));
 		model.addAttribute("empleado", new Empleado());
 		model.addAttribute("titulo",
 				"Listado de Empleados de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
-		return "empleados/listar";
+		return "/empleados/listar";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
@@ -232,7 +226,7 @@ public class EmpleadoController {
 		try {
 			model.addAttribute("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
 			model.addAttribute("empleado", new Empleado());
-			model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
+			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
 			model.addAttribute("titulo", "Registro de Empleado");
 			return "empleados/crear";
 		} catch (Exception e) {
@@ -244,7 +238,7 @@ public class EmpleadoController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
 	public String crearEmpleado(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, @RequestParam("foto_emp") MultipartFile foto) {
+			RedirectAttributes flash, @RequestParam("foto_emp") MultipartFile foto, Authentication authentication) {
 		if (result.hasErrors()) {
 			model.addAttribute("empleado", empleado);
 			try {
@@ -253,20 +247,12 @@ public class EmpleadoController {
 				flash.addFlashAttribute("error", e.getMessage());
 				return "/empleados/crear";
 			}
-			model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
+			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
 			model.addAttribute("titulo", "Registro de Empleado");
 			return "/empleados/crear";
 		}
 		if (!foto.isEmpty()) {
-			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
-			/*
-			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
-			 */
-			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
-			// VEAN SIEMPRE
 			String rootPath = "C://Temp//uploads";
-
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -290,7 +276,7 @@ public class EmpleadoController {
 				return "/empleados/crear";
 			}
 			model.addAttribute("empleado", empleado);
-			model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
+			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
 			model.addAttribute("titulo", "Registro de Empleado");
 			model.addAttribute("error", e.getMessage());
 			return "/empleados/crear";
@@ -322,12 +308,11 @@ public class EmpleadoController {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "/empleados/crear";
 		}
-		Empleado empleadoEditable = null;
 		model.addAttribute("editable", true);
-		model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
+		model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
 		model.addAttribute("titulo", "Modificar Empleado");
 		try {
-			empleadoEditable = empleadoService.findById(id);
+			Empleado empleadoEditable = empleadoService.findById(id);
 			model.addAttribute("empleado", empleadoEditable);
 			return "/empleados/crear";
 		} catch (Exception e) {
@@ -352,20 +337,12 @@ public class EmpleadoController {
 			}
 			model.addAttribute("empleado", empleado);
 			model.addAttribute("editable", true);
-			model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
+			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
 			model.addAttribute("titulo", "Modificar Empleado");
 			return "/empleados/editar";
 		}
 		if (!foto.isEmpty()) {
-			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
-			/*
-			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
-			 */
-			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
-			// VEAN SIEMPRE
 			String rootPath = "C://Temp//uploads";
-
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -391,7 +368,7 @@ public class EmpleadoController {
 			}
 			model.addAttribute("empleado", empleado);
 			model.addAttribute("editable", true);
-			model.addAttribute("roles", roleService.findEmpleadoAndSupervisor());
+			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
 			model.addAttribute("titulo", "Modificar Empleado");
 			model.addAttribute("error", e.getMessage());
 			return "/empleados/crear";
@@ -401,9 +378,8 @@ public class EmpleadoController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarEmpleado(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
-		Empleado empleado = null;
 		try {
-			empleado = empleadoService.findById(id);
+			Empleado empleado = empleadoService.findById(id);
 			empleado.setEstado(false);
 			empleadoService.update(empleado);
 			flash.addFlashAttribute("info", "El empleado con código " + empleado.getId() + " ha sido deshabilitado.");
@@ -412,17 +388,5 @@ public class EmpleadoController {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "redirect:/empleados/listar";
 		}
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	@GetMapping("/perfil-admin")
-	public String perfilAdmin() {
-		return "/empleados/perfil-admin";
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO')")
-	@GetMapping("/perfil-empleado")
-	public String perfilEmpleado() {
-		return "/empleados/perfil-empleado";
 	}
 }

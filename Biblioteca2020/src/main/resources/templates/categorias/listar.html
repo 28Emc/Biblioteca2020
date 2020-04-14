@@ -12,10 +12,15 @@
 
 		<h1 class="text-warning py-2" th:text="${titulo}"></h1>
 
-		<p sec:authorize="hasRole('ROLE_ADMIN')">
-			<a class="btn btn-primary btn-xs" th:href="@{/categorias/crear}"><i
-				class="fas fa-shield-alt"></i> Crear Categoría</a>
-		</p>
+		<div class="row pb-4"
+			sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')">
+			<div class="col-md-2 col-xl-1">
+				<a class="btn btn-primary btn-block" th:href="@{/categorias/crear}"
+					data-toggle="tooltip" data-placement="top" title="Crear Categoría">
+					<i class="fas fa-lg fa-plus"></i>
+				</a>
+			</div>
+		</div>
 
 		<h1 th:if="${#lists.isEmpty(categorias)}">No hay categorias</h1>
 
@@ -40,30 +45,39 @@
 								<span class="badge badge-success" th:text="'Activo'"></span>
 							</h5>
 						</td>
-						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
-							class="btn btn-warning btn-xs"
-							th:href="@{/categorias/crear/}+${categoria.id}"><i
-								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td th:if="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
-							class="btn btn-info btn-xs"
-							th:href="@{/categorias/deshabilitar/}+${categoria.id}"
-							onclick="return confirm('Seguro de querer deshabilitar la categoría?');"><i
-								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
 
-						<td th:unless="${estado}">
-							<h5>
-								<span class="badge badge-danger" th:text="'Inactivo'"></span>
-							</h5>
-						</td>
-						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
-							class="disabled btn btn-secondary btn-xs"
-							th:href="@{/categorias/crear/}+${categoria.id}"><i
-								class="fas fa-shield-alt"></i> Editar</a></td>
-						<td th:unless="${estado}" sec:authorize="hasRole('ROLE_ADMIN')"><a
-							class=" disabled btn btn-secondary btn-xs"
-							th:href="@{/categorias/deshabilitar/}+${categoria.id}"
-							onclick="return confirm('Seguro de querer deshabilitar la categoría?');"><i
-								class="fas fa-shield-alt"></i> Deshabilitar</a></td>
+						<th:block
+							sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')">
+
+							<th:block th:if="${estado}">
+								<td class="px-2 py-auto"><a
+									class="btn btn-warning btn-block"
+									th:href="@{/categorias/crear/}+${categoria.id}"
+									data-toggle="tooltip" data-placement="top"
+									title="Editar Categoría"><i class="far fa-edit"></i></a></td>
+								<td class="px-2 py-auto"><a class="btn btn-info btn-block"
+									th:href="@{/categorias/deshabilitar/}+${categoria.id}"
+									onclick="return confirm('Seguro de querer deshabilitar la categoría?');"
+									data-toggle="tooltip" data-placement="top"
+									title="Deshabilitar Categoría"><i class="fas fa-ban"></i></a></td>
+							</th:block>
+
+							<th:block th:unless="${estado}">
+								<td>
+									<h5>
+										<span class="badge badge-danger" th:text="'Inactivo'"></span>
+									</h5>
+								</td>
+								<td class="px-2 py-auto"><a
+									class="disabled btn btn-secondary btn-xs" th:href="'#'"><i
+										class="far fa-edit"></i></a></td>
+								<td class="px-2 py-auto"><a
+									class=" disabled btn btn-secondary btn-xs" th:href="'#'"><i
+										class="fas fa-ban"></i></a></td>
+							</th:block>
+
+						</th:block>
+
 					</th:block>
 				</tr>
 			</tbody>

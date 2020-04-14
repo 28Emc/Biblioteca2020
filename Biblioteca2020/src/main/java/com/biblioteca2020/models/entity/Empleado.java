@@ -27,7 +27,6 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.Data;
 
 @Entity
@@ -39,7 +38,7 @@ public class Empleado implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// EMPLEADO(*):ROLE(2) - EL EMPLEADO PUEDE SER EMPLEADO Y/O SUPERVISOR
+	// EMPLEADO(*):ROLE(1)
 	@Size(min = 1)
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "empleados_roles", joinColumns = @JoinColumn(name = "empleado_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
@@ -73,7 +72,7 @@ public class Empleado implements Serializable {
 	@Size(max = 200)
 	private String direccion;
 
-	@Column(length = 30, nullable = true, unique = true)
+	@Column(length = 30, unique = true)
 	@Size(max = 30)
 	@Email
 	@NotBlank
@@ -94,15 +93,11 @@ public class Empleado implements Serializable {
 
 	@NotBlank
 	@Column(length = 60)
-	/* Patron de contraseña:
-	^                 # inicio cadena
-	(?=.*[0-9])       # mínimo 1 dígito
-	(?=.*[a-z])       # mínimo 1 letra minúscula
-	(?=.*[A-Z])       # mínimo 1 letra mayúscula
-	(?=\S+$)          # sin espacios
-	.{5,}             # mínimo 5 caracteres
-	$                 # fin cadena
-	*/
+	/*
+	 * Patron de contraseña: ^ # inicio cadena (?=.*[0-9]) # mínimo 1 dígito
+	 * (?=.*[a-z]) # mínimo 1 letra minúscula (?=.*[A-Z]) # mínimo 1 letra mayúscula
+	 * (?=\S+$) # sin espacios .{5,} # mínimo 5 caracteres $ # fin cadena
+	 */
 	@Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{5,}$")
 	private String password;
 

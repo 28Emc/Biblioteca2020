@@ -15,52 +15,42 @@
 
 	<header th:fragment="header">
 		<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
-			<a class="navbar-brand" href="#">Biblioteca</a>
+			<a class="navbar-brand" th:href="@{/home}">Biblioteca</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse"
 				data-target="#navbarNav" aria-controls="navbarNav"
 				aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
-				<ul class="navbar-nav">
-					<li class="nav-item"><a class="nav-link" th:href="@{/home}"><i
-							class="fas fa-home"></i> Inicio </a></li>
+				<ul class="navbar-nav ml-auto">
+					<li class="nav-item"><a class="nav-link" th:href="@{/home}">Inicio</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_ADMIN')"
-						th:href="@{/empresas/listar}"><i class="fas fa-shield-alt"></i>
-							Empresa</a></li>
+						th:href="@{/empresas/listar}">Empresa</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_ADMIN')"
-						th:href="@{/empleados/listar}"><i class="fas fa-shield-alt"></i>
-							Empleados</a></li>
+						th:href="@{/empleados/listar}">Empleados</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_ADMIN')"
-						th:href="@{/categorias/listar}"><i class="fas fa-shield-alt"></i>
-							Categorias</a></li>
+						th:href="@{/categorias/listar}">Categorias</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_ADMIN')"
-						th:href="@{/locales/libros/listar}"><i class="fas fa-book"></i>
-							Libros</a></li>
+						th:href="@{/locales/libros/listar}">Libros</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_ADMIN')"
-						th:href="@{/usuarios/listar}"><i class="fas fa-shield-alt"></i>
-							Usuarios</a></li>
+						th:href="@{/usuarios/listar}">Usuarios</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_ADMIN')"
-						th:href="@{/prestamos/listar}"><i class="fas fa-shield-alt"></i>
-							Préstamos</a></li>
+						th:href="@{/prestamos/listar}">Préstamos</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_EMPLEADO')"
-						th:href="@{/locales/libros/listar}"><i class="fas fa-book"></i>
-							Libros</a></li>
+						th:href="@{/locales/libros/listar}">Libros</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_EMPLEADO')"
-						th:href="@{/usuarios/listar}"><i class="fas fa-user"></i>
-							Usuarios</a></li>
+						th:href="@{/usuarios/listar}">Usuarios</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_EMPLEADO')"
-						th:href="@{/prestamos/listar}"><i
-							class="fas fa-clipboard-list"></i> Préstamos</a></li>
+						th:href="@{/prestamos/listar}">Préstamos</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_USER')"
 						th:href="@{/usuarios/biblioteca}"><i class="fas fa-book"></i>
@@ -77,26 +67,27 @@
 					<li sec:authorize="isAuthenticated()" class="dropdown show"><a
 						class="btn dropdown-toggle text-white" href="#" role="button"
 						id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
-						aria-expanded="false"> <span sec:authentication="name"></span>
+						aria-expanded="false"><span sec:authentication="name"></span>
 					</a>
-						<div class="dropdown-menu bg-light"
+						<div class="dropdown-menu dropdown-menu-right bg-light"
 							aria-labelledby="dropdownMenuLink">
 							<a
 								sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
 								class="dropdown-item bg-light"
-								th:href="@{/empleados/editar-perfil}">Mi Perfil</a> <a
+								th:href="@{/empleados/editar-perfil}"><i class="fas fa-user-alt"></i> Mi Perfil</a> <a
 								sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
 								class="dropdown-item bg-light"
-								th:href="@{/empleados/cambio-password}">Cambiar Password</a> <a
+								th:href="@{/empleados/cambio-password}"><i class="fas fa-user-lock"></i> Cambiar Password</a> <a
 								sec:authorize="hasRole('ROLE_USER')"
 								class="dropdown-item bg-light"
-								th:href="@{/usuarios/editar-perfil}">Mi Perfil</a> <a
+								th:href="@{/usuarios/editar-perfil}"><i class="fas fa-user-alt"></i> Mi Perfil</a> <a
 								sec:authorize="hasRole('ROLE_USER')"
 								class="dropdown-item bg-light"
-								th:href="@{/usuarios/cambio-password}">Cambiar Password</a>
+								th:href="@{/usuarios/cambio-password}"><i class="fas fa-user-lock"></i> Cambiar Password</a>
+							<div class="dropdown-divider"></div>
 							<form id="logoutForm" th:action="@{/logout}" method="post">
 								<button class="dropdown-item bg-light"
-									onclick="javascript: terminarSesion();" type="button">Cerrar
+									onclick="javascript: terminarSesion();" type="button"><i class="fas fa-sign-out-alt"></i> Cerrar
 									Sesión</button>
 							</form>
 						</div></li>
@@ -146,11 +137,11 @@
 	<footer th:fragment="footer" class="footer mt-auto py-3 text-center">
 		<p class="text-muted">Biblioteca ©2020</p>
 		<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+		<script th:src="@{/js/jquery-ui.min.js}"></script>
 		<script th:src="@{/js/snbutton.js}"></script>
 		<script th:src="@{/js/popper.min.js}"></script>
 		<script th:src="@{/js/bootstrap.min.js}"></script>
-		<script th:src="@{/js/jquery-ui.min.js}"></script>
-		<script th:src="@{/js/font-awesome.js}"></script>
+		<script th:src="@{/js/all.min.js}"></script>
 		<script th:src="@{/date-picker/js/bootstrap-datepicker.js}"></script>
 		<script th:src="@{/date-picker/js/bootstrap-datepicker.min.js}"></script>
 		<script
@@ -164,6 +155,10 @@
 			$(function() {
 				$('[data-toggle="tooltip"]').tooltip()
 			});
+
+			$(function() {
+				$('[data-toggle="tooltip"]').tooltip();
+			})
 
 			function terminarSesion() {
 				var r = confirm('Desea terminar la sesión?');
