@@ -34,7 +34,7 @@ public class Categoria implements Serializable {
 
 	@NotEmpty
 	@Size(min = 4, max = 30)
-	@Column()
+	@Column(unique = true)
 	private String nombre;
 
 	@Column(nullable = false)
