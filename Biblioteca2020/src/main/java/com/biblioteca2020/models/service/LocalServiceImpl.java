@@ -15,11 +15,13 @@ public class LocalServiceImpl implements ILocalService {
 	@Autowired
 	private ILocalDao localDao;
 
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Local> findAll() {
 		return (List<Local>) localDao.findAll();
 	}
+
 	// USADO
 	@Override
 	@Transactional
@@ -28,6 +30,7 @@ public class LocalServiceImpl implements ILocalService {
 			localDao.save(local);
 		}
 	}
+
 	// USADO
 	@Override
 	@Transactional()
@@ -60,6 +63,7 @@ public class LocalServiceImpl implements ILocalService {
 		}
 		return true;
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
@@ -69,12 +73,14 @@ public class LocalServiceImpl implements ILocalService {
 		}
 		return localDao.fetchByIdWithEmpresaWithEmpleado(idEmpresa, idEmpleado);
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Local findById(Long id) throws Exception {
 		return localDao.findById(id).orElseThrow(() -> new Exception("El local no existe."));
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)

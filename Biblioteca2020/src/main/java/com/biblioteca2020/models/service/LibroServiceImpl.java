@@ -12,6 +12,7 @@ public class LibroServiceImpl implements ILibroService {
 
 	@Autowired
 	private ILibroDao libroDao;
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
@@ -19,11 +20,13 @@ public class LibroServiceImpl implements ILibroService {
 		return (List<Libro>) libroDao.findAll();
 	}
 
+	// USADO
 	@Override
 	@Transactional
 	public void save(Libro libro) {
 		libroDao.save(libro);
 	}
+
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
@@ -31,23 +34,6 @@ public class LibroServiceImpl implements ILibroService {
 		return libroDao.findById(id).orElseThrow(() -> new Exception("El libro no existe."));
 	}
 
-	/*@Override
-	@Transactional
-	public void delete(Long id) {
-		libroDao.deleteById(id);
-	}*/
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<Libro> findByEstado(Boolean estado) {
-		return libroDao.findByEstado(estado);
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public List<Libro> findByTitulo(String term) {
-		return libroDao.findByTitulo(term);
-	}
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
@@ -55,30 +41,35 @@ public class LibroServiceImpl implements ILibroService {
 		return libroDao.findByTituloLikeIgnoreCaseAndLocalAndEstado("%" + term + "%", id, estado);
 	}
 
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Libro> fetchByIdWithLocalesWithEmpleado(Long id, Long idEmpleado) {
 		return libroDao.fetchByIdWithLocalesWithEmpleado(id, idEmpleado);
 	}
 
+	// USADO
 	@Override
 	@Transactional
 	public void update(Libro libro) {
 		libroDao.save(libro);
 	}
 
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Libro> findByTituloGroup() {
 		return libroDao.findByTituloGroup();
 	}
 
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public List<Libro> findByTituloLikeIgnoreCase(String titulo) {
 		return libroDao.findByTituloLikeIgnoreCase(titulo);
 	}
 
+	// USADO
 	@Override
 	@Transactional(readOnly = true)
 	public Libro findByTituloAndLocalAndEstado(String term, Long id, Boolean estado) {

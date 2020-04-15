@@ -1,6 +1,5 @@
 package com.biblioteca2020.models.service;
 
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,11 +12,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
 	@Autowired
 	private IEmpresaDao empresaDao;
 
-	@Override
-	@Transactional(readOnly = true)
-	public List<Empresa> findAll() {
-		return (List<Empresa>) empresaDao.findAll();
-	}
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
@@ -25,11 +19,6 @@ public class EmpresaServiceImpl implements IEmpresaService {
 		return empresaDao.findById(id).orElseThrow(() -> new Exception("La empresa con id " + id + " no existe."));
 	}
 
-	@Override
-	@Transactional(readOnly = true)
-	public Empresa findByEstado(Boolean estado) {
-		return empresaDao.findByEstado(estado);
-	}
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
@@ -37,29 +26,26 @@ public class EmpresaServiceImpl implements IEmpresaService {
 		return empresaDao.findByRucAndEstado(ruc, estado);
 	}
 
-	/*private boolean verificarRuc(Empresa empresa) throws ConstraintViolationException {
-		Empresa empresaEncontrada = empresaDao.findByRuc(empresa.getRuc());
-		if (empresaEncontrada != null) {
-			throw new ConstraintViolationException("El ruc ya está en uso.", null);
-		}
-		return true;
-	}
-
-	private boolean verificarRazonSocial(Empresa empresa) throws ConstraintViolationException {
-		Empresa empresaEncontrada = empresaDao.findByRazonSocial(empresa.getRazonSocial());
-		if (empresaEncontrada != null) {
-			throw new ConstraintViolationException("La razón social ya existe.", null);
-		}
-		return true;
-	}
-
-	@Override
-	@Transactional
-	public void save(Empresa empresa) throws Exception {
-		if (verificarRazonSocial(empresa) && verificarRuc(empresa)) {
-			empresaDao.save(empresa);
-		}
-	}*/
+	/*
+	 * private boolean verificarRuc(Empresa empresa) throws
+	 * ConstraintViolationException { Empresa empresaEncontrada =
+	 * empresaDao.findByRuc(empresa.getRuc()); if (empresaEncontrada != null) {
+	 * throw new ConstraintViolationException("El ruc ya está en uso.", null); }
+	 * return true; }
+	 * 
+	 * private boolean verificarRazonSocial(Empresa empresa) throws
+	 * ConstraintViolationException { Empresa empresaEncontrada =
+	 * empresaDao.findByRazonSocial(empresa.getRazonSocial()); if (empresaEncontrada
+	 * != null) { throw new
+	 * ConstraintViolationException("La razón social ya existe.", null); } return
+	 * true; }
+	 * 
+	 * @Override
+	 * 
+	 * @Transactional public void save(Empresa empresa) throws Exception { if
+	 * (verificarRazonSocial(empresa) && verificarRuc(empresa)) {
+	 * empresaDao.save(empresa); } }
+	 */
 	// USADO
 	@Override
 	@Transactional

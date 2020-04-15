@@ -1,7 +1,6 @@
 package com.biblioteca2020.controllers;
 
 import java.security.Principal;
-import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -81,14 +80,12 @@ public class EmpresaController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/editar/{id}")
-	public String editarFormEmpresa(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
-			RedirectAttributes flash) {
-		Empresa empresa = null;
-		modelMap.put("editable", true);
-		modelMap.put("titulo", "Modificar Empresa");
+	public String editarFormEmpresa(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash) {
+		model.addAttribute("editable", true);
+		model.addAttribute("titulo", "Modificar Empresa");
 		try {
-			empresa = empresaService.findOne(id);
-			modelMap.put("empresa", empresa);
+			Empresa empresa = empresaService.findOne(id);
+			model.addAttribute("empresa", empresa);
 			return "/empresas/crear";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());

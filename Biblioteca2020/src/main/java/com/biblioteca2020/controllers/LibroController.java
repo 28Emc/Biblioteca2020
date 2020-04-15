@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,8 +22,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import com.biblioteca2020.models.entity.Categoria;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Local;
@@ -59,19 +56,16 @@ public class LibroController {
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@GetMapping("/libros/cancelar")
 	public String cancelarAdmin(Model model) {
-		List<Libro> libros = libroService.findAll();
-		model.addAttribute("libros", libros);
-		model.addAttribute("titulo", "Listado de Libros");
 		return "redirect:/libros/listar";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@GetMapping("/libros/crear")
-	public String crearLibroAdmin(Map<String, Object> model) {
+	public String crearLibroAdmin(Model model) {
 		List<Local> locales = localService.findAll();
-		model.put("locales", locales);
-		model.put("libro", new Libro());
-		model.put("titulo", "Registro de Libro");
+		model.addAttribute("locales", locales);
+		model.addAttribute("libro", new Libro());
+		model.addAttribute("titulo", "Registro de Libro");
 		return "/libros/crear";
 	}
 
@@ -86,17 +80,8 @@ public class LibroController {
 			model.addAttribute("locales", locales);
 			return "/libros/crear";
 		}
-
 		if (!foto.isEmpty()) {
-			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
-			/*
-			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
-			 */
-			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
-			// VEAN SIEMPRE
 			String rootPath = "C://Temp//uploads";
-
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -108,7 +93,6 @@ public class LibroController {
 		} else if (libro.getFoto_libro() == null || libro.getFoto_libro() == "") {
 			libro.setFoto_libro("no-book.jpg");
 		}
-
 		try {
 			libroService.save(libro);
 			flash.addFlashAttribute("success",
@@ -126,16 +110,14 @@ public class LibroController {
 
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@GetMapping("/libros/editar/{id}")
-	public String editarLibroAdmin(@PathVariable(value = "id") Long idlibro, Map<String, Object> modelMap,
-			RedirectAttributes flash) {
-		Libro libro = null;
+	public String editarLibroAdmin(@PathVariable(value = "id") Long idlibro, Model model, RedirectAttributes flash) {
 		List<Local> locales = localService.findAll();
-		modelMap.put("locales", locales);
-		modelMap.put("editable", true);
-		modelMap.put("titulo", "Modificar Libro");
+		model.addAttribute("locales", locales);
+		model.addAttribute("editable", true);
+		model.addAttribute("titulo", "Modificar Libro");
 		try {
-			libro = libroService.findOne(idlibro);
-			modelMap.put("libro", libro);
+			Libro libro = libroService.findOne(idlibro);
+			model.addAttribute("libro", libro);
 			return "/libros/crear";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
@@ -154,15 +136,7 @@ public class LibroController {
 			model.addAttribute("titulo", "Modificar Libro");
 			return "/libros/crear";
 		}
-
 		if (!foto_libro.isEmpty()) {
-			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
-			/*
-			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
-			 */
-			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
-			// VEAN SIEMPRE
 			String rootPath = "C://Temp//uploads";
 			byte[] bytes;
 			try {
@@ -173,11 +147,9 @@ public class LibroController {
 			} catch (IOException e) {
 				model.addAttribute("error", e.getMessage());
 			}
-
 		} else if (libro.getFoto_libro() == null || libro.getFoto_libro() == "") {
 			libro.setFoto_libro("no-book.jpg");
 		}
-
 		try {
 			libroService.update(libro);
 			flash.addFlashAttribute("warning",
@@ -197,9 +169,8 @@ public class LibroController {
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@RequestMapping("/libros/deshabilitar/{id}")
 	public String deshabilitarLibroAdmin(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
-		Libro libro = null;
 		try {
-			libro = libroService.findOne(id);
+			Libro libro = libroService.findOne(id);
 			libro.setEstado(false);
 			libroService.update(libro);
 			flash.addFlashAttribute("info", "El libro '" + libro.getTitulo() + "' ha sido deshabilitado.");
@@ -234,17 +205,12 @@ public class LibroController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/locales/libros/crear")
-	public String crearLibro(Map<String, Object> model, Authentication authentication) {
+	public String crearLibro(Model model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-
-		Categoria categoria = new Categoria();
-		Libro libro = new Libro();
-		libro.setCategoria(categoria);
-
-		model.put("libro", libro);
-		model.put("titulo", "Registro de Libro");
-		model.put("local", empleado.getLocal());
+		model.addAttribute("libro", new Libro());
+		model.addAttribute("titulo", "Registro de Libro");
+		model.addAttribute("local", empleado.getLocal());
 		return "/libros/crear";
 	}
 
@@ -255,9 +221,8 @@ public class LibroController {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		if (result.hasErrors()) {
-			Local local;
 			try {
-				local = localService.findById(empleado.getLocal().getId());
+				Local local = localService.findById(empleado.getLocal().getId());
 				model.addAttribute("titulo", "Registro de Libro");
 				model.addAttribute("libro", libro);
 				model.addAttribute("local", local);
@@ -268,15 +233,7 @@ public class LibroController {
 			}
 		}
 		if (!foto.isEmpty()) {
-			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
-			/*
-			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
-			 */
-			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
-			// VEAN SIEMPRE
 			String rootPath = "C://Temp//uploads";
-
 			try {
 				byte[] bytes = foto.getBytes();
 				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
@@ -311,24 +268,22 @@ public class LibroController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/locales/libros/editar/{id}")
-	public String editarLibro(@PathVariable(value = "id") Long idlibro, Map<String, Object> modelMap,
-			RedirectAttributes flash, Authentication authentication) {
+	public String editarLibro(@PathVariable(value = "id") Long idlibro, Model model, RedirectAttributes flash,
+			Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		Libro libro = null;
-		Local local;
 		try {
-			local = localService.findById(empleado.getLocal().getId());
-			modelMap.put("editable", true);
-			modelMap.put("titulo", "Modificar Libro");
-			modelMap.put("local", local);
+			Local local = localService.findById(empleado.getLocal().getId());
+			model.addAttribute("editable", true);
+			model.addAttribute("titulo", "Modificar Libro");
+			model.addAttribute("local", local);
 		} catch (Exception e1) {
-			modelMap.put("error", e1.getMessage());
+			model.addAttribute("error", e1.getMessage());
 			return "/locales/libros/listar";
 		}
 		try {
-			libro = libroService.findOne(idlibro);
-			modelMap.put("libro", libro);
+			Libro libro = libroService.findOne(idlibro);
+			model.addAttribute("libro", libro);
 			return "/libros/crear";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
@@ -336,7 +291,7 @@ public class LibroController {
 		}
 	}
 
-	//BUG CON @VALID
+	// BUG CON @VALID
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping("/locales/libros/editar")
 	public String guardarLibro(Libro libro, BindingResult result, Model model, SessionStatus status,
@@ -344,9 +299,8 @@ public class LibroController {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		if (result.hasErrors()) {
-			Local local;
 			try {
-				local = localService.findById(empleado.getLocal().getId());
+				Local local = localService.findById(empleado.getLocal().getId());
 				model.addAttribute("titulo", "Registro de Libro");
 				model.addAttribute("libro", libro);
 				model.addAttribute("local", local);
@@ -357,13 +311,6 @@ public class LibroController {
 			}
 		}
 		if (!foto.isEmpty()) {
-			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
-			/*
-			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
-			 */
-			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
-			// VEAN SIEMPRE
 			String rootPath = "C://Temp//uploads";
 			try {
 				byte[] bytes = foto.getBytes();

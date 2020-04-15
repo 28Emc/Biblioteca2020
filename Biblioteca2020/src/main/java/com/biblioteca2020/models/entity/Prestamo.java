@@ -37,10 +37,9 @@ public class Prestamo implements Serializable {
 	@Valid
 	private Usuario usuario;
 
-	// PRESTAMOS(*):EMPLEADO(1)	
+	// PRESTAMOS(*):EMPLEADO(1)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "empleado_id")
-	//@Valid
 	private Empleado empleado;
 
 	// PRESTAMOS(*):LIBRO(1)
@@ -48,11 +47,11 @@ public class Prestamo implements Serializable {
 	@JoinColumn(name = "libro_id", nullable = false)
 	@Valid
 	private Libro libro;
-	
+
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-mm-dd")
 	private Date fecha_despacho;
-	
+
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date fecha_devolucion;

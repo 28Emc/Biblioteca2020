@@ -14,11 +14,11 @@
 
 		<div class="row pb-4"
 			sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')">
-			<div class="col-md-2 col-xl-1">
-				<a class="btn btn-primary btn-block" th:href="@{/categorias/crear}"
-					data-toggle="tooltip" data-placement="top" title="Crear Categoría">
-					<i class="fas fa-lg fa-plus"></i>
-				</a>
+			<div class="col-sm-3 col-md-2 col-xl-1">
+				<a class="btn btn-primary btn-block rounded-0 border-0"
+					th:href="@{/categorias/crear}" data-toggle="tooltip"
+					data-placement="auto" th:title="'Nuevo'"><i
+					class="fas fa-lg fa-plus fa-2x"></i> </a>
 			</div>
 		</div>
 
@@ -36,11 +36,11 @@
 			</thead>
 			<tbody>
 				<tr th:each="categoria: ${categorias}">
-					<td th:text="${categoria.id}"></td>
-					<td th:text="${categoria.nombre}"></td>
+					<td class="align-middle" th:text="${categoria.id}"></td>
+					<td class="align-middle" th:text="${categoria.nombre}"></td>
 
 					<th:block th:with="estado=${categoria.estado}">
-						<td th:if="${estado}">
+						<td class="align-middle" th:if="${estado}">
 							<h5>
 								<span class="badge badge-success" th:text="'Activo'"></span>
 							</h5>
@@ -50,30 +50,35 @@
 							sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')">
 
 							<th:block th:if="${estado}">
-								<td class="px-2 py-auto"><a
-									class="btn btn-warning btn-block"
+								<td class="align-middle"><a
+									class="btn btn-transparent btn-block rounded-0 shadow-none"
 									th:href="@{/categorias/crear/}+${categoria.id}"
-									data-toggle="tooltip" data-placement="top"
-									title="Editar Categoría"><i class="far fa-edit"></i></a></td>
-								<td class="px-2 py-auto"><a class="btn btn-info btn-block"
+									data-toggle="tooltip" data-placement="auto"
+									th:title="'Editar'"><i
+										class="far fa-edit fa-2x text-warning"></i> </a></td>
+								<td class="align-middle"><a
+									class="btn btn-transparent btn-block rounded-0 shadow-none"
 									th:href="@{/categorias/deshabilitar/}+${categoria.id}"
 									onclick="return confirm('Seguro de querer deshabilitar la categoría?');"
-									data-toggle="tooltip" data-placement="top"
-									title="Deshabilitar Categoría"><i class="fas fa-ban"></i></a></td>
+									data-toggle="tooltip" data-placement="auto"
+									th:title="'Deshabilitar'"><i
+										class="fas fa-ban fa-2x text-info"></i> </a></td>
 							</th:block>
 
 							<th:block th:unless="${estado}">
-								<td>
+								<td class="align-middle">
 									<h5>
 										<span class="badge badge-danger" th:text="'Inactivo'"></span>
 									</h5>
 								</td>
-								<td class="px-2 py-auto"><a
-									class="disabled btn btn-secondary btn-xs" th:href="'#'"><i
-										class="far fa-edit"></i></a></td>
-								<td class="px-2 py-auto"><a
-									class=" disabled btn btn-secondary btn-xs" th:href="'#'"><i
-										class="fas fa-ban"></i></a></td>
+								<td class="align-middle"><a
+									class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
+									th:href="'#'"><i class="far fa-edit fa-2x text-secondary"></i>
+								</a></td>
+								<td class="align-middle"><a
+									class=" disabled btn btn-transparent btn-block rounded-0 shadow-none"
+									th:href="'#'"><i class="fas fa-ban fa-2x text-secondary"></i>
+								</a></td>
 							</th:block>
 
 						</th:block>

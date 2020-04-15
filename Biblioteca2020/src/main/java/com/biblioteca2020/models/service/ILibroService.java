@@ -7,24 +7,28 @@ public interface ILibroService {
 	// USADO
 	public List<Libro> findAll();
 
+	// USADO
 	public void save(Libro libro);
+
 	// USADO
 	public Libro findOne(Long id) throws Exception;
 
-	public List<Libro> findByEstado(Boolean estado);
-    // USADO
+	// USADO
 	public List<Libro> findByTituloGroup();
-    // USADO
-	public List<Libro> findByTitulo(String term);
+
 	// USADO
 	public List<Libro> findByTituloLikeIgnoreCase(String titulo);
+
 	// USADO
 	public List<Libro> findByTituloLikeIgnoreCaseAndLocalAndEstado(String term, Long id, Boolean estado);
+
 	// USADO
 	public Libro findByTituloAndLocalAndEstado(String term, Long id, Boolean estado);
+
 	// USADO
 	public List<Libro> fetchByIdWithLocalesWithEmpleado(Long id, Long idEmpleado);
-	
+
+	// USADO
 	public void update(Libro libro);
 
 }

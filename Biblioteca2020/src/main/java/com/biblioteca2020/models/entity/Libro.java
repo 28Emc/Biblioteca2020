@@ -34,7 +34,6 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "libros")
-//@Data
 @Getter
 @Setter
 @RequiredArgsConstructor
@@ -45,7 +44,6 @@ public class Libro implements Serializable {
 	private Long id;
 
 	// LIBRO(*):LOCAL(1)
-	// @Size(min = 1)
 	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "local_id")
@@ -55,12 +53,13 @@ public class Libro implements Serializable {
 	@JsonIgnore
 	@OneToMany(mappedBy = "libro", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Prestamo> prestamos;
-	
+
 	// LIBRO(*):CATEGORIA(1)
 	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "categoria_id")
-	// ANOTACIÓN QUE SIRVE PARA VALIDAR CAMPOS DE ESTA ENTIDAD EN OTROS FORMULARIOS (EJM. LIBRO)
+	// ANOTACIÓN QUE SIRVE PARA VALIDAR CAMPOS DE ESTA ENTIDAD EN OTROS FORMULARIOS
+	// (EJM. LIBRO)
 	@Valid
 	private Categoria categoria;
 
@@ -74,11 +73,9 @@ public class Libro implements Serializable {
 	@Size(min = 1, max = 100)
 	private String autor;
 
-	/*@Column(length = 255)*/
-	//@Size(max = 255)
-	@Type(type="text")
+	@Type(type = "text")
 	private String descripcion;
-	
+
 	@Transient
 	private String descripcionMin;
 
@@ -91,7 +88,7 @@ public class Libro implements Serializable {
 	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-mm-dd")
 	private Date fechaRegistro;
-	
+
 	@Column(nullable = false)
 	private Boolean estado;
 
@@ -100,14 +97,14 @@ public class Libro implements Serializable {
 	@Max(value = 9999)
 	@NotNull
 	private Integer stock;
-	
+
 	private String foto_libro;
 
 	@PrePersist
 	public void prePersist() {
 		fechaRegistro = new Date();
 		estado = true;
-		foto_libro="no-book.jpg";
+		foto_libro = "no-book.jpg";
 	}
 
 	private static final long serialVersionUID = 1L;

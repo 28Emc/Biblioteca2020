@@ -80,7 +80,7 @@ public class UsuarioController {
 	public String listarAllLibrosUser(Model model, Principal principal) {
 		model.addAttribute("titulo", "Catálogo de libros");
 		// ESTE MÈTODO ES DE REFERENCIA NADA MAS, A LA HORA DE VER LA DISPONIBILIDAD,
-		// AHI SI FILTRO POR LOCAL
+		// AHI SI FILTRO LOS LIBROS POR LOCAL
 		List<Libro> libros = libroService.findByTituloGroup();
 		// LÓGICA DE MOSTRAR UNA DESCRICIÓN REDUCIDA DE 150 CARACTERES DEL LIBRO
 		for (int i = 0; i < libros.size(); i++) {
@@ -101,6 +101,7 @@ public class UsuarioController {
 		List<Libro> libros = libroService.findByTituloLikeIgnoreCase(titulo);
 		model.addAttribute("titulo", "Ver disponibilidad");
 		model.addAttribute("libros", libros);
+		// RECOJO LOS DETALLES DEL PRIMER LIBRO, YA QUE AL FINAL TODOS SON IGUALES
 		model.addAttribute("libroDetalle", libros.get(0));
 		return "/usuarios/biblioteca/ver";
 	}
@@ -123,15 +124,12 @@ public class UsuarioController {
 	}
 
 	// GENERAR ORDEN DE PRÉSTAMO
-	// PROBLEMA RESUELTO 9.04.2020
-	// SE AGREGÓ EN LA VISTA CON th:attr="value=${objeto.valor}"
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
 	@PostMapping(value = "/biblioteca/solicitar-libro")
 	public String solicitarLibro(Prestamo prestamo, @RequestParam(name = "id_libro", required = false) Long id_libro,
 			@RequestParam(name = "id_usuario", required = false) Long id_usuario,
 			@RequestParam(name = "fecha_devolucion", required = false) String fecha_devolucion,
 			RedirectAttributes flash, SessionStatus status, Model model, Authentication authentication) {
-
 		try {
 			if (id_libro == null || id_usuario == null || fecha_devolucion == null) {
 				model.addAttribute("prestamo", prestamo);
@@ -146,16 +144,12 @@ public class UsuarioController {
 					libros.get(i).setDescripcion(descripcionFull);
 					model.addAttribute("libros", libros);
 				}
-
 				model.addAttribute("error",
 						"Lo sentimos, hubo un error a la hora de guardar su orden. Intentelo mas tarde.");
-				System.out.println(id_libro + ", " + id_usuario + ", " + fecha_devolucion);
 				return "/usuarios/biblioteca";
 			}
 
 			/* LÓGICA DE REGISTRO DE ORDEN DE LIBRO */
-			// LA ORDEN DE PRÈSTAMO VALIDA ID_LIBRO, ID_USUARIO,
-			// FECHA_DESPACHO, FECHA_DEVOLUCIÒN Y OBSERVACIONES.
 			// LIBRO
 			Libro libroAPrestar = libroService.findByTituloAndLocalAndEstado(libroService.findOne(id_libro).getTitulo(),
 					libroService.findOne(id_libro).getLocal().getId(), true);
@@ -164,7 +158,6 @@ public class UsuarioController {
 			if (libroAPrestar.getStock() <= 0) {
 				model.addAttribute("error", "Lo sentimos, no hay stock suficiente del libro seleccionado ("
 						+ libroAPrestar.getTitulo() + ")");
-
 				model.addAttribute("titulo", "Catálogo de libros");
 				List<Libro> libros = libroService.findByTituloGroup();
 				for (int i = 0; i < libros.size(); i++) {
@@ -175,7 +168,6 @@ public class UsuarioController {
 					libros.get(i).setDescripcion(descripcionFull);
 					model.addAttribute("libros", libros);
 				}
-
 				return "/usuarios/biblioteca";
 			} else {
 				libroAPrestar.setStock(libroAPrestar.getStock() - 1);
@@ -183,8 +175,8 @@ public class UsuarioController {
 			// USUARIO
 			prestamo.setUsuario(usuarioService.findById(id_usuario));
 			// EMPLEADO
-			// EL EMPLEADO SE SETEA CON EL USUARIO DE PRUEBA DEL LOCAL DEL LIBRO POR PARTE DEL
-			// USUARIO
+			// EL EMPLEADO SE SETEA CON EL USUARIO DE PRUEBA DEL LOCAL DEL LIBRO POR PARTE
+			// DEL USUARIO
 			prestamo.setEmpleado(empleadoService.findByUsernameAndLocal("Prueba", libroAPrestar.getLocal().getId()));
 			// FECHA_DESPACHO
 			Date fechaDespacho = new Date();
@@ -224,7 +216,6 @@ public class UsuarioController {
 					.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(prestamo.getUsuario().getId()));
 			return "redirect:/prestamos/prestamos-pendientes";
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
 			flash.addFlashAttribute("error", e.getMessage());
 			// IR A BIBLIOTECA YA QUE HUBO UN ERROR A LA HORA DE GUARDAR LA ORDEN
 			model.addAttribute("titulo", "Catálogo de libros");
@@ -272,7 +263,6 @@ public class UsuarioController {
 			return "redirect:/usuarios/perfil";
 		} else {
 			usuario.setFoto_usuario("no-image.jpg");
-
 			try {
 				usuarioService.save(usuario);
 			} catch (Exception e) {
@@ -282,12 +272,10 @@ public class UsuarioController {
 				model.addAttribute("error", e.getMessage());
 				return "/usuarios/perfil";
 			}
-
 			// ESTÀ FUERA DE LA LÒGICA DE REGITRO PORQUE TENGO QUE VALIDAR QUE EL USUARIO
 			// ESTÉ REGISTRADO ANTES DE MANDAR EL CORREO DE CONFIRMACIÒN
 			ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
 			confirmationTokenRepository.save(confirmationToken);
-
 			// ENVIO DE MAIL CON MIMEMESSAGE
 			try {
 				String message = "<html><head>" + "<meta charset='UTF-8' />"
@@ -313,7 +301,6 @@ public class UsuarioController {
 				model.addAttribute("roles", roleService.findOnlyUsers());
 				model.addAttribute("titulo", "Registro de Usuario");
 				model.addAttribute("error", ex.getMessage());
-				System.out.println(ex.getMostSpecificCause());
 				return "/usuarios/perfil";
 			}
 		}
@@ -343,15 +330,14 @@ public class UsuarioController {
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@GetMapping("/editar-perfil")
-	public String editarPerfil(Map<String, Object> modelMap, RedirectAttributes flash, Authentication authentication) {
+	public String editarPerfil(Model model, RedirectAttributes flash, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Usuario usuario = usuarioService.findByUsernameAndEstado(userDetails.getUsername(), true);
-		modelMap.put("editable", true);
-		modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
-		modelMap.put("roles", roleService.findOnlyUsers());
-		modelMap.put("titulo", "Modificar Usuario");
+		model.addAttribute("editable", true);
+		model.addAttribute("roles", roleService.findOnlyUsers());
+		model.addAttribute("titulo", "Modificar Usuario");
 		try {
-			modelMap.put("usuario", usuario);
+			model.addAttribute("usuario", usuario);
 			return "/usuarios/perfil";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
@@ -362,34 +348,19 @@ public class UsuarioController {
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@PostMapping(value = "/editar-perfil")
 	public String guardarPerfil(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_usu") MultipartFile foto) {
+			RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
-			modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
 			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Modificar Perfil");
 			return "/usuarios/perfil";
 		}
 		if (!foto.isEmpty()) {
-			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
-			/*
-			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
-			 */
-			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
-			// VEAN SIEMPRE
-			//String rootPath = "C://Temp//uploads";
-			// AHORA USO LA LIBRERIA PATHS
 			Path rootPath = Paths.get("uploads").resolve(foto.getOriginalFilename());
 			Path rootAbsolutePath = rootPath.toAbsolutePath();
 			try {
-				/*byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);*/
-				
 				Files.copy(foto.getInputStream(), rootAbsolutePath);
-				
 				usuario.setFoto_usuario(foto.getOriginalFilename());
 			} catch (IOException e) {
 				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
@@ -397,7 +368,6 @@ public class UsuarioController {
 		} else if (usuario.getFoto_usuario() == null || usuario.getFoto_usuario() == "") {
 			usuario.setFoto_usuario("no-image.jpg");
 		}
-
 		try {
 			usuarioService.update(usuario);
 			flash.addFlashAttribute("warning",
@@ -407,7 +377,6 @@ public class UsuarioController {
 		} catch (Exception e) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("editable", true);
-			modelMap.put("passwordForm", new CambiarPassword(usuario.getId()));
 			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Modificar Perfil");
 			model.addAttribute("error", e.getMessage());
@@ -431,7 +400,6 @@ public class UsuarioController {
 	@PostMapping("/cambio-password")
 	public String cambioPasswordUser(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
 			RedirectAttributes flash, Authentication authentication) {
-
 		if (resultForm.hasErrors()) {
 			// CON ESTE BLOQUE SOBREESCRIBO EL ERROR GENÈRICO "NO PUEDE ESTAR VACÍO"
 			if (cambiarPassword.getPasswordActual().equals("") || cambiarPassword.getNuevaPassword().equals("")
@@ -440,11 +408,9 @@ public class UsuarioController {
 				model.addAttribute("titulo", "Cambiar Password");
 				return "/usuarios/cambio-password";
 			}
-
 			String result = resultForm.getAllErrors().stream().map(x -> x.getDefaultMessage())
 					.collect(Collectors.joining(", "));
 			model.addAttribute("cambiarPasswordError", result);
-			System.out.println(result);
 			model.addAttribute("titulo", "Cambiar Password");
 			return "/usuarios/cambio-password";
 		}
@@ -499,21 +465,17 @@ public class UsuarioController {
 			@RequestParam(name = "nroDocumento", required = false) String nroDocumento,
 			@RequestParam(name = "email", required = false) String email, RedirectAttributes flash,
 			Authentication authentication, Model model) {
-
 		if (result.hasErrors()) {
 			model.addAttribute("titulo", "Recupera tu cuenta");
 			model.addAttribute("recuperarCuenta", recuperarCuenta);
 			return "/usuarios/recuperar-cuenta";
 		}
-
 		try {
 			Usuario usuario = usuarioService.findByNroDocumentoAndEmailAndEstado(recuperarCuenta.getNroDocumento(),
 					recuperarCuenta.getEmail(), false);
-
 			// LÒGICA DE GENERACIÓN DE TOKEN DE CONFIRMACION CORREO
 			ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
 			confirmationTokenRepository.save(confirmationToken);
-
 			// LÒGICA DE ENVIO CORREO, Y VALIDACIÓN CON MÈTODO EN COMÚN AL REGISTRO DE
 			// USUARIOS NUEVOS
 			try {
@@ -565,34 +527,26 @@ public class UsuarioController {
 		return "redirect:/usuarios/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/crear")
-	public String crearFormUsuario(Map<String, Object> modelMap) {
-		modelMap.put("usuario", new Usuario());
-		modelMap.put("roles", roleService.findOnlyUsers());
-		modelMap.put("titulo", "Registro de Usuario");
+	public String crearFormUsuario(Model model) {
+		model.addAttribute("usuario", new Usuario());
+		model.addAttribute("roles", roleService.findOnlyUsers());
+		model.addAttribute("titulo", "Registro de Usuario");
 		return "usuarios/crear";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
-	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, Map<String, Object> modelMap,
-			SessionStatus status, RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
+	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
+			RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("roles", roleService.findOnlyUsers());
 			model.addAttribute("titulo", "Registro de Usuario");
 			return "/usuarios/crear";
 		}
-
-		if (!foto.isEmpty()) {
-			// ESTE CODIGO GUARDA IMAGENES DENTRO DEL PROYECTO, USANDO UNA CARPETA INTERNA
-			/*
-			 * Path directorioRecursos = Paths.get("src//main//resources//static/uploads");
-			 * String rootPath = directorioRecursos.toFile().getAbsolutePath();
-			 */
-			// AHORA TENGO QUE USAR UNA CARPETA EXTERNA EN LA PC PARA QUE LAS IMAGENES SE
-			// VEAN SIEMPRE
+		if (!foto.isEmpty()) {			
 			String rootPath = "C://Temp//uploads";
 			try {
 				byte[] bytes = foto.getBytes();
@@ -603,7 +557,6 @@ public class UsuarioController {
 				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
 			}
 		}
-
 		try {
 			usuarioService.save(usuario);
 			flash.addFlashAttribute("success",
@@ -622,9 +575,8 @@ public class UsuarioController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
-		Usuario usuario = null;
 		try {
-			usuario = usuarioService.findById(id);
+			Usuario usuario = usuarioService.findById(id);
 			usuario.setEstado(false);
 			usuarioService.update(usuario);
 			flash.addFlashAttribute("info", "El usuario con código " + usuario.getId() + " ha sido deshabilitado.");
