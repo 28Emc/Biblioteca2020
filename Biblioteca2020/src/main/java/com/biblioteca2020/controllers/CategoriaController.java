@@ -62,6 +62,7 @@ public class CategoriaController {
 			model.addAttribute("titulo", "Registro de Categoría");
 			return "/categorias/crear";
 		}
+
 		try {
 			categoria.setEstado(true);
 			categoriaService.save(categoria);
