@@ -10,39 +10,42 @@
 
 	<div class="container-fluid my-3 px-5">
 
-		<h1 class="text-warning py-2" th:text="${titulo}"></h1>
+		<h1 class="py-2" th:text="${titulo}"></h1>
 
-		<div class="row pb-4"
+		<div class="row pt-5 pb-4"
 			sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')">
 			<div class="col-sm-3 col-md-2 col-xl-1">
-				<a class="btn btn-primary btn-block rounded-0 border-0"
+				<a class="btn btn-primary btn-block rounded-0 border-0 py-2"
 					th:href="@{/categorias/crear}" data-toggle="tooltip"
-					data-placement="auto" th:title="'Nuevo'"><i
-					class="fas fa-lg fa-plus fa-2x"></i> </a>
+					data-placement="top" th:title="'Nuevo'"><i
+					class="fas fa-plus fa-lg"></i></a>
 			</div>
 		</div>
 
-		<h1 th:if="${#lists.isEmpty(categorias)}">No hay categorias</h1>
+		<h2 th:if="${#lists.isEmpty(categorias)}">No hay categorias</h2>
 
-		<table class="table table-responsive"
+		<table class="table table-responsive table-borderless"
 			th:if="${not #lists.isEmpty(categorias)}">
-			<thead>
+			<caption class="py-4" th:text="'Total: ' + ${#lists.size(categorias)}"></caption>
+			<thead class="table-dark">
 				<tr>
-					<th>Id</th>
+					<th hidden>Id</th>
 					<th>Nombre</th>
 					<th>Estado</th>
-					<th colspan="2">Opciones</th>
+					<th colspan="2" class="text-center">Opciones</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr th:each="categoria: ${categorias}">
-					<td class="align-middle" th:text="${categoria.id}"></td>
+					<td class="align-middle" th:text="${categoria.id}" hidden></td>
 					<td class="align-middle" th:text="${categoria.nombre}"></td>
 
 					<th:block th:with="estado=${categoria.estado}">
-						<td class="align-middle" th:if="${estado}">
+						<td class="align-middle pl-2" th:if="${estado}">
 							<h5>
-								<span class="badge badge-success" th:text="'Activo'"></span>
+								<span
+									class="badge badge-transparent text-success font-weight-bold"
+									th:text="'Activo'"></span>
 							</h5>
 						</td>
 
@@ -53,31 +56,32 @@
 								<td class="align-middle"><a
 									class="btn btn-transparent btn-block rounded-0 shadow-none"
 									th:href="@{/categorias/crear/}+${categoria.id}"
-									data-toggle="tooltip" data-placement="auto"
-									th:title="'Editar'"><i
-										class="far fa-edit fa-2x text-warning"></i> </a></td>
+									data-toggle="tooltip" data-placement="bottom" th:title="'Editar'"><i
+										class="far fa-edit fa-lg text-warning"></i> </a></td>
 								<td class="align-middle"><a
 									class="btn btn-transparent btn-block rounded-0 shadow-none"
 									th:href="@{/categorias/deshabilitar/}+${categoria.id}"
 									onclick="return confirm('Seguro de querer deshabilitar la categoría?');"
-									data-toggle="tooltip" data-placement="auto"
+									data-toggle="tooltip" data-placement="bottom"
 									th:title="'Deshabilitar'"><i
-										class="fas fa-ban fa-2x text-info"></i> </a></td>
+										class="fas fa-ban fa-lg text-info"></i> </a></td>
 							</th:block>
 
 							<th:block th:unless="${estado}">
-								<td class="align-middle">
+								<td class="align-middle pl-2">
 									<h5>
-										<span class="badge badge-danger" th:text="'Inactivo'"></span>
+										<span
+											class="badge badge-transparent text-danger font-weight-bold"
+											th:text="'Inactivo'"></span>
 									</h5>
 								</td>
 								<td class="align-middle"><a
 									class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
-									th:href="'#'"><i class="far fa-edit fa-2x text-secondary"></i>
+									th:href="'#'"><i class="far fa-edit fa-lg text-secondary"></i>
 								</a></td>
 								<td class="align-middle"><a
 									class=" disabled btn btn-transparent btn-block rounded-0 shadow-none"
-									th:href="'#'"><i class="fas fa-ban fa-2x text-secondary"></i>
+									th:href="'#'"><i class="fas fa-ban fa-lg text-secondary"></i>
 								</a></td>
 							</th:block>
 
