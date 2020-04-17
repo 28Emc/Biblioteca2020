@@ -8,74 +8,81 @@
 
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container my-4">
-		<h1 class="text-warning" th:text="${titulo}"></h1>
+	<div class="container my-3 px-5">
+
+		<h1 class="py-4" th:text="${titulo}"></h1>
+
 		<form enctype="multipart/form-data"
 			sec:authorize="hasRole('ROLE_ADMIN')" th:object="${libro}"
 			method="post"
 			th:action="${editable} ? @{'/locales/libros/editar'} : @{'/locales/libros/crear'}">
 
 			<div class="form-group row">
-				<div class="col-md-6">
+				<div class="col-sm-12 col-md-12 col-lg-6">
 					<label class="col-form-label" for="titulo">Titulo</label> <input
-						class="form-control" type="text" name="titulo"
-						placeholder="Título..." th:field="*{titulo}" autofocus /> <small
-						class="form-text text-danger"
+						class="form-control rounded-0 shadow-none" type="text"
+						name="titulo" placeholder="Título" th:field="*{titulo}" autofocus />
+					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></small>
 				</div>
-				<div class="col-md-6">
+				<div class="col-sm-12 col-md-12 col-lg-6">
 					<label class="col-form-label" for="autor">Autor</label> <input
-						class="form-control" type="text" name="autor"
-						placeholder="Autor..." th:field="*{autor}" /> <small
+						class="form-control rounded-0 shadow-none" type="text"
+						name="autor" placeholder="Autor" th:field="*{autor}" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('autor')}" th:errors="*{autor}"></small>
 				</div>
-				<div class="col-md-6">
+				<div class="col-sm-12 col-md-12 col-lg-6">
 					<label class="col-form-label" for="descripcion">Descripción</label>
-					<textarea class="form-control" rows="3" name="descripcion"
-						placeholder="Descripción..." th:field="*{descripcion}" /></textarea>
+					<textarea class="form-control rounded-0 shadow-none" rows="3"
+						name="descripcion" placeholder="Descripción"
+						th:field="*{descripcion}" /></textarea>
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('descripcion')}"
 						th:errors="*{descripcion}"></small>
 				</div>
-				<div class="col-md-6">
+				<div class="col-sm-12 col-md-12 col-lg-6">
 					<label class="col-form-label" for="categoria">Categoría</label> <input
 						type="text" name="buscar_categoria" id="buscar_categoria"
-						class="form-control" placeholder="Buscar categoría..."
-						th:field="*{categoria.nombre}" /> <small
-						th:if="${#fields.hasErrors('categoria.nombre')}"
+						class="form-control rounded-0 shadow-none"
+						placeholder="Buscar por categoría" th:field="*{categoria.nombre}" />
+					<small th:if="${#fields.hasErrors('categoria.nombre')}"
 						th:errors="*{categoria.nombre}" class="form-text text-danger"></small>
 				</div>
-				<div class="col-md-6" hidden>
+				<div class="col-sm-12 col-md-12 col-lg-6" hidden>
 					<label class="col-form-label" for="id_categoria">ID
 						Categoría</label> <input type="text" name="id_categoria" id="id_categoria"
-						placeholder="Id Categoria" class="form-control"
+						placeholder="Id Categoria"
+						class="form-control rounded-0 shadow-none"
 						th:field="*{categoria.id}" readonly /> <small
 						th:if="${#fields.hasErrors('categoria.id')}"
 						th:errors="*{categoria.id}" class="form-text text-danger"></small>
 				</div>
-				<div class="col-md-6" hidden>
+				<div class="col-sm-12 col-md-12 col-lg-6" hidden>
 					<label class="col-form-label" for="local"> Local</label> <select
-						name="local" class="form-control" th:field="*{local}"
+						name="local"
+						class="form-control custom-select rounded-0 shadow-none"
+						th:field="*{local}" th:size="${#lists.size(local)}"
 						th:errorclass="'form-control alert-danger'">
 						<option th:each="local :${local}" th:value="${local.id}"
 							th:text="${local.direccion}"></option>
 					</select> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('local')}" th:errors="*{local}"></small>
 				</div>
-				<div class="col-md-6">
+				<div class="col-sm-12 col-md-12 col-lg-6">
 					<label class="col-form-label" for="fecha_publicacion">Fecha
-						Publicación</label> <input class="form-control datepicker" type="text"
+						Publicación</label> <input
+						class="form-control datepicker rounded-0 shadow-none" type="text"
 						name="fechaPublicacion" placeholder="yyyy-mm-dd"
 						th:field="*{fechaPublicacion}" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('fechaPublicacion')}"
 						th:errors="*{fechaPublicacion}"></small>
 				</div>
-				<div class="col-md-6">
+				<div class="col-sm-12 col-md-12 col-lg-6">
 					<label class="col-form-label" for="stock">Stock</label> <input
-						class="form-control" type="number" name="stock"
-						th:field="*{stock}" placeholder="0" /> <small
+						class="form-control rounded-0 shadow-none" type="number"
+						name="stock" th:field="*{stock}" placeholder="0 - 9999" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></small>
 				</div>
@@ -83,163 +90,195 @@
 
 			<h3 class="mb-4">Foto</h3>
 			<div class="form-group row">
-				<div class="col-md-6 p-3" style="text-align: center;">
+				<div class="col-sm-12 col-md-12 col-lg-6 p-3"
+					style="text-align: center;">
 					<img
 						th:if="${libro.foto_libro!=null && #strings.length(libro.foto_libro) > 0}"
-						class="img-thumbnail rounded" style="max-width: 70%;"
-						th:alt="${libro.foto_libro}"
+						class="img-thumbnail rounded-0 shadow-none"
+						style="max-width: 70%;" th:alt="${libro.foto_libro}"
 						th:src="@{'/uploads/'+${libro.foto_libro}}">
 				</div>
-				<div class="col-sm-6 p-3" style="position: relative;">
+				<div class="col-sm-12 col-md-12 col-lg-6 p-3"
+					style="position: relative;">
 					<input style="position: absolute; bottom: 0;"
-						class="form-control-file" type="file" name="foto_li" /> <small
-						class="form-text text-danger"
+						class="form-control-file rounded-0 shadow-none" type="file"
+						name="foto_li" /> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('foto_libro')}"
 						th:errors="*{foto_libro}"></small>
 				</div>
 			</div>
 
-			<div class="form-group row py-4">
-				<div class="col-md-6">
-					<a class="btn btn-light btn-block"
-						th:href="@{'/locales/libros/cancelar/'}"><i
-						class="fas fa-shield-alt"></i> Cancelar</a>
+			<div class="form-group row py-3">
+				<!-- MOVIL -->
+				<div class="col-6 d-block d-sm-none">
+					<a class="btn btn-transparent btn-block rounded-0 shadow-none"
+						th:href="@{'/locales/libros/cancelar'}"><i
+						class="fas fa-times fa-2x"></i></a>
 				</div>
-				<div class="col-md-6">
-					<input class="btn btn-dark btn-block" type="submit"
-						th:value="${editable}?'Guardar Libro':'Registrar Libro'" />
+				<div class="col-6 d-block d-sm-none">
+					<button
+						class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+						type="submit">
+						<i class="fas fa-check fa-2x"></i>
+					</button>
+				</div>
+
+				<!-- WEB -->
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<a
+						class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+						th:href="@{'/locales/libros/cancelar'}">CANCELAR</a>
+				</div>
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<input
+						class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+						type="submit" th:value="${editable}?'GUARDAR CAMBIOS':'CREAR'" />
 				</div>
 			</div>
 
 		</form>
 
+
+
+
+
 		<form enctype="multipart/form-data"
 			sec:authorize="hasRole('ROLE_SYSADMIN')"
 			th:action="${editable} ? @{/libros/editar} : @{/libros/crear/}"
 			th:object="${libro}" method="post">
-			<h3 class="mb-4">Título</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<input class="form-control" type="text" name="titulo"
-						placeholder="Título..." th:field="*{titulo}" /> <small
-						class="form-text text-danger"
+
+			<div class="form-group row">
+
+				<div class="col-sm-12 col-md-12 col-lg-6">
+					<label class="col-form-label" for="titulo">Titulo</label> <input
+						class="form-control rounded-0 shadow-none" type="text"
+						name="titulo" placeholder="Título" th:field="*{titulo}" autofocus />
+					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></small>
 				</div>
-			</div>
-
-			<h3 class="mb-4">Autor</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<input class="form-control" type="text" name="autor"
-						placeholder="Autor..." th:field="*{autor}" /> <small
+				<div class="col-sm-12 col-md-12 col-lg-6">
+					<label class="col-form-label" for="autor">Autor</label> <input
+						class="form-control rounded-0 shadow-none" type="text"
+						name="autor" placeholder="Autor" th:field="*{autor}" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('autor')}" th:errors="*{autor}"></small>
 				</div>
-			</div>
-
-			<h3 class="mb-4">Descripción</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<textarea class="form-control" rows="3" name="descripcion"
-						placeholder="Descripción..." th:field="*{descripcion}" /></textarea>
+				<div class="col-sm-12 col-md-12 col-lg-6">
+					<label class="col-form-label" for="descripcion">Descripción</label>
+					<textarea class="form-control rounded-0 shadow-none" rows="3"
+						name="descripcion" placeholder="Descripción"
+						th:field="*{descripcion}" /></textarea>
 					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('descripcion')}"
 						th:errors="*{descripcion}"></small>
 				</div>
-			</div>
-
-
-			<h3 class="mb-4">Categoría</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<input type="text" name="buscar_categoria" id="buscar_categoria"
-						class="form-control" placeholder="Buscar categoría..."
-						th:field="*{categoria.nombre}" required />
-
+				<div class="col-sm-12 col-md-12 col-lg-6">
+					<label class="col-form-label" for="categoria">Categoría</label> <input
+						type="text" name="buscar_categoria" id="buscar_categoria"
+						class="form-control rounded-0 shadow-none"
+						placeholder="Buscar por categoría" th:field="*{categoria.nombre}" />
+					<small th:if="${#fields.hasErrors('categoria.nombre')}"
+						th:errors="*{categoria.nombre}" class="form-text text-danger"></small>
 				</div>
-				<div class="col-sm-2" hidden>
-					<input type="text" name="id_categoria" id="id_categoria"
-						placeholder="Id Categoria" class="form-control"
-						th:field="*{categoria.id}" readonly />
+				<div class="col-sm-12 col-md-12 col-lg-6" hidden>
+					<label class="col-form-label" for="id_categoria">ID
+						Categoría</label> <input type="text" name="id_categoria" id="id_categoria"
+						placeholder="Id Categoria"
+						class="form-control rounded-0 shadow-none"
+						th:field="*{categoria.id}" readonly /> <small
+						th:if="${#fields.hasErrors('categoria.id')}"
+						th:errors="*{categoria.id}" class="form-text text-danger"></small>
 				</div>
-			</div>
 
-			<h3 class="mb-4">Local</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<select class="form-control" th:field="*{locales}"
-						multiple="multiple" size="3">
+				<div class="col-sm-12 col-md-12 col-lg-6" hidden>
+					<label class="col-form-label" for="local"> Local</label> <select
+						name="local" multiple="multiple"
+						class="form-control custom-select rounded-0 shadow-none"
+						th:field="*{locales}" th:size="${#lists.size(local)}"
+						th:errorclass="'form-control alert-danger'">
 						<option th:each="local :${locales}" th:value="${local.id}"
 							th:text="${local.direccion}"></option>
 					</select> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('locales')}" th:errors="*{locales}"></small>
 				</div>
-			</div>
 
-			<h3 class="mb-4">Fecha Publicación</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<input class="form-control datepicker" type="text" name="fecha_publicacion"
-						placeholder="yyyy-mm-dd" th:field="*{fecha_publicacion}" /> <small
+				<div class="col-sm-12 col-md-12 col-lg-6">
+					<label class="col-form-label" for="fecha_publicacion">Fecha
+						Publicación</label> <input
+						class="form-control datepicker rounded-0 shadow-none" type="text"
+						name="fechaPublicacion" placeholder="yyyy-mm-dd"
+						th:field="*{fechaPublicacion}" /> <small
 						class="form-text text-danger"
-						th:if="${#fields.hasErrors('fecha_publicacion')}"
-						th:errors="*{fecha_publicacion}"></small>
+						th:if="${#fields.hasErrors('fechaPublicacion')}"
+						th:errors="*{fechaPublicacion}"></small>
 				</div>
-			</div>
-			
-			<h4 class="my-4">Fecha Devolución</h4>
-				<div class="form-group row">
-					<div class="col-md-6">
-						<input class="form-control datepicker" type="text"
-							name="fecha_devolucion" id="fecha_devolucion"
-							placeholder="Escojer fecha (1 día - 3 meses)" required autofocus />
-					</div>
-				</div>
-
-			<h3 class="mb-4">Stock</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
-					<input class="form-control" type="text" name="stock"
-						th:field="*{stock}" placeholder="0" /> <small
+				<div class="col-sm-12 col-md-12 col-lg-6">
+					<label class="col-form-label" for="stock">Stock</label> <input
+						class="form-control rounded-0 shadow-none" type="number"
+						name="stock" th:field="*{stock}" placeholder="0 - 9999" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('stock')}" th:errors="*{stock}"></small>
 				</div>
 			</div>
 
 			<h3 class="mb-4">Foto</h3>
-			<div class="form-group">
-				<div class="col-sm-6">
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-12 col-lg-6 p-3"
+					style="text-align: center;">
 					<img
 						th:if="${libro.foto_libro!=null && #strings.length(libro.foto_libro) > 0}"
-						class="img-thumbnail rounded float-left" style="max-width: 25%;"
-						th:alt="${libro.foto_libro}"
+						class="img-thumbnail rounded-0 shadow-none"
+						style="max-width: 70%;" th:alt="${libro.foto_libro}"
 						th:src="@{'/uploads/'+${libro.foto_libro}}">
+				</div>
+				<div class="col-sm-12 col-md-12 col-lg-6 p-3"
+					style="position: relative;">
+					<input style="position: absolute; bottom: 0;"
+						class="form-control-file rounded-0 shadow-none" type="file"
+						name="foto_li" /> <small class="form-text text-danger"
+						th:if="${#fields.hasErrors('foto_libro')}"
+						th:errors="*{foto_libro}"></small>
 				</div>
 			</div>
 
-			<div class="form-group row">
-				<div class="col-sm-6">
-					<a class="btn btn-light btn-block" th:href="@{'/libros/cancelar/'}"><i
-						class="fas fa-user-shield"></i> Cancelar</a>
+			<div class="form-group row py-3">
+				<!-- MOVIL -->
+				<div class="col-6 d-block d-sm-none">
+					<a class="btn btn-transparent btn-block rounded-0 shadow-none"
+						th:href="@{'/libros/cancelar'}"><i class="fas fa-times fa-2x"></i></a>
 				</div>
-				<div class="col-sm-6">
-					<input class="btn btn-dark btn-block" type="submit"
-						th:value="${editable}?'Guardar Libro':'Registrar Libro'" />
+				<div class="col-6 d-block d-sm-none">
+					<button
+						class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+						type="submit">
+						<i class="fas fa-check fa-2x"></i>
+					</button>
+				</div>
+
+				<!-- WEB -->
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<a
+						class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+						th:href="@{'/libros/cancelar'}">CANCELAR</a>
+				</div>
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<input
+						class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+						type="submit" th:value="${editable}?'GUARDAR CAMBIOS':'CREAR'" />
 				</div>
 			</div>
 
 		</form>
 	</div>
+
 	<footer th:replace="layout/layout :: footer"></footer>
 	<script th:replace="layout/autocomplete-categorias :: javascript"></script>
 	<script th:replace="layout/autocomplete-locales :: javascript"></script>
-	
+
 	<script type="text/javascript">
 		// COMPONENTE DE FECHA ESPECIFICO PARA EL FORMULARIO
 		$('.datepicker').datepicker({
 			format : 'yyyy-mm-dd', // FORMATO DE FECHA
-			//startDate : '+2d', // MUESTRA FECHA DESDE MAÑANA
-			//endDate : '+2m', // MUESTRA FECHA HASTA UN MAXIMO DE 3 MESES
 			autoclose : true, // OCULTAR AUTOMATICAMENTE COMPONENTE AL ESCOJER FECHA
 			todayHighlight : true, // ENFASIS EN EL DIA ACTUAL 
 			language : 'es', // LENGUAJE DEL COMPONENTE

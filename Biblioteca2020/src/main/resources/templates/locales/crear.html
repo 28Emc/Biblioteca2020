@@ -8,17 +8,20 @@
 
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container my-4">
+	<div class="container my-3 px-5">
 
-		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<h1 class="py-4" th:text="${titulo}"></h1>
 
 		<form th:action="${editable} ? @{/locales/editar} : @{/locales/crear}"
 			th:object="${local}" method="post">
 
 			<div class="form-group row" hidden>
-				<div class="col-md-6">
+				<div class="col-sm-12 col-md-12 col-lg-6">
 					<label class="col-form-label" for="empresa">Empresa</label> <select
-						name="empresa" id="empresa" class="form-control" th:field="${local.empresa}"
+						name="empresa" id="empresa"
+						class="form-control custom-select rounded-0 shadow-none"
+						th:field="${local.empresa}"
+						th:size="${#lists.size(empresaLocales)}"
 						th:errorclass="'form-control alert-danger'" readonly>
 						<option th:each="empresa : ${empresaLocales}"
 							th:value="${empresa.id}" th:text="${empresa.razonSocial}">
@@ -30,17 +33,20 @@
 			</div>
 
 			<div class="form-group row">
-				<div class="col-md-6">
+				<div class="col-sm-12 col-md-12 col-lg-6">
 					<label class="col-form-label" for="direccion">Dirección</label> <input
-						class="form-control" type="text" th:field="${local.direccion}"
+						class="form-control rounded-0 shadow-none" type="text"
+						th:field="${local.direccion}"
 						th:errorclass="'form-control alert-danger'"
-						placeholder="Ejm. Av. Lima 123" name="direccion" id="direccion" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('direccion')}" th:errors="${local.direccion}"></small>
+						placeholder="Ejm. Av. Lima 123" name="direccion" id="direccion"
+						autofocus /> <small class="form-text text-danger"
+						th:if="${#fields.hasErrors('direccion')}"
+						th:errors="${local.direccion}"></small>
 				</div>
-				<div class="col-md-6">
+				<div class="col-sm-12 col-md-12 col-lg-6">
 					<label class="col-form-label" for="observaciones">Observaciones</label>
-					<textarea class="form-control" rows="3" th:field="${local.observaciones}"
+					<textarea class="form-control rounded-0 shadow-none" rows="3"
+						th:field="${local.observaciones}"
 						th:errorclass="'form-control alert-danger'"
 						placeholder="Ejm. 'Este local contiene solo libros de habla hispana.'"
 						name="observaciones" id="observaciones"></textarea>
@@ -49,16 +55,34 @@
 						th:errors="${local.observaciones}"></small>
 				</div>
 			</div>
-			<div class="form-group row py-4">
-				<div class="col-md-6">
-					<a class="btn btn-light btn-block" th:href="@{'/locales/cancelar'}"><i
-						class="fas fa-shield-alt"></i> Cancelar</a>
+
+			<div class="form-group row py-3">
+				<!-- MOVIL -->
+				<div class="col-6 d-block d-sm-none">
+					<a class="btn btn-transparent btn-block rounded-0 shadow-none"
+						th:href="@{'/locales/cancelar'}"><i class="fas fa-times fa-2x"></i></a>
 				</div>
-				<div class="col-md-6">
-					<input class="btn btn-dark btn-block" type="submit"
-						th:value="${editable} ? 'Guardar Local' : 'Crear Local'" />
+				<div class="col-6 d-block d-sm-none">
+					<button
+						class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+						type="submit">
+						<i class="fas fa-check fa-2x"></i>
+					</button>
+				</div>
+
+				<!-- WEB -->
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<a
+						class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+						th:href="@{'/locales/cancelar'}">CANCELAR</a>
+				</div>
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<input
+						class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+						type="submit" th:value="${editable}?'GUARDAR CAMBIOS':'CREAR'" />
 				</div>
 			</div>
+
 		</form>
 	</div>
 

@@ -80,7 +80,7 @@
 						class="form-control rounded-0 shadow-none" type="text"
 						th:field="${empleado.username}"
 						th:errorclass="'form-control alert-danger'"
-						placeholder="Usuario..." /> <small class="form-text text-danger"
+						placeholder="Usuario" /> <small class="form-text text-danger"
 						th:if="${#fields.hasErrors('username')}"
 						th:errors="${empleado.username}"></small>
 				</div>
@@ -101,8 +101,8 @@
 						class="form-control rounded-0 shadow-none" type="password"
 						th:field="${empleado.password}"
 						th:errorclass="'form-control alert-danger'"
-						placeholder="Contraseña..." /> <small
-						class="form-text text-danger"
+						placeholder="Mín. 8 caracteres, 1 dígito, 1 letra mayúscula, 1 letra minúscula, sin espacios" />
+					<small class="form-text text-danger"
 						th:if="${#fields.hasErrors('password')}"
 						th:errors="${empleado.password}"></small>
 				</div>
@@ -111,7 +111,7 @@
 						readonly class="form-control rounded-0 shadow-none"
 						type="password" th:field="${empleado.passwordConfirmacion}"
 						th:errorclass="'form-control alert-danger'"
-						placeholder="Escribe nuevamente tu contraseña..." /> <small
+						placeholder="Escribe nuevamente tu contraseña" /> <small
 						class="form-text text-danger"
 						th:if="${#fields.hasErrors('passwordConfirmacion')}"
 						th:errors="${empleado.passwordConfirmacion}"></small>

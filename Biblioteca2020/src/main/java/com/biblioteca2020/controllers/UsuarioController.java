@@ -193,7 +193,7 @@ public class UsuarioController {
 			}
 			// USO CALENDAR PARA MOSTRAR LA FECHA DE DEVOLUCION
 			Calendar calendar = Calendar.getInstance(new Locale("es", "ES"));
-			calendar.setTime(prestamo.getFecha_devolucion());
+			calendar.setTime(prestamo.getFecha_despacho());
 			// MOSTRAR FECHA POR DIA, MES Y ANIO
 			String anio = String.valueOf(calendar.get(Calendar.YEAR));
 			String mes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, new Locale("es", "ES"));
@@ -203,7 +203,7 @@ public class UsuarioController {
 			prestamo.setObservaciones(
 					"El usuario: " + prestamo.getUsuario().getNombres() + ", " + prestamo.getUsuario().getApellidos()
 							+ "(DNI " + prestamo.getUsuario().getNroDocumento() + ") ha solicitado el libro: "
-							+ prestamo.getLibro().getTitulo() + " para el dìa " + fechaPrestamoHoy + ", hasta el dìa "
+							+ prestamo.getLibro().getTitulo() + " el dìa " + fechaPrestamoHoy + ", hasta el dìa "
 							+ prestamo.getFecha_devolucion() + ". A la espera de confirmación.");
 			// DEVOLUCION
 			prestamo.setDevolucion(false);

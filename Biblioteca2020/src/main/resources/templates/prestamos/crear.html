@@ -8,98 +8,129 @@
 
 	<header th:replace="layout/layout :: header"></header>
 
-	<div class="container my-4">
+	<div class="container my-3 px-5">
 
-		<h1 class="text-warning" th:text="${titulo}"></h1>
+		<h1 class="py-4" th:text="${titulo}"></h1>
 
 		<form th:action="@{/prestamos/crear}" th:object="${prestamo}"
 			method="post">
 
-			<h4 class="my-3">Libro</h4>
+			<h4 class="py-4">Libro</h4>
 			<div class="form-group row">
-				<div class="col-md-12">
+				<div class="col-sm-12 col-md-12">
 					<label class="col-form-label" for="buscar_libro">Título</label> <input
 						type="text" name="buscar_libro" id="buscar_libro"
-						class="form-control" placeholder="Buscar libro por su nombre..." th:field="*{libro.titulo}"
-						autofocus /> 
-					<small class="form-text text-danger"
-						th:if="${#fields.hasErrors('libro.titulo')}" th:errors="*{libro.titulo}"></small>
+						class="form-control rounded-0 shadow-none"
+						placeholder="Buscar libro por su título"
+						th:field="*{libro.titulo}" autofocus /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('libro.titulo')}"
+						th:errors="*{libro.titulo}"></small>
 				</div>
 			</div>
 
 			<div class="form-group row">
-				<div class="col-md-4" id="col_id_libro">
+				<div class="col-sm-12 col-md-4 col-lg-4" id="col_id_libro">
 					<label class="text-muted col-form-label" for="id_libro">ID</label>
 					<input type="text" name="id_libro" id="id_libro"
-						placeholder="Id Libro" class="form-control" th:field="*{libro}" readonly />
+						placeholder="Id Libro" class="form-control rounded-0 shadow-none"
+						th:field="*{libro}" readonly />
 				</div>
-				<div class="col-md-4" id="col_autor_libro">
+				<div class="col-sm-12 col-md-4 col-lg-4" id="col_autor_libro">
 					<label class="text-muted col-form-label" for="autor_libro">Autor</label>
 					<input type="text" name="autor_libro" id="autor_libro"
-						class="form-control" placeholder="Autor" th:field="*{libro.autor}" disabled />
+						class="form-control rounded-0 shadow-none" placeholder="Autor"
+						th:field="*{libro.autor}" disabled />
 				</div>
-				<div class="col-md-4" id="col_stock_libro">
+				<div class="col-sm-12 col-md-4 col-lg-4" id="col_stock_libro">
 					<label class="text-muted col-form-label" for="stock_libro">Stock</label>
 					<input type="text" name="stock_libro" id="stock_libro"
-						class="form-control" placeholder="Stock" th:field="*{libro.stock}" disabled />
+						class="form-control rounded-0 shadow-none" placeholder="Stock"
+						th:field="*{libro.stock}" disabled />
 				</div>
 			</div>
 
-			<h4 class="my-3">Usuario</h4>
+			<h4 class="py-4">Usuario</h4>
 			<div class="form-group row">
-				<div class="col-md-12">
+				<div class="col-sm-12 col-md-12">
 					<label class="col-form-label" for="buscar_usuario">DNI
 						Usuario</label> <input type="number" name="buscar_usuario"
-						id="buscar_usuario" class="form-control"
-						placeholder="Escribir DNI" th:field="*{usuario.nroDocumento}" /> 
-					<small class="form-text text-danger"
-						th:if="${#fields.hasErrors('usuario.nroDocumento')}" th:errors="*{usuario.nroDocumento}"></small>
+						id="buscar_usuario" class="form-control rounded-0 shadow-none"
+						placeholder="Buscar usuario por su DNI"
+						th:field="*{usuario.nroDocumento}" /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('usuario.nroDocumento')}"
+						th:errors="*{usuario.nroDocumento}"></small>
 				</div>
 			</div>
 
 			<div class="form-group row">
-				<div class="col-md-4" id="col_id_usuario">
+				<div class="col-sm-12 col-md-4 col-lg-4" id="col_id_usuario">
 					<label class="text-muted col-form-label" for="id_usuario">ID</label>
 					<input type="text" name="id_usuario" id="id_usuario"
-						class="form-control" placeholder="Id Usuario" th:field="*{usuario}" readonly />
+						class="form-control rounded-0 shadow-none"
+						placeholder="Id Usuario" th:field="*{usuario}" readonly />
 				</div>
-				<div class="col-md-8" id="col_nombre_usuario">
+				<div class="col-sm-12 col-md-8 col-lg-8" id="col_nombre_usuario">
 					<label class="text-muted col-form-label" for="nombre_usuario">Nombre</label>
 					<input type="text" name="nombre_usuario" id="nombre_usuario"
-						class="form-control" placeholder="Nombres del Usuario" th:field="*{usuario.nombres}" disabled />
+						class="form-control rounded-0 shadow-none"
+						placeholder="Nombres del Usuario" th:field="*{usuario.nombres}"
+						disabled />
 				</div>
 			</div>
 
-			<h4 class="my-3">Fecha Devolución</h4>
+			<h4 class="py-4">Fecha Devolución</h4>
 			<div class="form-group row">
-				<div class="col-md-6">
+				<div class="col-sm-12 col-md-6 col-lg-6">
 					<label class="col-form-label" for="fecha_devolucion">Fecha
-						Devoluciòn</label> <input class="form-control datepicker" type="text"
-						name="fecha_devolucion" th:field=*{fecha_devolucion} required />
-					<small class="form-text text-danger"
-						th:if="${#fields.hasErrors('fecha_devolucion')}" th:errors="*{fecha_devolucion}"></small>
+						Devoluciòn</label> <input
+						class="form-control rounded-0 shadow-none datepicker" type="text"
+						placeholder=" yyyy/mm/dd" name="fecha_devolucion"
+						th:field=*{fecha_devolucion} required /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('fecha_devolucion')}"
+						th:errors="*{fecha_devolucion}"></small>
 				</div>
 			</div>
 
-			<div class="form-group row py-4">
-				<div class="col-md-6">
-					<a class="btn btn-light btn-block"
+			<div class="form-group row py-3">
+				<!-- MOVIL -->
+				<div class="col-6 d-block d-sm-none">
+					<a class="btn btn-transparent btn-block rounded-0 shadow-none"
 						th:href="@{'/prestamos/cancelar'}"><i
-						class="fas fa-shield-alt"></i> Cancelar</a>
+						class="fas fa-times fa-2x"></i></a>
 				</div>
-				<div class="col-md-6">
-					<input class="btn btn-dark btn-block" type="submit"
-						th:value="'Registrar Préstamo'" />
+				<div class="col-6 d-block d-sm-none">
+					<button
+						class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+						type="submit">
+						<i class="fas fa-check fa-2x"></i>
+					</button>
+				</div>
+
+				<!-- WEB -->
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<a
+						class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+						th:href="@{'/prestamos/cancelar'}">CANCELAR</a>
+				</div>
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<input
+						class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+						type="submit" th:value="'CREAR'" />
 				</div>
 			</div>
+
 
 		</form>
 	</div>
+
 	<footer th:replace="layout/layout :: footer"></footer>
 	<script th:replace="layout/autocomplete-libros :: javascript"></script>
 	<script th:replace="layout/autocomplete-usuarios :: javascript"></script>
 	<script th:replace="layout/autocomplete-empleados :: javascript"></script>
-	
+
 	<script type="text/javascript">
 		// COMPONENTE DE FECHA ESPECIFICO PARA EL FORMULARIO
 		$('.datepicker').datepicker({
