@@ -33,10 +33,13 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import com.biblioteca2020.models.dao.IConfirmationTokenDao;
 import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.dto.RecuperarCuenta;
 import com.biblioteca2020.models.entity.ConfirmationToken;
+import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Prestamo;
 import com.biblioteca2020.models.entity.Usuario;
@@ -182,15 +185,12 @@ public class UsuarioController {
 			Date fechaDespacho = new Date();
 			prestamo.setFecha_despacho(fechaDespacho);
 			// FECHA DEVOLUCIÓN
-			try {
-				DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-				Date fechaDevolucionPrestamo = null;
-				fechaDevolucionPrestamo = formatter.parse(fecha_devolucion);
-				prestamo.setFecha_devolucion(fechaDevolucionPrestamo);
-			} catch (ParseException pe) {
-				model.addAttribute("error", pe.getMessage());
-				return "/usuarios/biblioteca/solicitar-libro";
-			}
+			// try {
+			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			Date fechaDevolucionPrestamo = null;
+			fechaDevolucionPrestamo = formatter.parse(fecha_devolucion);
+			prestamo.setFecha_devolucion(fechaDevolucionPrestamo);
+
 			// USO CALENDAR PARA MOSTRAR LA FECHA DE DEVOLUCION
 			Calendar calendar = Calendar.getInstance(new Locale("es", "ES"));
 			calendar.setTime(prestamo.getFecha_despacho());
@@ -200,21 +200,93 @@ public class UsuarioController {
 			String dia = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
 			String fechaPrestamoHoy = dia + " de " + mes + " " + anio;
 			// OBSERVACIONES
-			prestamo.setObservaciones(
-					"El usuario: " + prestamo.getUsuario().getNombres() + ", " + prestamo.getUsuario().getApellidos()
-							+ "(DNI " + prestamo.getUsuario().getNroDocumento() + ") ha solicitado el libro: "
-							+ prestamo.getLibro().getTitulo() + " el dìa " + fechaPrestamoHoy + ", hasta el dìa "
-							+ prestamo.getFecha_devolucion() + ". A la espera de confirmación.");
+			prestamo.setObservaciones("El usuario: " + prestamo.getUsuario().getNombres() + ", "
+					+ prestamo.getUsuario().getApellidos() + "(DNI " + prestamo.getUsuario().getNroDocumento()
+					+ ") ha solicitado el libro: " + prestamo.getLibro().getTitulo() + " el dìa " + fechaPrestamoHoy
+					+ ", hasta el dìa " + prestamo.getFecha_devolucion() + ". A la espera de confirmación.");
 			// DEVOLUCION
 			prestamo.setDevolucion(false);
 			prestamoService.save(prestamo);
+
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+
+			// ENVIO DE MAIL DE CONFIRMACIÓN DE ORDEN DE LIBRO CON MIMEMESSAGE
+			String message = "<html><head>" + "<meta charset='UTF-8' />"
+					+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+					+ "<title>Solicitud Libro | Biblioteca2020</title>" + "</head>" + "<body>"
+					+ "<div class='container' style='padding-top: 1rem;'>"
+					+ "<img src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+					+ "<div class='container' style='padding-top: 5rem;'>" + "<p>Saludos " + usuario.getUsername()
+					+ ", hemos recibido su orden de préstamo. </p><br/><br/>" + "<table border='0'>" + "<tr>"
+					+ "<th>Código Préstamo</th>" + "<th>Libro</th>" + "<th>Local</th>" + "<th>Fecha Despacho</th>"
+					+ "<th>Fecha Devolución</th>" + "</tr>" + "<tr>" + "<td>" + prestamo.getId() + "</td>" + "<td>"
+					+ prestamo.getLibro().getTitulo() + " - " + prestamo.getLibro().getAutor() + "</td>" + "<td>"
+					+ prestamo.getLibro().getLocal().getDireccion() + "</td>"
+					// FALTA FORMATEAR LAS FECHAS EN EL FORMATO yyyy/mm/dd
+					+ "<td>" + prestamo.getFecha_despacho() + "</td>" + "<td>" + prestamo.getFecha_devolucion()
+					+ "</td>" + "</table><br/>"
+					+ "<p>Si usted no es el destinatario a quien se dirige el presente correo, "
+					+ "favor de contactar al remitente respondiendo al presente correo y eliminar el correo original "
+					+ "incluyendo sus archivos, así como cualquier copia del mismo.</p>" + "</div>" + "</div>"
+					+ "</body>"
+					+ "<div class='footer' style='padding-top: 5rem; padding-bottom:1rem;'>Biblioteca ©2020</div>"
+					+ "</html>";
+			emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
+					"Solicitud Libro | Biblioteca2020", message);
+
 			flash.addFlashAttribute("success", "Excelente! Su orden ha sido registrada!");
 			flash.addFlashAttribute("confirma", false);
 			// IR A PRESTAMOS PENDIENTES
 			flash.addFlashAttribute("titulo", "Préstamos Pendientes");
 			flash.addFlashAttribute("prestamosPendientes", prestamoService
 					.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(prestamo.getUsuario().getId()));
+
+			// AQUI VALIDO SI LOS LIBROS SON MENORES QUE 10, SI LO SON, ENVÍO OTRO CORREO
+			// PERO AL ADMIN
+			Empleado adminLocal = empleadoService.findByRoleAndLocal("ADMIN", libroAPrestar.getLocal().getId());
+			if (libroAPrestar.getStock() < 10) {
+				String messageAdmin = "<html><head>" + "<meta charset='UTF-8' />"
+						+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+						+ "<title>Stock Libro | Biblioteca2020</title>" + "</head>" + "<body>"
+						+ "<div class='container' style='padding-top: 1rem;'>"
+						+ "<img src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+						+ "<div class='container' style='padding-top: 5rem;'>" + "<p>Saludos "
+						+ adminLocal.getUsername()
+						+ ", le enviamos el siguiente correo para comunicarle que el stock del libro '"
+						+ prestamo.getLibro().getTitulo() + "', presente en el local situado en '"
+						+ prestamo.getLibro().getLocal().getDireccion() + "' es menor a las 10 unidades. </p><br/><br/>"
+						+ "<p>ESTE CORREO ES CONFIDENCIAL. Si usted no es el destinatario a quien se dirige el presente correo, "
+						+ "favor de contactar al remitente respondiendo al presente correo y eliminar el correo original "
+						+ "incluyendo sus archivos, así como cualquier copia del mismo. O de lo contrario, podría incurrir en sanciones legales.</p>"
+						+ "</div>" + "</div>" + "</body>"
+						+ "<div class='footer' style='padding-top: 5rem; padding-bottom:1rem;'>Biblioteca ©2020</div>"
+						+ "</html>";
+				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
+						"Stock Libro | Biblioteca2020", messageAdmin);
+			}
+
 			return "redirect:/prestamos/prestamos-pendientes";
+
+			// ERROR A LA HJORA DE FORMATEAR FECHA
+		} catch (ParseException pe) {
+			model.addAttribute("error", pe.getMessage());
+			return "/usuarios/biblioteca/solicitar-libro";
+
+			// IR A BIBLIOTECA YA QUE HUBO UN ERROR A LA HORA DE ENVIAR EL CORREO
+		} catch (MailException ex) {
+			model.addAttribute("titulo", "Catálogo de libros");
+			List<Libro> libros = libroService.findByTituloGroup();
+			for (int i = 0; i < libros.size(); i++) {
+				String descripcionMin = libros.get(i).getDescripcion().substring(0, 150);
+				String descripcionFull = libros.get(i).getDescripcion().substring(150,
+						libros.get(i).getDescripcion().length());
+				libros.get(i).setDescripcionMin(descripcionMin + " ...");
+				libros.get(i).setDescripcion(descripcionFull);
+				model.addAttribute("libros", libros);
+			}
+			return "/usuarios/biblioteca";
+
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
 			// IR A BIBLIOTECA YA QUE HUBO UN ERROR A LA HORA DE GUARDAR LA ORDEN
@@ -276,6 +348,9 @@ public class UsuarioController {
 			// ESTÉ REGISTRADO ANTES DE MANDAR EL CORREO DE CONFIRMACIÒN
 			ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
 			confirmationTokenRepository.save(confirmationToken);
+			// OBTENER PATH DEL SERVIDOR EN LA PETICION ACTUAL, ES DECIR
+			// "http://localhost:8080"
+			String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 			// ENVIO DE MAIL CON MIMEMESSAGE
 			try {
 				String message = "<html><head>" + "<meta charset='UTF-8' />"
@@ -286,10 +361,10 @@ public class UsuarioController {
 						+ "<div class='container' style='padding-top: 3rem;'>"
 						+ "<p>Saludos, hemos recibido tu peticiòn de registro a Biblioteca2020.</p><br/>"
 						+ "<p style='padding-top: 1rem;'>Para confirmar tu cuenta, entrar aquì: "
-						+ "<a class='text-info' href='http://localhost:8080/usuarios/cuenta-verificada?token="
-						+ confirmationToken.getConfirmationToken()
-						+ "'>http://localhost:8080/usuarios/cuenta-verificada?token="
-						+ confirmationToken.getConfirmationToken() + "</a>" + "</p>" + "</div>" + "</div>" + "</body>"
+						+ "<a class='text-info' href='" + baseUrl + "/usuarios/cuenta-verificada?token="
+						+ confirmationToken.getConfirmationToken() + "'>" + baseUrl
+						+ "/usuarios/cuenta-verificada?token=" + confirmationToken.getConfirmationToken() + "</a>"
+						+ "</p>" + "</div>" + "</div>" + "</body>"
 						+ "<div class='footer' style='padding-top: 3rem;'>Biblioteca ©2020</div>" + "</html>";
 				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
 						"Completar Registro | Biblioteca2020", message);
@@ -416,29 +491,84 @@ public class UsuarioController {
 		}
 		try {
 			usuarioService.cambiarPassword(cambiarPassword);
-			flash.addFlashAttribute("success", "Password Actualizada");
-			return "redirect:/home";
 		} catch (Exception e) {
 			model.addAttribute("cambiarPassword", cambiarPassword);
 			model.addAttribute("titulo", "Cambiar Password");
 			model.addAttribute("cambiarPasswordError", e.getMessage());
 			return "/usuarios/cambio-password";
 		}
+
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+
+		// ENVIO DE MAIL DE CONFIRMACIÓN CON MIMEMESSAGE
+		try {
+			String message = "<html><head>" + "<meta charset='UTF-8' />"
+					+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+					+ "<title>Cambio de Contraseña | Biblioteca2020</title>" + "</head>" + "<body>"
+					+ "<div class='container' style='padding-top: 1rem;'>"
+					+ "<img src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+					+ "<div class='container' style='padding-top: 5rem;'>" + "<p>Saludos " + usuario.getUsername()
+					+ ", recientemente ha actualizado su contraseña de usuario de Biblioteca2020.</p>"
+					+ "<p>Recuerde no divulgar sus datos a terceros.</p>"
+					+ "<p>Si usted no es el destinatario a quien se dirige el presente correo, "
+					+ "favor de contactar al remitente respondiendo al presente correo y eliminar el correo original "
+					+ "incluyendo sus archivos, así como cualquier copia del mismo.</p>" + "</div>" + "</div>"
+					+ "</body>"
+					+ "<div class='footer' style='padding-top: 5rem; padding-bottom:1rem;'>Biblioteca ©2020</div>"
+					+ "</html>";
+			emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
+					"Cambio de Contraseña | Biblioteca2020", message);
+
+			flash.addFlashAttribute("success", "Password Actualizada");
+			return "redirect:/home";
+		} catch (MailException ex) {
+			model.addAttribute("cambiarPassword", cambiarPassword);
+			model.addAttribute("titulo", "Cambiar Password");
+			model.addAttribute("cambiarPasswordError", ex.getMessage());
+			return "/usuarios/cambio-password";
+		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@GetMapping(value = "/deshabilitar-perfil")
-	public String deshabilitarPerfil(RedirectAttributes flash, Authentication authentication) {
+	public String deshabilitarPerfil(Model model, RedirectAttributes flash, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+		// OBTENER PATH DEL SERVIDOR EN LA PETICION ACTUAL, ES DECIR
+		// "http://localhost:8080"
+		String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 		try {
-			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-			Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
 			usuario.setEstado(false);
 			usuarioService.update(usuario);
+			// ENVIO DE MAIL DE CONFIRMACIÓN CON MIMEMESSAGE
+			String message = "<html><head>" + "<meta charset='UTF-8' />"
+					+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+					+ "<title>Cuenta Deshabilitada | Biblioteca2020</title>" + "</head>" + "<body>"
+					+ "<div class='container' style='padding-top: 1rem;'>"
+					+ "<img src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+					+ "<div class='container' style='padding-top: 5rem;'>" + "<p>Saludos " + usuario.getUsername()
+					+ ", acaba de deshabilitar su cuenta de usuario de Biblioteca2020.</p>"
+					+ "<p>Para poder recuperar nuevamente su cuenta, ingrese a este enlace: "
+					+ "<a class='text-info' href='" + baseUrl + "/usuarios/recuperar-cuenta'>" + baseUrl
+					+ "/usuarios/recuperar-cuenta</a></p><br/>"
+					+ "<p>Si usted no es el destinatario a quien se dirige el presente correo, "
+					+ "favor de contactar al remitente respondiendo al presente correo y eliminar el correo original "
+					+ "incluyendo sus archivos, así como cualquier copia del mismo.</p>" + "</div>" + "</div>"
+					+ "</body>"
+					+ "<div class='footer' style='padding-top: 5rem; padding-bottom:1rem;'>Biblioteca ©2020</div>"
+					+ "</html>";
+			emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
+					"Cuenta Deshabilitada | Biblioteca2020", message);
+
 			flash.addFlashAttribute("info", "Su cuenta ha sido deshabilitada.");
 			// CON ESTA PROPIEDAD ELIMINO LA SESIÓN DEL USUARIO LOGUEADO, PARA PODERLO
 			// REDIRECCIONAR AL LOGIN
 			authentication.setAuthenticated(false);
 			return "redirect:/login";
+		} catch (MailException ex) {
+			flash.addFlashAttribute("error", ex.getMessage());
+			return "redirect:/usuarios/perfil";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
 			return "redirect:/usuarios/perfil";
@@ -476,6 +606,9 @@ public class UsuarioController {
 			// LÒGICA DE GENERACIÓN DE TOKEN DE CONFIRMACION CORREO
 			ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
 			confirmationTokenRepository.save(confirmationToken);
+			// OBTENER PATH DEL SERVIDOR EN LA PETICION ACTUAL, ES DECIR
+			// "http://localhost:8080"
+			String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 			// LÒGICA DE ENVIO CORREO, Y VALIDACIÓN CON MÈTODO EN COMÚN AL REGISTRO DE
 			// USUARIOS NUEVOS
 			try {
@@ -487,10 +620,10 @@ public class UsuarioController {
 						+ "<div class='container' style='padding-top: 3rem;'>"
 						+ "<p>Saludos, hemos recibido tu peticiòn de recuperación de tu cuenta.</p><br/>"
 						+ "<p style='padding-top: 1rem;'>Para reactivar tu cuenta, entrar aquì: "
-						+ "<a class='text-info' href='http://localhost:8080/usuarios/cuenta-verificada?token="
-						+ confirmationToken.getConfirmationToken()
-						+ "'>http://localhost:8080/usuarios/cuenta-verificada?token="
-						+ confirmationToken.getConfirmationToken() + "</a>" + "</p>" + "</div>" + "</div>" + "</body>"
+						+ "<a class='text-info' href='" + baseUrl + "/usuarios/cuenta-verificada?token="
+						+ confirmationToken.getConfirmationToken() + "'>" + baseUrl
+						+ "/usuarios/cuenta-verificada?token=" + confirmationToken.getConfirmationToken() + "</a>"
+						+ "</p>" + "</div>" + "</div>" + "</body>"
 						+ "<div class='footer' style='padding-top: 3rem;'>Biblioteca ©2020</div>" + "</html>";
 				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
 						"Recuperar Cuenta | Biblioteca2020", message);
@@ -546,7 +679,7 @@ public class UsuarioController {
 			model.addAttribute("titulo", "Registro de Usuario");
 			return "/usuarios/crear";
 		}
-		if (!foto.isEmpty()) {			
+		if (!foto.isEmpty()) {
 			String rootPath = "C://Temp//uploads";
 			try {
 				byte[] bytes = foto.getBytes();

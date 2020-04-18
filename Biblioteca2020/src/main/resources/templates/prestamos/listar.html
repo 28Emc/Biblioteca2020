@@ -44,7 +44,7 @@
 					<th hidden>Id</th>
 					<th>Libro</th>
 					<th>Nombre Empleado</th>
-					<th sec:authorize="!hasRole('ROLE_USER')">Local Empleado</th>
+					<th>Local</th>
 					<th>Nombre Suscriptor</th>
 					<th>Fecha Despacho</th>
 					<th>Fecha Devolución/Anulación</th>
@@ -62,7 +62,7 @@
 						<td class="align-middle" th:text="${prestamo.id}" hidden></td>
 						<td class="align-middle"
 							th:text="${prestamo.libro.titulo}+', '+${prestamo.libro.autor}"></td>
-						<td class="align-middle" th:text="'En espera de confirmación'"></td>
+						<td class="align-middle" th:text="${prestamo.devolucion}?'-':'Sin confirmar'"></td>
 						<td class="align-middle"
 							th:text="${prestamo.empleado.local.direccion}"></td>
 						<td class="align-middle"
@@ -134,7 +134,7 @@
 						<td class="align-middle" th:text="${prestamo.id}" hidden></td>
 						<td class="align-middle"
 							th:text="${prestamo.libro.titulo}+', '+${prestamo.libro.autor}"></td>
-						<td class="align-middle" sec:authorize="!hasRole('ROLE_USER')"
+						<td class="align-middle"
 							th:text="${prestamo.empleado.nombres}+', '+${prestamo.empleado.apellidos}"></td>
 						<td class="align-middle"
 							th:text="${prestamo.empleado.local.direccion}"></td>

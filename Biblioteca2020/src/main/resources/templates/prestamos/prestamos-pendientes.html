@@ -60,7 +60,7 @@
 						<td class="align-middle text-center" data-toggle="tooltip"
 							data-placement="auto"
 							th:title="${prestamoPendiente.observaciones}"><i
-							class="fas fa-search fa-lg"></i></td>
+							class="fas fa-search fa-2x"></i></td>
 						<td class="align-middle" sec:authorize="hasRole('ROLE_USER')"><a
 							class="btn btn-transparent btn-block rounded-0 shadow-none"
 							th:href="@{/prestamos/anular-orden/}+${prestamoPendiente.id}"
@@ -89,8 +89,8 @@
 						<td class="align-middle text-center" data-toggle="tooltip"
 							data-placement="auto"
 							th:title="${prestamoPendiente.observaciones}"><i
-							class="fas fa-search fa-lg"></i></td>
-						<td class="align-middle" sec:authorize="hasRole('ROLE_USER')"><a
+							class="fas fa-search fa-2x"></i></td>
+						<td th:unless="${devolucion}" class="align-middle" sec:authorize="hasRole('ROLE_USER')"><a
 							class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
 							th:href="'#'"><i class="far fa-edit fa-lg text-secondary"></i></a></td>
 					</th:block>

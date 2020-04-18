@@ -197,4 +197,11 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	public Empleado findByUsernameAndLocal(String username, Long id_local) {
 		return empleadoDao.findByUsernameAndLocal("%" + username + "%", id_local);
 	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public Empleado findByRoleAndLocal(String role, Long id_local) {
+		return empleadoDao.findByRoleAndLocal("%" + role + "%", id_local);
+	}
 }

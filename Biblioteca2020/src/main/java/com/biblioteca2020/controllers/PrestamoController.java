@@ -1,11 +1,10 @@
 package com.biblioteca2020.controllers;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +23,7 @@ import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Prestamo;
 import com.biblioteca2020.models.entity.Usuario;
+import com.biblioteca2020.models.service.EmailSenderService;
 import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.IPrestamoService;
@@ -45,6 +45,9 @@ public class PrestamoController {
 
 	@Autowired
 	private IUsuarioService usuarioService;
+
+	@Autowired
+	private EmailSenderService emailSenderService;
 
 	// ############################ ADMIN, EMPLEADO ############################
 	// LISTADO POR ROLES
@@ -150,14 +153,6 @@ public class PrestamoController {
 		// FECHA DESPACHO
 		Date fechaDespacho = new Date();
 		prestamo.setFecha_despacho(fechaDespacho);
-		// USO CALENDAR PARA MOSTRAR LA FECHA DE DEVOLUCION
-		Calendar calendar = Calendar.getInstance(new Locale("es", "ES"));
-		calendar.setTime(prestamo.getFecha_devolucion());
-		// MOSTRAR FECHA POR DIA, MES Y ANIO
-		String anio = String.valueOf(calendar.get(Calendar.YEAR));
-		String mes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, new Locale("es", "ES"));
-		String dia = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
-		String fechaPrestamoHoy = dia + " de " + mes + " " + anio;
 		// OBSERVACIONES
 		prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo()
 				+ " ha sido programado para su devolución el día " + prestamo.getFecha_devolucion()
@@ -265,10 +260,44 @@ public class PrestamoController {
 					+ "), ha sido anulado el día " + prestamo.getFecha_devolucion() + ", por el empleado: "
 					+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código empleado "
 					+ empleado.getId() + ")");
-			prestamoService.save(prestamo);
-			flash.addFlashAttribute("warning",
-					"El préstamo del libro '" + prestamo.getLibro().getTitulo() + "' ha sido anulado.");
-			flash.addFlashAttribute("confirma", true);
+			/* prestamoService.save(prestamo); */
+
+			// ENVIO DE MAIL DE CONFIRMACIÓN DE ANULACION AL USUARIO CON MIMEMESSAGE
+			try {
+				String message = "<html><head>" + "<meta charset='UTF-8' />"
+						+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+						+ "<title>Préstamo Anulado | Biblioteca2020</title>" + "</head>" + "<body>"
+						+ "<div class='container' style='padding-top: 1rem;'>"
+						+ "<img src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+						+ "<div class='container' style='padding-top: 5rem;'>" + "<p>Saludos "
+						+ prestamo.getUsuario().getUsername()
+						+ ", se procedió a anular su orden de préstamo del libro '" + prestamo.getLibro().getTitulo()
+						+ "', con Código Préstamo '" + prestamo.getId() + "' situado en el local '"
+						+ prestamo.getLibro().getLocal().getDireccion() + "'.</p><br/>"
+						+ "<p>Si usted no estaba al corriente de dicha acción, favor de notificarlo al local donde realizó la orden.</p><br/>"
+						+ "<p>Si usted no es el destinatario a quien se dirige el presente correo, "
+						+ "favor de contactar al remitente respondiendo al presente correo y eliminar el correo original "
+						+ "incluyendo sus archivos, así como cualquier copia del mismo.</p>" + "</div>" + "</div>"
+						+ "</body>"
+						+ "<div class='footer' style='padding-top: 5rem; padding-bottom:1rem;'>Biblioteca ©2020</div>"
+						+ "</html>";
+				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", prestamo.getUsuario().getEmail(),
+						"Préstamo Anulado | Biblioteca2020", message);
+
+				prestamoService.save(prestamo);
+
+				flash.addFlashAttribute("warning",
+						"El préstamo del libro '" + prestamo.getLibro().getTitulo() + "' ha sido anulado.");
+				flash.addFlashAttribute("confirma", true);
+			} catch (MailException ex) {
+				model.addAttribute("error", ex.getMessage());
+			}
+
+			/*
+			 * flash.addFlashAttribute("warning", "El préstamo del libro '" +
+			 * prestamo.getLibro().getTitulo() + "' ha sido anulado.");
+			 * flash.addFlashAttribute("confirma", true);
+			 */
 		}
 		return "redirect:/prestamos/listar";
 	}
@@ -319,39 +348,33 @@ public class PrestamoController {
 	}
 
 	// ANULACIÒN DE PRÉSTAMO POR PARTE DEL USUARIO
-	/*@PreAuthorize("hasAnyRole('ROLE_USER')")
-	@GetMapping(value = "/anular-orden/{id}")
-	public String anularPrestamoUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash,
-			Authentication authentication, Model model) {
-		if (id > 0) {
-			Prestamo prestamo = prestamoService.findById(id);
-			// ACTUALIZACIÓN DE STOCK
-			int stockNuevo = prestamo.getLibro().getStock();
-			try {
-				Libro libro = libroService.findOne(prestamo.getLibro().getId());
-				libro.setStock(stockNuevo + 1);
-			} catch (Exception e) {
-				model.addAttribute("error", e.getMessage());
-				return "redirect:/prestamos/prestamos-pendientes";
-			}
-			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-			Usuario usuario = usuarioService.findByUsernameAndEstado(userDetails.getUsername().toString(), true);
-			prestamo.setUsuario(usuario);
-			prestamo.setDevolucion(true);
-			prestamo.setObservaciones("El préstamo del libro: " + prestamo.getLibro().getTitulo() + " (código " + id
-					+ "), ha sido anulado el día " + prestamo.getFecha_devolucion() + ", por el usuario: "
-					+ prestamo.getUsuario().getNombres().concat(", " + prestamo.getUsuario().getApellidos())
-					+ " (código usuario " + prestamo.getUsuario().getId() + ")");
-			// prestamoService.delete(id);
-			prestamoService.save(prestamo);
-			model.addAttribute("prestamos",
-					prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(usuario.getId()));
-			flash.addFlashAttribute("error",
-					"El préstamo del libro '" + prestamo.getLibro().getTitulo() + "' ha sido anulado.");
-			flash.addFlashAttribute("confirma", true);
-		}
-		return "redirect:/prestamos/historial-user";
-	}*/
+	/*
+	 * @PreAuthorize("hasAnyRole('ROLE_USER')")
+	 * 
+	 * @GetMapping(value = "/anular-orden/{id}") public String
+	 * anularPrestamoUsuario(@PathVariable(value = "id") Long id, RedirectAttributes
+	 * flash, Authentication authentication, Model model) { if (id > 0) { Prestamo
+	 * prestamo = prestamoService.findById(id); // ACTUALIZACIÓN DE STOCK int
+	 * stockNuevo = prestamo.getLibro().getStock(); try { Libro libro =
+	 * libroService.findOne(prestamo.getLibro().getId()); libro.setStock(stockNuevo
+	 * + 1); } catch (Exception e) { model.addAttribute("error", e.getMessage());
+	 * return "redirect:/prestamos/prestamos-pendientes"; } UserDetails userDetails
+	 * = (UserDetails) authentication.getPrincipal(); Usuario usuario =
+	 * usuarioService.findByUsernameAndEstado(userDetails.getUsername().toString(),
+	 * true); prestamo.setUsuario(usuario); prestamo.setDevolucion(true);
+	 * prestamo.setObservaciones("El préstamo del libro: " +
+	 * prestamo.getLibro().getTitulo() + " (código " + id +
+	 * "), ha sido anulado el día " + prestamo.getFecha_devolucion() +
+	 * ", por el usuario: " + prestamo.getUsuario().getNombres().concat(", " +
+	 * prestamo.getUsuario().getApellidos()) + " (código usuario " +
+	 * prestamo.getUsuario().getId() + ")"); // prestamoService.delete(id);
+	 * prestamoService.save(prestamo); model.addAttribute("prestamos",
+	 * prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(
+	 * usuario.getId())); flash.addFlashAttribute("error", "El préstamo del libro '"
+	 * + prestamo.getLibro().getTitulo() + "' ha sido anulado.");
+	 * flash.addFlashAttribute("confirma", true); } return
+	 * "redirect:/prestamos/historial-user"; }
+	 */
 
 	// ANULACIÒN DE PRÉSTAMO POR PARTE DEL USUARIO
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
@@ -363,8 +386,8 @@ public class PrestamoController {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Usuario usuario = usuarioService.findByUsernameAndEstado(userDetails.getUsername().toString(), true);
 		if (id > 0) {
-			prestamo = prestamoService.findById(id); 
-			prestamo.setDevolucion(true); 
+			prestamo = prestamoService.findById(id);
+			prestamo.setDevolucion(true);
 			// ACTUALIZACIÓN DE STOCK
 			int stockNuevo = prestamo.getLibro().getStock();
 			Libro libro;
@@ -374,19 +397,45 @@ public class PrestamoController {
 			} catch (Exception e) {
 				model.addAttribute("error", e.getMessage());
 				return "redirect:/prestamos/listar";
-			} 
+			}
 			// FECHA DEVOLUCION
 			prestamo.setFecha_devolucion(fechaDevolución);
 			prestamo.setObservaciones("El préstamo del libro: " + prestamo.getLibro().getTitulo() + " (código " + id
 					+ "), ha sido anulado el día " + prestamo.getFecha_devolucion() + ", por el usuario: "
 					+ prestamo.getUsuario().getNombres().concat(", " + prestamo.getUsuario().getApellidos())
 					+ " (código usuario " + prestamo.getUsuario().getId() + ")");
-			prestamoService.save(prestamo);
-			model.addAttribute("prestamos",
-					prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(usuario.getId()));
-			flash.addFlashAttribute("error",
-					"El préstamo del libro '" + prestamo.getLibro().getTitulo() + "' ha sido anulado.");
-			flash.addFlashAttribute("confirma", true);
+
+			// ENVIO DE MAIL DE CONFIRMACIÓN DE ANULACION AL USUARIO CON MIMEMESSAGE
+			try {
+				String message = "<html><head>" + "<meta charset='UTF-8' />"
+						+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+						+ "<title>Préstamo Anulado | Biblioteca2020</title>" + "</head>" + "<body>"
+						+ "<div class='container' style='padding-top: 1rem;'>"
+						+ "<img src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+						+ "<div class='container' style='padding-top: 5rem;'>" + "<p>Saludos " + usuario.getUsername()
+						+ ", le comunicamos que su orden de préstamo del libro '" + prestamo.getLibro().getTitulo()
+						+ "', con Código Préstamo '" + prestamo.getId() + "' y situado en el local con dirección '"
+						+ prestamo.getLibro().getLocal().getDireccion() + "' ha sido anulada.</p><br/>"
+						+ "<p>Si usted no estaba al corriente de dicha acción, favor de notificarlo al local donde realizó la orden.</p><br/>"
+						+ "<p>Si usted no es el destinatario a quien se dirige el presente correo, "
+						+ "favor de contactar al remitente respondiendo al presente correo y eliminar el correo original "
+						+ "incluyendo sus archivos, así como cualquier copia del mismo.</p>" + "</div>" + "</div>"
+						+ "</body>"
+						+ "<div class='footer' style='padding-top: 5rem; padding-bottom:1rem;'>Biblioteca ©2020</div>"
+						+ "</html>";
+				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", prestamo.getUsuario().getEmail(),
+						"Préstamo Anulado | Biblioteca2020", message);
+
+				prestamoService.save(prestamo);
+
+				model.addAttribute("prestamos",
+						prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(usuario.getId()));
+				flash.addFlashAttribute("error",
+						"El préstamo del libro '" + prestamo.getLibro().getTitulo() + "' ha sido anulado.");
+				flash.addFlashAttribute("confirma", true);
+			} catch (MailException ex) {
+				model.addAttribute("error", ex.getMessage());
+			}
 		}
 		return "redirect:/prestamos/historial-user";
 	}
