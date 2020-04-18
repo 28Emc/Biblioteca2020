@@ -105,7 +105,6 @@ public class Usuario implements Serializable {
 	public void prePersist() {
 		fecha_registro = new Date();
 		estado = false;
-		foto_usuario = "no-image.jpg";
 	}
 
 	private static final long serialVersionUID = 1L;

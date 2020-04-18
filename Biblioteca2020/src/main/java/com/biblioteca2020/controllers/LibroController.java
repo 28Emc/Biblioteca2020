@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,8 @@ public class LibroController {
 	@Autowired
 	private IEmpleadoService empleadoService;
 
+	private static final List<String> formatosFoto = Arrays.asList("image/png", "image/jpeg", "image/jpg");
+
 	/* ************************ SECCIÓN DE SYSADMIN ************************ */
 	// LISTADO DE TODOS LOS LIBROS
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
@@ -63,8 +66,10 @@ public class LibroController {
 	@GetMapping("/libros/crear")
 	public String crearLibroAdmin(Model model) {
 		List<Local> locales = localService.findAll();
+		Libro libro = new Libro();
 		model.addAttribute("locales", locales);
-		model.addAttribute("libro", new Libro());
+		libro.setFoto_libro("no-book.jpg");
+		model.addAttribute("libro", libro);
 		model.addAttribute("titulo", "Registro de Libro");
 		return "/libros/crear";
 	}
@@ -80,19 +85,37 @@ public class LibroController {
 			model.addAttribute("locales", locales);
 			return "/libros/crear";
 		}
+
+		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
-			String rootPath = "C://Temp//uploads";
-			try {
-				byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
-				libro.setFoto_libro(foto.getOriginalFilename());
-			} catch (IOException e) {
-				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar la imagen del libro");
+			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+			if (formatosFoto.contains(foto.getContentType())) {
+				String rootPath = "C://Temp//uploads";
+				try {
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					libro.setFoto_libro(foto.getOriginalFilename());
+				} catch (IOException e) {
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+					model.addAttribute("titulo", "Registro de Libro");
+					model.addAttribute("libro", libro);
+					List<Local> locales = localService.findAll();
+					model.addAttribute("locales", locales);
+					return "/libros/crear";
+				}
+			} else {
+				model.addAttribute("error", "El formato de la foto es incorrecto");
+				model.addAttribute("titulo", "Registro de Libro");
+				model.addAttribute("libro", libro);
+				List<Local> locales = localService.findAll();
+				model.addAttribute("locales", locales);
+				return "/libros/crear";
 			}
-		} else if (libro.getFoto_libro() == null || libro.getFoto_libro() == "") {
+		} else {
 			libro.setFoto_libro("no-book.jpg");
 		}
+
 		try {
 			libroService.save(libro);
 			flash.addFlashAttribute("success",
@@ -136,20 +159,35 @@ public class LibroController {
 			model.addAttribute("titulo", "Modificar Libro");
 			return "/libros/crear";
 		}
+
+		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto_libro.isEmpty()) {
-			String rootPath = "C://Temp//uploads";
-			byte[] bytes;
-			try {
-				bytes = foto_libro.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto_libro.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
-				libro.setFoto_libro(foto_libro.getOriginalFilename());
-			} catch (IOException e) {
-				model.addAttribute("error", e.getMessage());
+			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+			if (formatosFoto.contains(foto_libro.getContentType())) {
+				String rootPath = "C://Temp//uploads";
+				try {
+					byte[] bytes = foto_libro.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto_libro.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					libro.setFoto_libro(foto_libro.getOriginalFilename());
+				} catch (IOException e) {
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+					List<Local> locales = localService.findAll();
+					model.addAttribute("locales", locales);
+					model.addAttribute("editable", true);
+					model.addAttribute("titulo", "Modificar Libro");
+					return "/libros/crear";
+				}
+			} else {
+				model.addAttribute("error", "El formato de la foto es incorrecto");
+				List<Local> locales = localService.findAll();
+				model.addAttribute("locales", locales);
+				model.addAttribute("editable", true);
+				model.addAttribute("titulo", "Modificar Libro");
+				return "/libros/crear";
 			}
-		} else if (libro.getFoto_libro() == null || libro.getFoto_libro() == "") {
-			libro.setFoto_libro("no-book.jpg");
 		}
+
 		try {
 			libroService.update(libro);
 			flash.addFlashAttribute("warning",
@@ -208,7 +246,9 @@ public class LibroController {
 	public String crearLibro(Model model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		model.addAttribute("libro", new Libro());
+		Libro libro = new Libro();
+		libro.setFoto_libro("no-book.jpg");
+		model.addAttribute("libro", libro);
 		model.addAttribute("titulo", "Registro de Libro");
 		model.addAttribute("local", empleado.getLocal());
 		return "/libros/crear";
@@ -232,19 +272,56 @@ public class LibroController {
 				return "redirect:/locales/libros/listar";
 			}
 		}
+
+		/*
+		 * if (!foto.isEmpty()) { String rootPath = "C://Temp//uploads"; try { byte[]
+		 * bytes = foto.getBytes(); Path rutaCompleta = Paths.get(rootPath + "//" +
+		 * foto.getOriginalFilename()); Files.write(rutaCompleta, bytes);
+		 * libro.setFoto_libro(foto.getOriginalFilename()); } catch (IOException e) {
+		 * e.printStackTrace(); } } else if (libro.getFoto_libro() == null ||
+		 * libro.getFoto_libro() == "") { libro.setFoto_libro("no-book.jpg"); }
+		 */
+
+		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
-			String rootPath = "C://Temp//uploads";
-			try {
-				byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
-				libro.setFoto_libro(foto.getOriginalFilename());
-			} catch (IOException e) {
-				e.printStackTrace();
+			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+			if (formatosFoto.contains(foto.getContentType())) {
+				String rootPath = "C://Temp//uploads";
+				try {
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					libro.setFoto_libro(foto.getOriginalFilename());
+				} catch (IOException e) {
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+					try {
+						Local local = localService.findById(empleado.getLocal().getId());
+						model.addAttribute("titulo", "Registro de Libro");
+						model.addAttribute("libro", libro);
+						model.addAttribute("local", local);
+						return "/libros/crear";
+					} catch (Exception e2) {
+						model.addAttribute("error", e2.getMessage());
+						return "redirect:/locales/libros/listar";
+					}
+				}
+			} else {
+				model.addAttribute("error", "El formato de la foto es incorrecto");
+				try {
+					Local local = localService.findById(empleado.getLocal().getId());
+					model.addAttribute("titulo", "Registro de Libro");
+					model.addAttribute("libro", libro);
+					model.addAttribute("local", local);
+					return "/libros/crear";
+				} catch (Exception e3) {
+					model.addAttribute("error", e3.getMessage());
+					return "redirect:/locales/libros/listar";
+				}
 			}
-		} else if (libro.getFoto_libro() == null || libro.getFoto_libro() == "") {
+		} else {
 			libro.setFoto_libro("no-book.jpg");
 		}
+
 		try {
 			libroService.save(libro);
 			flash.addFlashAttribute("success",
@@ -310,19 +387,54 @@ public class LibroController {
 				return "/locales/libros/editar";
 			}
 		}
+
+		/*
+		 * if (!foto.isEmpty()) { String rootPath = "C://Temp//uploads"; try { byte[]
+		 * bytes = foto.getBytes(); Path rutaCompleta = Paths.get(rootPath + "//" +
+		 * foto.getOriginalFilename()); Files.write(rutaCompleta, bytes);
+		 * libro.setFoto_libro(foto.getOriginalFilename()); } catch (IOException e) {
+		 * e.printStackTrace(); } } else if (libro.getFoto_libro() == null ||
+		 * libro.getFoto_libro() == "") { libro.setFoto_libro("no-book.jpg"); }
+		 */
+
+		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
-			String rootPath = "C://Temp//uploads";
-			try {
-				byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
-				libro.setFoto_libro(foto.getOriginalFilename());
-			} catch (IOException e) {
-				e.printStackTrace();
+			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+			if (formatosFoto.contains(foto.getContentType())) {
+				String rootPath = "C://Temp//uploads";
+				try {
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					libro.setFoto_libro(foto.getOriginalFilename());
+				} catch (IOException e) {
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+					try {
+						Local local = localService.findById(empleado.getLocal().getId());
+						model.addAttribute("titulo", "Registro de Libro");
+						model.addAttribute("libro", libro);
+						model.addAttribute("local", local);
+						return "/libros/crear";
+					} catch (Exception e2) {
+						model.addAttribute("error", e2.getMessage());
+						return "/locales/libros/editar";
+					}
+				}
+			} else {
+				model.addAttribute("error", "El formato de la foto es incorrecto");
+				try {
+					Local local = localService.findById(empleado.getLocal().getId());
+					model.addAttribute("titulo", "Registro de Libro");
+					model.addAttribute("libro", libro);
+					model.addAttribute("local", local);
+					return "/libros/crear";
+				} catch (Exception e3) {
+					model.addAttribute("error", e3.getMessage());
+					return "/locales/libros/editar";
+				}
 			}
-		} else if (libro.getFoto_libro() == null || libro.getFoto_libro() == "") {
-			libro.setFoto_libro("no-book.jpg");
 		}
+
 		try {
 			libroService.update(libro);
 			flash.addFlashAttribute("warning",

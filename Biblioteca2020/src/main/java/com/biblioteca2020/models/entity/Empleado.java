@@ -114,7 +114,6 @@ public class Empleado implements Serializable {
 	public void prePersist() {
 		fecha_registro = new Date();
 		estado = true;
-		foto_empleado = "no-image.jpg";
 	}
 
 	private static final long serialVersionUID = 1L;

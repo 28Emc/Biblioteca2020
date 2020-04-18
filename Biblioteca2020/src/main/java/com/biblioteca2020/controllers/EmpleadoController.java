@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
@@ -42,6 +44,8 @@ public class EmpleadoController {
 
 	@Autowired
 	private IRoleService roleService;
+
+	private static final List<String> formatosFoto = Arrays.asList("image/png", "image/jpeg", "image/jpg");
 
 	// ############################## ROLE EMPLEADO, ROLE ADMIN
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
@@ -90,18 +94,53 @@ public class EmpleadoController {
 			}
 			return "/empleados/perfil";
 		}
+
+		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
-			String rootPath = "C://Temp//uploads";
-			try {
-				byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
-				empleado.setFoto_empleado(foto.getOriginalFilename());
-			} catch (IOException e) {
-				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+			if (formatosFoto.contains(foto.getContentType())) {
+				String rootPath = "C://Temp//uploads";
+				try {
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					empleado.setFoto_empleado(foto.getOriginalFilename());
+				} catch (IOException e) {
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+					model.addAttribute("titulo", "Modificar Perfil");
+					model.addAttribute("empleado", empleado);
+					model.addAttribute("editable", true);
+					switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_ADMIN]":
+						model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+						break;
+					case "[ROLE_EMPLEADO]":
+						model.addAttribute("roles", roleService.findOnlyEmpleados());
+						break;
+					case "[ROLE_SYSADMIN]":
+						model.addAttribute("roles", roleService.findForSysadmin());
+						break;
+					}
+					return "/empleados/perfil";
+				}
+			} else {
+				model.addAttribute("error", "El formato de la foto es incorrecto");
+				model.addAttribute("titulo", "Modificar Perfil");
+				model.addAttribute("empleado", empleado);
+				model.addAttribute("editable", true);
+				switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_ADMIN]":
+					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					break;
+				case "[ROLE_EMPLEADO]":
+					model.addAttribute("roles", roleService.findOnlyEmpleados());
+					break;
+				case "[ROLE_SYSADMIN]":
+					model.addAttribute("roles", roleService.findForSysadmin());
+					break;
+				}
+				return "/empleados/perfil";
 			}
-		} else if (empleado.getFoto_empleado() == null || empleado.getFoto_empleado() == "") {
-			empleado.setFoto_empleado("no-image.jpg");
 		}
 
 		try {
@@ -225,7 +264,9 @@ public class EmpleadoController {
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		try {
 			model.addAttribute("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
-			model.addAttribute("empleado", new Empleado());
+			Empleado emp = new Empleado();
+			emp.setFoto_empleado("no-image.jpg");
+			model.addAttribute("empleado", emp);
 			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
 			model.addAttribute("titulo", "Registro de Empleado");
 			return "empleados/crear";
@@ -251,6 +292,7 @@ public class EmpleadoController {
 			model.addAttribute("titulo", "Registro de Empleado");
 			return "/empleados/crear";
 		}
+
 		if (!foto.isEmpty()) {
 			String rootPath = "C://Temp//uploads";
 			try {
@@ -262,6 +304,49 @@ public class EmpleadoController {
 				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
 			}
 		}
+
+		// PREGUNTO SI EL PARAMETRO ES NULO
+		if (!foto.isEmpty()) {
+			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+			if (formatosFoto.contains(foto.getContentType())) {
+				String rootPath = "C://Temp//uploads";
+				try {
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					empleado.setFoto_empleado(foto.getOriginalFilename());
+				} catch (IOException e) {
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+					model.addAttribute("empleado", empleado);
+					try {
+						model.addAttribute("localesList",
+								localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
+					} catch (Exception e1) {
+						flash.addFlashAttribute("error", e1.getMessage());
+						return "/empleados/crear";
+					}
+					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					model.addAttribute("titulo", "Registro de Empleado");
+					return "/empleados/crear";
+				}
+			} else {
+				model.addAttribute("error", "El formato de la foto es incorrecto");
+				model.addAttribute("empleado", empleado);
+				try {
+					model.addAttribute("localesList",
+							localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
+				} catch (Exception e2) {
+					flash.addFlashAttribute("error", e2.getMessage());
+					return "/empleados/crear";
+				}
+				model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+				model.addAttribute("titulo", "Registro de Empleado");
+				return "/empleados/crear";
+			}
+		} else {
+			empleado.setFoto_empleado("no-image.jpg");
+		}
+
 		try {
 			empleadoService.save(empleado);
 			flash.addFlashAttribute("success",
@@ -341,17 +426,58 @@ public class EmpleadoController {
 			model.addAttribute("titulo", "Modificar Empleado");
 			return "/empleados/editar";
 		}
+
+		/*
+		 * if (!foto.isEmpty()) { String rootPath = "C://Temp//uploads"; try { byte[]
+		 * bytes = foto.getBytes(); Path rutaCompleta = Paths.get(rootPath + "//" +
+		 * foto.getOriginalFilename()); Files.write(rutaCompleta, bytes);
+		 * empleado.setFoto_empleado(foto.getOriginalFilename()); } catch (IOException
+		 * e) { model.addAttribute("error",
+		 * "Lo sentimos, hubo un error a la hora de cargar tu foto"); } }
+		 */
+
+		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
-			String rootPath = "C://Temp//uploads";
-			try {
-				byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
-				empleado.setFoto_empleado(foto.getOriginalFilename());
-			} catch (IOException e) {
-				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+			if (formatosFoto.contains(foto.getContentType())) {
+				String rootPath = "C://Temp//uploads";
+				try {
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					empleado.setFoto_empleado(foto.getOriginalFilename());
+				} catch (IOException e) {
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+					try {
+						model.addAttribute("localesList",
+								localService.findFirstByEmpresa(empleadoLogueado.getLocal().getEmpresa()));
+					} catch (Exception e2) {
+						flash.addFlashAttribute("error", e2.getMessage());
+						return "/empleados/crear";
+					}
+					model.addAttribute("empleado", empleado);
+					model.addAttribute("editable", true);
+					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					model.addAttribute("titulo", "Modificar Empleado");
+					return "/empleados/editar";
+				}
+			} else {
+				model.addAttribute("error", "El formato de la foto es incorrecto");
+				try {
+					model.addAttribute("localesList",
+							localService.findFirstByEmpresa(empleadoLogueado.getLocal().getEmpresa()));
+				} catch (Exception e3) {
+					flash.addFlashAttribute("error", e3.getMessage());
+					return "/empleados/crear";
+				}
+				model.addAttribute("empleado", empleado);
+				model.addAttribute("editable", true);
+				model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+				model.addAttribute("titulo", "Modificar Empleado");
+				return "/empleados/editar";
 			}
 		}
+
 		try {
 			empleadoService.update(empleado);
 			flash.addFlashAttribute("warning",

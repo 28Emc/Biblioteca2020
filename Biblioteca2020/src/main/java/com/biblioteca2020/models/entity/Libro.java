@@ -104,7 +104,6 @@ public class Libro implements Serializable {
 	public void prePersist() {
 		fechaRegistro = new Date();
 		estado = true;
-		foto_libro = "no-book.jpg";
 	}
 
 	private static final long serialVersionUID = 1L;

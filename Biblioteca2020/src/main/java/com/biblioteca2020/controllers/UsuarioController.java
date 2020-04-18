@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -75,6 +76,8 @@ public class UsuarioController {
 
 	@Autowired
 	private IEmpleadoService empleadoService;
+
+	private static final List<String> formatosFoto = Arrays.asList("image/png", "image/jpeg", "image/jpg");
 
 	// ############################ ROLE USER ############################
 	// CATÁLOGO DE LIBROS PARA EL USUARIO
@@ -431,18 +434,35 @@ public class UsuarioController {
 			model.addAttribute("titulo", "Modificar Perfil");
 			return "/usuarios/perfil";
 		}
+
+		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
-			Path rootPath = Paths.get("uploads").resolve(foto.getOriginalFilename());
-			Path rootAbsolutePath = rootPath.toAbsolutePath();
-			try {
-				Files.copy(foto.getInputStream(), rootAbsolutePath);
-				usuario.setFoto_usuario(foto.getOriginalFilename());
-			} catch (IOException e) {
-				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+			if (formatosFoto.contains(foto.getContentType())) {
+				String rootPath = "C://Temp//uploads";
+				try {
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					usuario.setFoto_usuario(foto.getOriginalFilename());
+				} catch (IOException e) {
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+					model.addAttribute("usuario", usuario);
+					model.addAttribute("editable", true);
+					model.addAttribute("roles", roleService.findOnlyUsers());
+					model.addAttribute("titulo", "Modificar Perfil");
+					return "/usuarios/perfil";
+				}
+			} else {
+				model.addAttribute("error", "El formato de la foto es incorrecto");
+				model.addAttribute("usuario", usuario);
+				model.addAttribute("editable", true);
+				model.addAttribute("roles", roleService.findOnlyUsers());
+				model.addAttribute("titulo", "Modificar Perfil");
+				return "/usuarios/perfil";
 			}
-		} else if (usuario.getFoto_usuario() == null || usuario.getFoto_usuario() == "") {
-			usuario.setFoto_usuario("no-image.jpg");
 		}
+
 		try {
 			usuarioService.update(usuario);
 			flash.addFlashAttribute("warning",
@@ -663,7 +683,9 @@ public class UsuarioController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping("/crear")
 	public String crearFormUsuario(Model model) {
-		model.addAttribute("usuario", new Usuario());
+		Usuario usuario = new Usuario();
+		usuario.setFoto_usuario("no-image.jpg");
+		model.addAttribute("usuario", usuario);
 		model.addAttribute("roles", roleService.findOnlyUsers());
 		model.addAttribute("titulo", "Registro de Usuario");
 		return "usuarios/crear";
@@ -679,17 +701,35 @@ public class UsuarioController {
 			model.addAttribute("titulo", "Registro de Usuario");
 			return "/usuarios/crear";
 		}
+
+		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
-			String rootPath = "C://Temp//uploads";
-			try {
-				byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
-				usuario.setFoto_usuario(foto.getOriginalFilename());
-			} catch (IOException e) {
-				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+			if (formatosFoto.contains(foto.getContentType())) {
+				String rootPath = "C://Temp//uploads";
+				try {
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					usuario.setFoto_usuario(foto.getOriginalFilename());
+				} catch (IOException e) {
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+					model.addAttribute("usuario", usuario);
+					model.addAttribute("roles", roleService.findOnlyUsers());
+					model.addAttribute("titulo", "Registro de Usuario");
+					return "/usuarios/crear";
+				}
+			} else {
+				model.addAttribute("error", "El formato de la foto es incorrecto");
+				model.addAttribute("usuario", usuario);
+				model.addAttribute("roles", roleService.findOnlyUsers());
+				model.addAttribute("titulo", "Registro de Usuario");
+				return "/usuarios/crear";
 			}
+		} else {
+			usuario.setFoto_usuario("no-image.jpg");
 		}
+
 		try {
 			usuarioService.save(usuario);
 			flash.addFlashAttribute("success",
