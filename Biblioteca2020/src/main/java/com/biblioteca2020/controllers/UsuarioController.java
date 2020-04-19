@@ -43,12 +43,16 @@ import com.biblioteca2020.models.entity.ConfirmationToken;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Prestamo;
+import com.biblioteca2020.models.entity.PrestamoLog;
 import com.biblioteca2020.models.entity.Usuario;
+import com.biblioteca2020.models.entity.UsuarioLog;
 import com.biblioteca2020.models.service.EmailSenderService;
 import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.ILibroService;
+import com.biblioteca2020.models.service.IPrestamoLogService;
 import com.biblioteca2020.models.service.IPrestamoService;
 import com.biblioteca2020.models.service.IRoleService;
+import com.biblioteca2020.models.service.IUsuarioLogService;
 import com.biblioteca2020.models.service.IUsuarioService;
 
 @Controller
@@ -60,7 +64,13 @@ public class UsuarioController {
 	private IUsuarioService usuarioService;
 
 	@Autowired
+	private IUsuarioLogService usuarioLogService;
+
+	@Autowired
 	private IPrestamoService prestamoService;
+
+	@Autowired
+	private IPrestamoLogService prestamoLogService;
 
 	@Autowired
 	private IConfirmationTokenDao confirmationTokenRepository;
@@ -193,7 +203,6 @@ public class UsuarioController {
 			Date fechaDevolucionPrestamo = null;
 			fechaDevolucionPrestamo = formatter.parse(fecha_devolucion);
 			prestamo.setFecha_devolucion(fechaDevolucionPrestamo);
-
 			// USO CALENDAR PARA MOSTRAR LA FECHA DE DEVOLUCION
 			Calendar calendar = Calendar.getInstance(new Locale("es", "ES"));
 			calendar.setTime(prestamo.getFecha_despacho());
@@ -211,9 +220,17 @@ public class UsuarioController {
 			prestamo.setDevolucion(false);
 			prestamoService.save(prestamo);
 
+			// JUSTO DESPUES DE SOLICITAR LA ORDEN DE PRÉSTAMO, INSERTO EL REGISTRO EN MI
+			// TABLA LOG
+			prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamo.getEmpleado().getId(), null,
+					prestamo.getLibro().getId(), null, prestamo.getUsuario().getId(), null, "INSERT USER",
+					prestamo.getUsuario().getUsername()
+							.concat(" (Cod. Usuario: " + prestamo.getUsuario().getId() + ")"),
+					prestamo.getFecha_despacho(), null, prestamo.getFecha_devolucion(), null, prestamo.getDevolucion(),
+					null, prestamo.getObservaciones(), null, new Date(), null, null));
+
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 			Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
-
 			// ENVIO DE MAIL DE CONFIRMACIÓN DE ORDEN DE LIBRO CON MIMEMESSAGE
 			String message = "<html><head>" + "<meta charset='UTF-8' />"
 					+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
@@ -340,6 +357,15 @@ public class UsuarioController {
 			usuario.setFoto_usuario("no-image.jpg");
 			try {
 				usuarioService.save(usuario);
+
+				// AL CREAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+				Long idRole = usuario.getRoles().iterator().next().getId();
+				usuarioLogService.save(new UsuarioLog(idRole, usuario.getNombres(), null, usuario.getApellidos(), null,
+						usuario.getNroDocumento(), null, usuario.getDireccion(), null, usuario.getEmail(), null,
+						usuario.getCelular(), null, usuario.getFecha_registro(), null, usuario.getUsername(), null,
+						usuario.getPassword(), null, usuario.getEstado(), null, usuario.getFoto_usuario(), null,
+						"INSERT USER", new Date(), null, null));
+
 			} catch (Exception e) {
 				model.addAttribute("usuario", usuario);
 				model.addAttribute("roles", roleService.findOnlyUsers());
@@ -390,8 +416,21 @@ public class UsuarioController {
 		if (token != null) {
 			try {
 				Usuario usuario = usuarioService.findByEmailIgnoreCase(token.getUsuario().getEmail());
+				Usuario usuarioOld = usuario;
 				usuario.setEstado(true);
 				usuarioService.update(usuario);
+
+				// AL ACTUALIZAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+				Long idRole = usuario.getRoles().iterator().next().getId();
+				usuarioLogService.save(new UsuarioLog(idRole, usuarioOld.getNombres(), usuario.getNombres(),
+						usuarioOld.getApellidos(), usuario.getApellidos(), usuarioOld.getNroDocumento(),
+						usuario.getNroDocumento(), usuarioOld.getDireccion(), usuario.getDireccion(),
+						usuarioOld.getEmail(), usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(),
+						usuarioOld.getFecha_registro(), usuario.getFecha_registro(), usuarioOld.getUsername(),
+						usuario.getUsername(), usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(),
+						usuario.getEstado(), usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(),
+						"VALIDATE ACCOUNT USER", null, new Date(), null));
+
 				model.addAttribute("titulo", "Cuenta Verificada");
 				return "/usuarios/cuenta-verificada";
 			} catch (Exception e) {
@@ -464,7 +503,19 @@ public class UsuarioController {
 		}
 
 		try {
+			Usuario usuarioOld = usuario;
 			usuarioService.update(usuario);
+
+			// AL ACTUALIZAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = usuario.getRoles().iterator().next().getId();
+			usuarioLogService.save(new UsuarioLog(idRole, usuarioOld.getNombres(), usuario.getNombres(),
+					usuarioOld.getApellidos(), usuario.getApellidos(), usuarioOld.getNroDocumento(),
+					usuario.getNroDocumento(), usuarioOld.getDireccion(), usuario.getDireccion(), usuarioOld.getEmail(),
+					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
+					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
+					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "UPDATE USER", null, new Date(), null));
+
 			flash.addFlashAttribute("warning",
 					"La información de su perfil han sido actualizados en la base de datos.");
 			status.setComplete();
@@ -495,6 +546,10 @@ public class UsuarioController {
 	@PostMapping("/cambio-password")
 	public String cambioPasswordUser(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
 			RedirectAttributes flash, Authentication authentication) {
+
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+		Usuario usuarioOld = usuario;
 		if (resultForm.hasErrors()) {
 			// CON ESTE BLOQUE SOBREESCRIBO EL ERROR GENÈRICO "NO PUEDE ESTAR VACÍO"
 			if (cambiarPassword.getPasswordActual().equals("") || cambiarPassword.getNuevaPassword().equals("")
@@ -511,15 +566,24 @@ public class UsuarioController {
 		}
 		try {
 			usuarioService.cambiarPassword(cambiarPassword);
+
+			// AL ACTUALIZAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = usuario.getRoles().iterator().next().getId();
+			usuarioLogService.save(new UsuarioLog(idRole, usuarioOld.getNombres(), usuario.getNombres(),
+					usuarioOld.getApellidos(), usuario.getApellidos(), usuarioOld.getNroDocumento(),
+					usuario.getNroDocumento(), usuarioOld.getDireccion(), usuario.getDireccion(), usuarioOld.getEmail(),
+					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
+					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
+					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "CHANGE PASSWORD USER", null, new Date(),
+					null));
+
 		} catch (Exception e) {
 			model.addAttribute("cambiarPassword", cambiarPassword);
 			model.addAttribute("titulo", "Cambiar Password");
 			model.addAttribute("cambiarPasswordError", e.getMessage());
 			return "/usuarios/cambio-password";
 		}
-
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
 
 		// ENVIO DE MAIL DE CONFIRMACIÓN CON MIMEMESSAGE
 		try {
@@ -555,12 +619,25 @@ public class UsuarioController {
 	public String deshabilitarPerfil(Model model, RedirectAttributes flash, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+		Usuario usuarioOld = usuario;
 		// OBTENER PATH DEL SERVIDOR EN LA PETICION ACTUAL, ES DECIR
 		// "http://localhost:8080"
 		String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 		try {
 			usuario.setEstado(false);
 			usuarioService.update(usuario);
+
+			// AL ACTUALIZAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = usuario.getRoles().iterator().next().getId();
+			usuarioLogService.save(new UsuarioLog(idRole, usuarioOld.getNombres(), usuario.getNombres(),
+					usuarioOld.getApellidos(), usuario.getApellidos(), usuarioOld.getNroDocumento(),
+					usuario.getNroDocumento(), usuarioOld.getDireccion(), usuario.getDireccion(), usuarioOld.getEmail(),
+					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
+					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
+					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "LOCK ACCOUNT USER", null, new Date(),
+					null));
+
 			// ENVIO DE MAIL DE CONFIRMACIÓN CON MIMEMESSAGE
 			String message = "<html><head>" + "<meta charset='UTF-8' />"
 					+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
@@ -732,6 +809,15 @@ public class UsuarioController {
 
 		try {
 			usuarioService.save(usuario);
+
+			// AL CREAR EL USUARIO, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = usuario.getRoles().iterator().next().getId();
+			usuarioLogService.save(new UsuarioLog(idRole, usuario.getNombres(), null, usuario.getApellidos(), null,
+					usuario.getNroDocumento(), null, usuario.getDireccion(), null, usuario.getEmail(), null,
+					usuario.getCelular(), null, usuario.getFecha_registro(), null, usuario.getUsername(), null,
+					usuario.getPassword(), null, usuario.getEstado(), null, usuario.getFoto_usuario(), null,
+					"INSERT ADMIN", new Date(), null, null));
+
 			flash.addFlashAttribute("success",
 					"El usuario ha sido registrado en la base de datos (Código " + usuario.getId() + ")");
 			status.setComplete();
@@ -750,8 +836,21 @@ public class UsuarioController {
 	public String deshabilitarUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		try {
 			Usuario usuario = usuarioService.findById(id);
+			Usuario usuarioOld = usuario;
 			usuario.setEstado(false);
 			usuarioService.update(usuario);
+
+			// AL ACTUALIZAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = usuario.getRoles().iterator().next().getId();
+			usuarioLogService.save(new UsuarioLog(idRole, usuarioOld.getNombres(), usuario.getNombres(),
+					usuarioOld.getApellidos(), usuario.getApellidos(), usuarioOld.getNroDocumento(),
+					usuario.getNroDocumento(), usuarioOld.getDireccion(), usuario.getDireccion(), usuarioOld.getEmail(),
+					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
+					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
+					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "LOCK ACCOUNT ADMIN", null, new Date(),
+					null));
+
 			flash.addFlashAttribute("info", "El usuario con código " + usuario.getId() + " ha sido deshabilitado.");
 			return "redirect:/usuarios/listar";
 		} catch (Exception e) {
