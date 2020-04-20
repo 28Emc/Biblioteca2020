@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-Biblioteca2020Application<Biblioteca2020>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.biblioteca2020.Biblioteca2020Application",
+            "projectName": "Biblioteca2020",
+            "args": ""
+        }
+    ]
+}
