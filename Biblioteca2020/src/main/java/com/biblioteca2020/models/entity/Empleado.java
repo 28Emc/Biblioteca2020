@@ -40,7 +40,8 @@ public class Empleado implements Serializable {
 
 	// EMPLEADO(*):ROLE(1)
 	@Size(min = 1)
-	@ManyToMany(fetch = FetchType.LAZY)
+	// VER USUARIO, SE REALIZÓ EL MISMO CAMBIO
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "empleados_roles", joinColumns = @JoinColumn(name = "empleado_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
 	private Set<Role> roles;
 

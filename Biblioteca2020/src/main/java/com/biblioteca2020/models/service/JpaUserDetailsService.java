@@ -63,11 +63,11 @@ public class JpaUserDetailsService implements UserDetailsService {
 		}
 
 		// AL INICIAR SESIÓN, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
-		Long idRole = usuario.getRoles().iterator().next().getId();
-		usuarioLogService.save(new UsuarioLog(idRole, usuario.getNombres(), null, usuario.getApellidos(), null,
+		Long idRoleUser = usuario.getRoles().iterator().next().getId();
+		usuarioLogService.save(new UsuarioLog(idRoleUser, usuario.getNombres(), null, usuario.getApellidos(), null,
 				usuario.getNroDocumento(), null, usuario.getDireccion(), null, usuario.getEmail(), null,
 				usuario.getCelular(), null, usuario.getFecha_registro(), null, usuario.getUsername(), null,
-				usuario.getPassword(), null, usuario.getEstado(), null, usuario.getFoto_usuario(), null, "LOGIN USER",
+				usuario.getPassword(), null, usuario.getEstado(), null, usuario.getFoto_usuario(), null, "LOGIN BY USER",
 				new Date(), null, null));
 
 		return new User(usuario.getUsername(), usuario.getPassword(), usuario.getEstado(), true, true, true,
