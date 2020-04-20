@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.entity.Empleado;
+import com.biblioteca2020.models.entity.EmpleadoLog;
+import com.biblioteca2020.models.service.IEmpleadoLogService;
 import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.ILocalService;
 import com.biblioteca2020.models.service.IRoleService;
@@ -38,6 +41,9 @@ public class EmpleadoController {
 
 	@Autowired
 	private IEmpleadoService empleadoService;
+
+	@Autowired
+	private IEmpleadoLogService empleadoLogService;
 
 	@Autowired
 	private ILocalService localService;
@@ -58,15 +64,15 @@ public class EmpleadoController {
 		model.addAttribute("empleado", empleado);
 		// AQUÍ PREGUNTO QUE ROL TIENE EL USUARIO REGISTRADO
 		switch (userDetails.getAuthorities().toString()) {
-		case "[ROLE_ADMIN]":
-			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-			break;
-		case "[ROLE_EMPLEADO]":
-			model.addAttribute("roles", roleService.findOnlyEmpleados());
-			break;
-		case "[ROLE_SYSADMIN]":
-			model.addAttribute("roles", roleService.findForSysadmin());
-			break;
+			case "[ROLE_ADMIN]":
+				model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+				break;
+			case "[ROLE_EMPLEADO]":
+				model.addAttribute("roles", roleService.findOnlyEmpleados());
+				break;
+			case "[ROLE_SYSADMIN]":
+				model.addAttribute("roles", roleService.findForSysadmin());
+				break;
 		}
 		return "/empleados/perfil";
 	}
@@ -82,15 +88,15 @@ public class EmpleadoController {
 			model.addAttribute("empleado", empleado);
 			model.addAttribute("editable", true);
 			switch (userDetails.getAuthorities().toString()) {
-			case "[ROLE_ADMIN]":
-				model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-				break;
-			case "[ROLE_EMPLEADO]":
-				model.addAttribute("roles", roleService.findOnlyEmpleados());
-				break;
-			case "[ROLE_SYSADMIN]":
-				model.addAttribute("roles", roleService.findForSysadmin());
-				break;
+				case "[ROLE_ADMIN]":
+					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					break;
+				case "[ROLE_EMPLEADO]":
+					model.addAttribute("roles", roleService.findOnlyEmpleados());
+					break;
+				case "[ROLE_SYSADMIN]":
+					model.addAttribute("roles", roleService.findForSysadmin());
+					break;
 			}
 			return "/empleados/perfil";
 		}
@@ -111,15 +117,15 @@ public class EmpleadoController {
 					model.addAttribute("empleado", empleado);
 					model.addAttribute("editable", true);
 					switch (userDetails.getAuthorities().toString()) {
-					case "[ROLE_ADMIN]":
-						model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-						break;
-					case "[ROLE_EMPLEADO]":
-						model.addAttribute("roles", roleService.findOnlyEmpleados());
-						break;
-					case "[ROLE_SYSADMIN]":
-						model.addAttribute("roles", roleService.findForSysadmin());
-						break;
+						case "[ROLE_ADMIN]":
+							model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+							break;
+						case "[ROLE_EMPLEADO]":
+							model.addAttribute("roles", roleService.findOnlyEmpleados());
+							break;
+						case "[ROLE_SYSADMIN]":
+							model.addAttribute("roles", roleService.findForSysadmin());
+							break;
 					}
 					return "/empleados/perfil";
 				}
@@ -129,22 +135,35 @@ public class EmpleadoController {
 				model.addAttribute("empleado", empleado);
 				model.addAttribute("editable", true);
 				switch (userDetails.getAuthorities().toString()) {
-				case "[ROLE_ADMIN]":
-					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-					break;
-				case "[ROLE_EMPLEADO]":
-					model.addAttribute("roles", roleService.findOnlyEmpleados());
-					break;
-				case "[ROLE_SYSADMIN]":
-					model.addAttribute("roles", roleService.findForSysadmin());
-					break;
+					case "[ROLE_ADMIN]":
+						model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+						break;
+					case "[ROLE_EMPLEADO]":
+						model.addAttribute("roles", roleService.findOnlyEmpleados());
+						break;
+					case "[ROLE_SYSADMIN]":
+						model.addAttribute("roles", roleService.findForSysadmin());
+						break;
 				}
 				return "/empleados/perfil";
 			}
 		}
 
 		try {
+			Empleado empleadoOld = empleado;
 			empleadoService.update(empleado);
+
+			// AL CAMBIAR PASSWORD, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = empleado.getRoles().iterator().next().getId();
+			empleadoLogService.save(new EmpleadoLog(idRole, empleadoOld.getNombres(), empleado.getNombres(),
+					empleadoOld.getApellidos(), empleado.getApellidos(), empleadoOld.getNroDocumento(),
+					empleado.getNroDocumento(), empleadoOld.getDireccion(), empleado.getDireccion(),
+					empleadoOld.getEmail(), empleado.getEmail(), empleadoOld.getCelular(), empleado.getCelular(),
+					empleadoOld.getFecha_registro(), empleado.getFecha_registro(), empleadoOld.getUsername(),
+					empleado.getUsername(), empleadoOld.getPassword(), empleado.getPassword(), empleadoOld.getEstado(),
+					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(),
+					"UPDATE PERFIL BY EMPLEADO", null, new Date(), null));
+
 			flash.addFlashAttribute("warning", "Perfil actualizado.");
 			status.setComplete();
 			return "redirect:/home";
@@ -154,15 +173,15 @@ public class EmpleadoController {
 			model.addAttribute("empleado", empleado);
 			model.addAttribute("error", e.getMessage());
 			switch (userDetails.getAuthorities().toString()) {
-			case "[ROLE_ADMIN]":
-				model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-				break;
-			case "[ROLE_EMPLEADO]":
-				model.addAttribute("roles", roleService.findOnlyEmpleados());
-				break;
-			case "[ROLE_SYSADMIN]":
-				model.addAttribute("roles", roleService.findForSysadmin());
-				break;
+				case "[ROLE_ADMIN]":
+					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					break;
+				case "[ROLE_EMPLEADO]":
+					model.addAttribute("roles", roleService.findOnlyEmpleados());
+					break;
+				case "[ROLE_SYSADMIN]":
+					model.addAttribute("roles", roleService.findForSysadmin());
+					break;
 			}
 			return "/empleados/perfil";
 		}
@@ -190,6 +209,9 @@ public class EmpleadoController {
 	@PostMapping("/cambio-password")
 	public String cambioPasswordEmpleado(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
 			RedirectAttributes flash, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		Empleado empleadoOld = empleado;
 		if (resultForm.hasErrors()) {
 			// CON ESTE BLOQUE SOBREESCRIBO EL ERROR GENÈRICO "NO PUEDE ESTAR VACÍO"
 			if (cambiarPassword.getPasswordActual().equals("") || cambiarPassword.getNuevaPassword().equals("")
@@ -205,6 +227,18 @@ public class EmpleadoController {
 		}
 		try {
 			empleadoService.cambiarPassword(cambiarPassword);
+
+			// AL CAMBIAR PASSWORD, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = empleado.getRoles().iterator().next().getId();
+			empleadoLogService.save(new EmpleadoLog(idRole, empleadoOld.getNombres(), empleado.getNombres(),
+					empleadoOld.getApellidos(), empleado.getApellidos(), empleadoOld.getNroDocumento(),
+					empleado.getNroDocumento(), empleadoOld.getDireccion(), empleado.getDireccion(),
+					empleadoOld.getEmail(), empleado.getEmail(), empleadoOld.getCelular(), empleado.getCelular(),
+					empleadoOld.getFecha_registro(), empleado.getFecha_registro(), empleadoOld.getUsername(),
+					empleado.getUsername(), empleadoOld.getPassword(), empleado.getPassword(), empleadoOld.getEstado(),
+					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(),
+					"CHANGE PASSWORD BY EMPLEADO", null, new Date(), null));
+
 			flash.addFlashAttribute("success", "Password Actualizada");
 			return "redirect:/home";
 		} catch (Exception e) {
@@ -218,11 +252,25 @@ public class EmpleadoController {
 	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
 	@GetMapping(value = "/deshabilitar-perfil")
 	public String deshabilitarPerfil(RedirectAttributes flash, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		Empleado empleadoOld = empleado;
+
 		try {
-			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-			Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 			empleado.setEstado(false);
 			empleadoService.update(empleado);
+
+			// AL DESHABILITAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = empleado.getRoles().iterator().next().getId();
+			empleadoLogService.save(new EmpleadoLog(idRole, empleadoOld.getNombres(), empleado.getNombres(),
+					empleadoOld.getApellidos(), empleado.getApellidos(), empleadoOld.getNroDocumento(),
+					empleado.getNroDocumento(), empleadoOld.getDireccion(), empleado.getDireccion(),
+					empleadoOld.getEmail(), empleado.getEmail(), empleadoOld.getCelular(), empleado.getCelular(),
+					empleadoOld.getFecha_registro(), empleado.getFecha_registro(), empleadoOld.getUsername(),
+					empleado.getUsername(), empleadoOld.getPassword(), empleado.getPassword(), empleadoOld.getEstado(),
+					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(),
+					"LOCK ACCOUNT BY EMPLEADO", null, new Date(), null));
+
 			flash.addFlashAttribute("info", "Su cuenta ha sido deshabilitada.");
 			// CON ESTA PROPIEDAD ELIMINO LA SESIÓN DEL EMPLEADO LOGUEADO, PARA PODERLO
 			// REDIRECCIONAR AL LOGIN
@@ -349,6 +397,15 @@ public class EmpleadoController {
 
 		try {
 			empleadoService.save(empleado);
+
+			// AL CREAR UN EMPLEADO, INSERTO MI REGISTRO EN EL LOG DE EMPLEADOS
+			Long idRole = empleado.getRoles().iterator().next().getId();
+			empleadoLogService.save(new EmpleadoLog(idRole, empleado.getNombres(), null, empleado.getApellidos(), null,
+					empleado.getNroDocumento(), null, empleado.getDireccion(), null, empleado.getEmail(), null,
+					empleado.getCelular(), null, empleado.getFecha_registro(), null, empleado.getUsername(), null,
+					empleado.getPassword(), null, empleado.getEstado(), null, empleado.getFoto_empleado(), null,
+					"INSERT BY ADMIN", new Date(), null, null));
+
 			flash.addFlashAttribute("success",
 					"El empleado ha sido registrado en la base de datos (Código " + empleado.getId() + ")");
 			status.setComplete();
@@ -412,6 +469,7 @@ public class EmpleadoController {
 			RedirectAttributes flash, Authentication authentication, @RequestParam("foto_emp") MultipartFile foto) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleadoLogueado = empleadoService.findByUsername(userDetails.getUsername());
+		Empleado empleadoOld = empleadoLogueado;
 		if (result.hasErrors()) {
 			try {
 				model.addAttribute("localesList",
@@ -426,15 +484,6 @@ public class EmpleadoController {
 			model.addAttribute("titulo", "Modificar Empleado");
 			return "/empleados/editar";
 		}
-
-		/*
-		 * if (!foto.isEmpty()) { String rootPath = "C://Temp//uploads"; try { byte[]
-		 * bytes = foto.getBytes(); Path rutaCompleta = Paths.get(rootPath + "//" +
-		 * foto.getOriginalFilename()); Files.write(rutaCompleta, bytes);
-		 * empleado.setFoto_empleado(foto.getOriginalFilename()); } catch (IOException
-		 * e) { model.addAttribute("error",
-		 * "Lo sentimos, hubo un error a la hora de cargar tu foto"); } }
-		 */
 
 		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
@@ -480,6 +529,18 @@ public class EmpleadoController {
 
 		try {
 			empleadoService.update(empleado);
+
+			// AL ACTUALIZAR UN EMPLEADO, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = empleado.getRoles().iterator().next().getId();
+			empleadoLogService.save(new EmpleadoLog(idRole, empleadoOld.getNombres(), empleado.getNombres(),
+					empleadoOld.getApellidos(), empleado.getApellidos(), empleadoOld.getNroDocumento(),
+					empleado.getNroDocumento(), empleadoOld.getDireccion(), empleado.getDireccion(),
+					empleadoOld.getEmail(), empleado.getEmail(), empleadoOld.getCelular(), empleado.getCelular(),
+					empleadoOld.getFecha_registro(), empleado.getFecha_registro(), empleadoOld.getUsername(),
+					empleado.getUsername(), empleadoOld.getPassword(), empleado.getPassword(), empleadoOld.getEstado(),
+					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(), "UPDATE BY ADMIN",
+					null, new Date(), null));
+
 			flash.addFlashAttribute("warning",
 					"El empleado con código " + empleado.getId() + " ha sido actualizado en la base de datos.");
 			status.setComplete();
@@ -506,8 +567,21 @@ public class EmpleadoController {
 	public String deshabilitarEmpleado(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		try {
 			Empleado empleado = empleadoService.findById(id);
+			Empleado empleadoOld = empleado;
 			empleado.setEstado(false);
 			empleadoService.update(empleado);
+
+			// AL DESHABILITAR UN EMPLEADO, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = empleado.getRoles().iterator().next().getId();
+			empleadoLogService.save(new EmpleadoLog(idRole, empleadoOld.getNombres(), empleado.getNombres(),
+					empleadoOld.getApellidos(), empleado.getApellidos(), empleadoOld.getNroDocumento(),
+					empleado.getNroDocumento(), empleadoOld.getDireccion(), empleado.getDireccion(),
+					empleadoOld.getEmail(), empleado.getEmail(), empleadoOld.getCelular(), empleado.getCelular(),
+					empleadoOld.getFecha_registro(), empleado.getFecha_registro(), empleadoOld.getUsername(),
+					empleado.getUsername(), empleadoOld.getPassword(), empleado.getPassword(), empleadoOld.getEstado(),
+					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(),
+					"LOCK ACCOUNT BY ADMIN", null, new Date(), null));
+
 			flash.addFlashAttribute("info", "El empleado con código " + empleado.getId() + " ha sido deshabilitado.");
 			return "redirect:/empleados/listar";
 		} catch (Exception e) {

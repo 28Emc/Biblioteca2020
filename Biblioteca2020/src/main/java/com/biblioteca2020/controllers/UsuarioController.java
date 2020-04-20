@@ -35,7 +35,6 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import com.biblioteca2020.models.dao.IConfirmationTokenDao;
 import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.dto.RecuperarCuenta;
@@ -223,7 +222,7 @@ public class UsuarioController {
 			// JUSTO DESPUES DE SOLICITAR LA ORDEN DE PRÉSTAMO, INSERTO EL REGISTRO EN MI
 			// TABLA LOG
 			prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamo.getEmpleado().getId(), null,
-					prestamo.getLibro().getId(), null, prestamo.getUsuario().getId(), null, "INSERT USER",
+					prestamo.getLibro().getId(), null, prestamo.getUsuario().getId(), null, "INSERT BY USER",
 					prestamo.getUsuario().getUsername()
 							.concat(" (Cod. Usuario: " + prestamo.getUsuario().getId() + ")"),
 					prestamo.getFecha_despacho(), null, prestamo.getFecha_devolucion(), null, prestamo.getDevolucion(),
@@ -514,7 +513,7 @@ public class UsuarioController {
 					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
 					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
 					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
-					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "UPDATE USER", null, new Date(), null));
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "UPDATE BY USER", null, new Date(), null));
 
 			flash.addFlashAttribute("warning",
 					"La información de su perfil han sido actualizados en la base de datos.");
@@ -575,7 +574,7 @@ public class UsuarioController {
 					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
 					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
 					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
-					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "CHANGE PASSWORD USER", null, new Date(),
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "CHANGE PASSWORD BY USER", null, new Date(),
 					null));
 
 		} catch (Exception e) {
@@ -635,7 +634,7 @@ public class UsuarioController {
 					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
 					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
 					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
-					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "LOCK ACCOUNT USER", null, new Date(),
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "LOCK ACCOUNT BY USER", null, new Date(),
 					null));
 
 			// ENVIO DE MAIL DE CONFIRMACIÓN CON MIMEMESSAGE
@@ -848,7 +847,7 @@ public class UsuarioController {
 					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
 					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
 					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
-					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "LOCK ACCOUNT ADMIN", null, new Date(),
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "LOCK ACCOUNT BY ADMIN", null, new Date(),
 					null));
 
 			flash.addFlashAttribute("info", "El usuario con código " + usuario.getId() + " ha sido deshabilitado.");

@@ -21,10 +21,12 @@ public class LoginController {
 			flash.addFlashAttribute("info", "Ya has iniciado sesión, " + principal.getName());
 			return "redirect:/home";
 		}
+
 		// MENSAJE DE LOGOUT
 		if (logout != null) {
 			model.addAttribute("success", "Ha cerrado sesiòn con éxito");
 		}
+
 		model.addAttribute("titulo", "Login");
 		return "login";
 	}

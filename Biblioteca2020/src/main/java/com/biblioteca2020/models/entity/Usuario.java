@@ -40,7 +40,8 @@ public class Usuario implements Serializable {
 
 	// USER(*):ROLE(*)
 	@Size(min = 1)
-	@ManyToMany(fetch = FetchType.LAZY)
+	// CAMBIÈ AQUI DE LAZY A EAGER PARA MANEJAR METODOS EN EL LOGOUTSUCCESSHANDLER
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "usuario_id"), inverseJoinColumns = @JoinColumn(name = "rol_id"))
 	private Set<Role> roles;
 

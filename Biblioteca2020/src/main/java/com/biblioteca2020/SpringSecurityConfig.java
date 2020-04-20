@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.biblioteca2020.auth.handler.LoginSuccessHandler;
+import com.biblioteca2020.auth.handler.LogoutSuccessHandler;
 import com.biblioteca2020.models.service.JpaEmpleadoDetailsService;
 import com.biblioteca2020.models.service.JpaUserDetailsService;
 
@@ -18,7 +19,10 @@ import com.biblioteca2020.models.service.JpaUserDetailsService;
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
-	private LoginSuccessHandler successHandler;
+	private LoginSuccessHandler loginSuccessHandler;
+
+	@Autowired
+	private LogoutSuccessHandler logoutSuccessHandler;
 
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {
@@ -60,11 +64,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 						"/**/cuenta-verificada/**", "/**/recuperar-cuenta/")
 				.permitAll()
 
-				.and().formLogin().successHandler(successHandler)
+				.and().formLogin().successHandler(loginSuccessHandler)
 				// es AQUI que yo realmente gestiono mi LOGIN
 				.loginPage("/login").permitAll()
 
-				.and().logout().permitAll()
+				.and().logout().permitAll().logoutSuccessHandler(logoutSuccessHandler)
 				
 				//.and().rememberMe()
 
