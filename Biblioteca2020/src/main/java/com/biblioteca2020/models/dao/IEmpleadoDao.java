@@ -32,7 +32,7 @@ public interface IEmpleadoDao extends CrudRepository<Empleado, Long> {
 	public Empleado findByRoleAndLocal(String role, Long id_local);
 
 	// USADO
-	@Query("select e from Empleado e join fetch e.roles r join fetch e.local l join fetch l.empresa em where em.id=?1 and r.authority not in ('ROLE_PRUEBA')")
+	@Query("select e from Empleado e join fetch e.roles r join fetch e.local l join fetch l.empresa em where l.id=?1 and r.authority not in ('ROLE_PRUEBA')")
 	public List<Empleado> fetchByIdWithLocalWithEmpresa(Long id);
 
 	// USADO

@@ -18,9 +18,11 @@ import com.biblioteca2020.models.service.JpaUserDetailsService;
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
+	// CLASE DE MANEJO DE LOGIN CORRECTO
 	@Autowired
 	private LoginSuccessHandler loginSuccessHandler;
 
+	// CLASE DE MANEJO DE LOGOUT CORRECTO
 	@Autowired
 	private LogoutSuccessHandler logoutSuccessHandler;
 
@@ -56,24 +58,24 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
-
 				.csrf().disable()
-
 				.authorizeRequests()
+				// AQUI autorizo el acceso a estos recursos estaticos (EJM. IMAGENES, CSS, JS,
+				// ETC)
 				.antMatchers("/css/**", "/js/**", "/date-picker/**", "/img/**", "/**/crear-perfil", "/**/editar-perfil",
 						"/**/cuenta-verificada/**", "/**/recuperar-cuenta/")
 				.permitAll()
-
+				// AQUI yo gestiono mi LOGIN
 				.and().formLogin().successHandler(loginSuccessHandler)
-				// es AQUI que yo realmente gestiono mi LOGIN
+				// AQUI personalizo mi pagina de login, la cual es accesible a todos
 				.loginPage("/login").permitAll()
-
+				// AQUI yo gestiono mi LOGOUT
 				.and().logout().permitAll().logoutSuccessHandler(logoutSuccessHandler)
-				
-				//.and().rememberMe()
-
+				// .and().rememberMe()
+				// AQUI yo gestiono si el acceso es proibido a algun recurso
 				.and().exceptionHandling().accessDeniedPage("/error_403")
-
+				// AQUI yo gestiono si soy un usuario autenticado para acceder a los demas
+				// recursos
 				.and().authorizeRequests().anyRequest().authenticated();
 	}
 

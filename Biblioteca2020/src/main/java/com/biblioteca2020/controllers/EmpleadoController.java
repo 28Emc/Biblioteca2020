@@ -292,7 +292,7 @@ public class EmpleadoController {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		model.addAttribute("empleados",
-				empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getEmpresa().getId()));
+				empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getId()));
 		model.addAttribute("empleado", new Empleado());
 		model.addAttribute("titulo",
 				"Listado de Empleados de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
