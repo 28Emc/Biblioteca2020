@@ -20,6 +20,13 @@
 					data-placement="top" th:title="'Generar Préstamo'"><i
 					class="fas fa-plus fa-lg"></i></a>
 			</div>
+
+			<div class="col-auto">
+				<a class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+					th:href="@{'/prestamos/listar'(format=pdf)}" data-toggle="tooltip"
+					data-placement="top" th:title="'Exportar a PDF'"><i class="far fa-file-pdf fa-2x text-danger"></i></a>
+			</div>
+			
 		</div>
 
 		<div class="row pt-5 pb-4" sec:authorize="hasRole('ROLE_USER')">
