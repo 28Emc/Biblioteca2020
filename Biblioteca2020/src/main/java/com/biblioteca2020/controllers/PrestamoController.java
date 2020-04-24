@@ -88,25 +88,35 @@ public class PrestamoController {
 
 	@GetMapping("/reportes/{formato}")
 	public String generarReportePrestamos(@PathVariable String formato, String role, Authentication authentication,
-	RedirectAttributes flash) throws FileNotFoundException, JRException {
-		// OBTENER USUARIO LOGUEADO ACTUALMENTE
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		role = userDetails.getAuthorities().toString();
-		switch (role) {
-			case "[ROLE_ADMIN]":
-				if (formato.equalsIgnoreCase("pdf")) {
-					flash.addFlashAttribute("success",
-							reporteService.exportarReportePrestamos(formato, role, authentication));
-				}
-				if (formato.equalsIgnoreCase("html")) {
-					flash.addFlashAttribute("success",
-							reporteService.exportarReportePrestamos(formato, role, authentication));
-				}
-				break;
-			case "[ROLE_EMPLEADO]":
-			flash.addFlashAttribute("success", reporteService.exportarReportePrestamos(formato, role, authentication));
-				break;
-
+			RedirectAttributes flash) {
+		try {
+			// OBTENER USUARIO LOGUEADO ACTUALMENTE
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			role = userDetails.getAuthorities().toString();
+			switch (role) {
+				case "[ROLE_ADMIN]":
+					if (formato.equalsIgnoreCase("pdf")) {
+						flash.addFlashAttribute("success",
+								reporteService.exportarReportePrestamos(formato, role, authentication));
+					}
+					if (formato.equalsIgnoreCase("xlsx")) {
+						flash.addFlashAttribute("success",
+								reporteService.exportarReportePrestamos(formato, role, authentication));
+					}
+					break;
+				case "[ROLE_EMPLEADO]":
+					if (formato.equalsIgnoreCase("pdf")) {
+						flash.addFlashAttribute("success",
+								reporteService.exportarReportePrestamos(formato, role, authentication));
+					}
+					if (formato.equalsIgnoreCase("xlsx")) {
+						flash.addFlashAttribute("success",
+								reporteService.exportarReportePrestamos(formato, role, authentication));
+					}
+					break;
+			}
+		} catch (FileNotFoundException | JRException e) {
+			flash.addFlashAttribute("error", e.getMessage());
 		}
 		return "redirect:/prestamos/listar";
 	}
