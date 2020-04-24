@@ -1,5 +1,6 @@
 package com.biblioteca2020.controllers;
 
+import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.List;
 import javax.validation.Valid;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import net.sf.jasperreports.engine.JRException;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Prestamo;
@@ -30,6 +32,7 @@ import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.IPrestamoLogService;
 import com.biblioteca2020.models.service.IPrestamoService;
 import com.biblioteca2020.models.service.IUsuarioService;
+import com.biblioteca2020.models.service.ReporteService;
 
 @Controller
 @RequestMapping("/prestamos")
@@ -54,6 +57,9 @@ public class PrestamoController {
 	@Autowired
 	private EmailSenderService emailSenderService;
 
+	@Autowired
+	private ReporteService reporteService;
+
 	// ############################ ADMIN, EMPLEADO ############################
 	// LISTADO POR ROLES
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
@@ -64,20 +70,45 @@ public class PrestamoController {
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		// MOSTRAR LISTADO DE ACUERDO A ROL
 		switch (userDetails.getAuthorities().toString()) {
-		// ADMIN: VE PRESTAMOS DEL LOCAL ENTERO
-		case "[ROLE_ADMIN]":
-			model.addAttribute("prestamos",
-					prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId()));
-			break;
-		// EMPLEADO: VE PRESTAMOS REALIZADOS A SU NOMBRE
-		case "[ROLE_EMPLEADO]":
-			model.addAttribute("prestamos",
-					prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId()));
-			break;
+			// ADMIN: VE PRESTAMOS DEL LOCAL ENTERO
+			case "[ROLE_ADMIN]":
+				model.addAttribute("prestamos",
+						prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId()));
+				break;
+			// EMPLEADO: VE PRESTAMOS REALIZADOS A SU NOMBRE
+			case "[ROLE_EMPLEADO]":
+				model.addAttribute("prestamos",
+						prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId()));
+				break;
 		}
 		model.addAttribute("titulo", "Listado de Préstamos");
 		model.addAttribute("confirma", true);
 		return "/prestamos/listar";
+	}
+
+	@GetMapping("/reportes/{formato}")
+	public String generarReportePrestamos(@PathVariable String formato, String role, Authentication authentication,
+	RedirectAttributes flash) throws FileNotFoundException, JRException {
+		// OBTENER USUARIO LOGUEADO ACTUALMENTE
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		role = userDetails.getAuthorities().toString();
+		switch (role) {
+			case "[ROLE_ADMIN]":
+				if (formato.equalsIgnoreCase("pdf")) {
+					flash.addFlashAttribute("success",
+							reporteService.exportarReportePrestamos(formato, role, authentication));
+				}
+				if (formato.equalsIgnoreCase("html")) {
+					flash.addFlashAttribute("success",
+							reporteService.exportarReportePrestamos(formato, role, authentication));
+				}
+				break;
+			case "[ROLE_EMPLEADO]":
+			flash.addFlashAttribute("success", reporteService.exportarReportePrestamos(formato, role, authentication));
+				break;
+
+		}
+		return "redirect:/prestamos/listar";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")

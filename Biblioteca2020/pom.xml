@@ -11,7 +11,7 @@
 	<artifactId>Biblioteca2020</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Biblioteca2020</name>
-	<description>Proyecto de Bibioteca hecho con Spring Boot</description>
+	<description>Proyecto de Biblioteca hecho con Spring Boot</description>
 
 	<properties>
 		<java.version>13</java.version>
@@ -84,6 +84,11 @@
 			<groupId>com.github.librepdf</groupId>
 			<artifactId>openpdf</artifactId>
 			<version>1.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>6.12.2</version>
 		</dependency>
 	</dependencies>
 
