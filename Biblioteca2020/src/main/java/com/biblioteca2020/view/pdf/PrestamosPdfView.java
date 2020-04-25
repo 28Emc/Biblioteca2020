@@ -68,25 +68,14 @@ public class PrestamosPdfView extends AbstractPdfView {
                 // TAMBIÉN MEJORO EL DISEÑO DE LA CELDA
                 Font fontCabeceraTabla = new Font(new Font(Font.BOLD, 11, Font.NORMAL, new Color(255, 255, 255)));
                 Font fontCuerpoTabla = new Font(new Font(Font.BOLD, 11, Font.NORMAL, new Color(0, 0, 0)));
-                /*
-                 * cell = new PdfPCell(new Phrase("Empleado", fontCabeceraTabla));
-                 * cell.setBackgroundColor(new Color(52, 58, 64)); cell.setColspan(1);
-                 * cell.setPadding(6f); cell.setBorderWidth(0); tabla.addCell(cell); cell = new
-                 * PdfPCell(new Phrase("Libro", fontCabeceraTabla)); cell.setBackgroundColor(new
-                 * Color(52, 58, 64)); cell.setColspan(3); cell.setPadding(6f);
-                 * cell.setBorderWidth(0); tabla.addCell(cell); cell = new PdfPCell(new
-                 * Phrase("Usuario", fontCabeceraTabla)); cell.setBackgroundColor(new Color(52,
-                 * 58, 64)); cell.setColspan(2); cell.setPadding(6f); cell.setBorderWidth(0);
-                 * tabla.addCell(cell);
-                 */
                 // AGREGO CABECERAS MAS ESPECÍFICAS
-                cell = new PdfPCell(new Phrase("Empleado", fontCabeceraTabla));
+                cell = new PdfPCell(new Phrase("Titulo", fontCabeceraTabla));
                 cell.setBackgroundColor(new Color(52, 58, 64));
                 cell.setPadding(6f);
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                 cell.setBorderWidth(0);
                 tabla.addCell(cell);
-                cell = new PdfPCell(new Phrase("Titulo", fontCabeceraTabla));
+                cell = new PdfPCell(new Phrase("Empleado", fontCabeceraTabla));
                 cell.setBackgroundColor(new Color(52, 58, 64));
                 cell.setPadding(6f);
                 cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
@@ -119,38 +108,33 @@ public class PrestamosPdfView extends AbstractPdfView {
                 // RECORRO MI LISTA PARA OBTENER LOS VARIOS PRESTAMOS
                 for (Prestamo prestamoItem : prestamos) {
                         // AGREGO LA DATA COMO TAL EN CELDAS
+                        // NOTA 3: REVISAR LOS CAMPOS A AGREGAR AL REPORTE
+                        cell = new PdfPCell(new Phrase(prestamoItem.getLibro().getTitulo(), fontCuerpoTabla));
+                        cell.setBorderWidth(0);
+                        cell.setPadding(6f);
+                        tabla.addCell(cell);
                         cell = new PdfPCell(new Phrase(prestamoItem.getEmpleado().getNombres() + ", "
                                         + prestamoItem.getEmpleado().getApellidos(), fontCuerpoTabla));
                         cell.setBorderWidth(0);
                         cell.setPadding(6f);
-                        // cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                        tabla.addCell(cell);
-                        cell = new PdfPCell(new Phrase(prestamoItem.getLibro().getTitulo(), fontCuerpoTabla));
-                        cell.setBorderWidth(0);
-                        cell.setPadding(6f);
-                        // cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                         tabla.addCell(cell);
                         cell = new PdfPCell(new Phrase(prestamoItem.getLibro().getAutor(), fontCuerpoTabla));
                         cell.setBorderWidth(0);
                         cell.setPadding(6f);
-                        // cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                         tabla.addCell(cell);
                         cell = new PdfPCell(new Phrase(prestamoItem.getLibro().getCategoria().getNombre(),
                                         fontCuerpoTabla));
                         cell.setBorderWidth(0);
                         cell.setPadding(6f);
-                        // cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                         tabla.addCell(cell);
                         cell = new PdfPCell(new Phrase(prestamoItem.getUsuario().getNombres() + ", "
                                         + prestamoItem.getUsuario().getApellidos(), fontCuerpoTabla));
                         cell.setBorderWidth(0);
                         cell.setPadding(6f);
-                        // cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                         tabla.addCell(cell);
                         cell = new PdfPCell(new Phrase(prestamoItem.getUsuario().getNroDocumento(), fontCuerpoTabla));
                         cell.setBorderWidth(0);
                         cell.setPadding(6f);
-                        // cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
                         tabla.addCell(cell);
                 }
                 // AL FINAL, AGREGO MI TABLA AL DOCUMENTO PDF

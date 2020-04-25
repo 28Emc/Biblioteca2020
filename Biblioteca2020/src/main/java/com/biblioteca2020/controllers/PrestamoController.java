@@ -1,6 +1,5 @@
 package com.biblioteca2020.controllers;
 
-import java.io.FileNotFoundException;
 import java.util.Date;
 import java.util.List;
 import javax.validation.Valid;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import net.sf.jasperreports.engine.JRException;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Prestamo;
@@ -32,7 +30,6 @@ import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.IPrestamoLogService;
 import com.biblioteca2020.models.service.IPrestamoService;
 import com.biblioteca2020.models.service.IUsuarioService;
-import com.biblioteca2020.models.service.ReporteService;
 
 @Controller
 @RequestMapping("/prestamos")
@@ -57,8 +54,8 @@ public class PrestamoController {
 	@Autowired
 	private EmailSenderService emailSenderService;
 
-	@Autowired
-	private ReporteService reporteService;
+	/*@Autowired
+	private ReporteService reporteService;*/
 
 	// ############################ ADMIN, EMPLEADO ############################
 	// LISTADO POR ROLES
@@ -86,7 +83,7 @@ public class PrestamoController {
 		return "/prestamos/listar";
 	}
 
-	@GetMapping("/reportes/{formato}")
+	/*@GetMapping("/reportes/{formato}")
 	public String generarReportePrestamos(@PathVariable String formato, String role, Authentication authentication,
 			RedirectAttributes flash) {
 		try {
@@ -119,7 +116,7 @@ public class PrestamoController {
 			flash.addFlashAttribute("error", "Lo sentimos, hubo un error a la hora de generar el archivo pdf. Inténtalo mas tarde.");
 		}
 		return "redirect:/prestamos/listar";
-	}
+	}*/
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
 	@GetMapping(value = "/cancelar")
