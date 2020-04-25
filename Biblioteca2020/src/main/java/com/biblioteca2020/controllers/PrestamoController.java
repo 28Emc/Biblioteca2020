@@ -116,7 +116,7 @@ public class PrestamoController {
 					break;
 			}
 		} catch (FileNotFoundException | JRException e) {
-			flash.addFlashAttribute("error", e.getMessage());
+			flash.addFlashAttribute("error", "Lo sentimos, hubo un error a la hora de generar el archivo pdf. Inténtalo mas tarde.");
 		}
 		return "redirect:/prestamos/listar";
 	}
