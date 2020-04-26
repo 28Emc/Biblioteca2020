@@ -1,6 +1,7 @@
 package com.biblioteca2020.view.pdf;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -69,42 +70,22 @@ public class PrestamosPdfView extends AbstractPdfView {
                 Font fontCabeceraTabla = new Font(new Font(Font.BOLD, 11, Font.NORMAL, new Color(255, 255, 255)));
                 Font fontCuerpoTabla = new Font(new Font(Font.BOLD, 11, Font.NORMAL, new Color(0, 0, 0)));
                 // AGREGO CABECERAS MAS ESPECÍFICAS
-                cell = new PdfPCell(new Phrase("Titulo", fontCabeceraTabla));
-                cell.setBackgroundColor(new Color(52, 58, 64));
-                cell.setPadding(6f);
-                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setBorderWidth(0);
-                tabla.addCell(cell);
-                cell = new PdfPCell(new Phrase("Empleado", fontCabeceraTabla));
-                cell.setBackgroundColor(new Color(52, 58, 64));
-                cell.setPadding(6f);
-                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setBorderWidth(0);
-                tabla.addCell(cell);
-                cell = new PdfPCell(new Phrase("Autor", fontCabeceraTabla));
-                cell.setBackgroundColor(new Color(52, 58, 64));
-                cell.setPadding(6f);
-                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setBorderWidth(0);
-                tabla.addCell(cell);
-                cell = new PdfPCell(new Phrase("Categoría", fontCabeceraTabla));
-                cell.setBackgroundColor(new Color(52, 58, 64));
-                cell.setPadding(6f);
-                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setBorderWidth(0);
-                tabla.addCell(cell);
-                cell = new PdfPCell(new Phrase("Usuario", fontCabeceraTabla));
-                cell.setBackgroundColor(new Color(52, 58, 64));
-                cell.setPadding(6f);
-                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setBorderWidth(0);
-                tabla.addCell(cell);
-                cell = new PdfPCell(new Phrase("DNI Usuario", fontCabeceraTabla));
-                cell.setBackgroundColor(new Color(52, 58, 64));
-                cell.setPadding(6f);
-                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cell.setBorderWidth(0);
-                tabla.addCell(cell);
+                // CREANDO CABECERA
+                ArrayList<String> listCabecera = new ArrayList<>();
+                listCabecera.add("Titulo");
+                listCabecera.add("Empleado");
+                listCabecera.add("Autor");
+                listCabecera.add("Categoría");
+                listCabecera.add("Usuario");
+                listCabecera.add("DNI Usuario");
+                for (String cabeceraItem : listCabecera) {
+                        cell = new PdfPCell(new Phrase(cabeceraItem, fontCabeceraTabla));
+                        cell.setBackgroundColor(new Color(52, 58, 64));
+                        cell.setPadding(6f);
+                        cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                        cell.setBorderWidth(0);
+                        tabla.addCell(cell);
+                }
                 // RECORRO MI LISTA PARA OBTENER LOS VARIOS PRESTAMOS
                 for (Prestamo prestamoItem : prestamos) {
                         // AGREGO LA DATA COMO TAL EN CELDAS
@@ -140,6 +121,8 @@ public class PrestamosPdfView extends AbstractPdfView {
                 // AL FINAL, AGREGO MI TABLA AL DOCUMENTO PDF
                 document.add(tabla);
                 document.close();
+                // ASIGNANDO NOMBRE AL ARCHIVO PDF (CON ESTA LINEA, YA NO SE PREVISUALIZA EL PDF, SI NO QUE SE DESCARGA AUTOMATICAMENTE)
+                response.setHeader("Content-Disposition", "attachment; filename=\"listado-prestamos-total.pdf\"");
         }
 
 }
