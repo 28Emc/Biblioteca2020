@@ -33,7 +33,8 @@
         <div class="col">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/listar'(format=pdf)}"
+            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            target="_blank"
             data-toggle="tooltip"
             data-placement="top"
             th:title="'Exportar a PDF'"
@@ -48,26 +49,6 @@
             data-placement="top"
             th:title="'Exportar en formato Xlsx'"
             ><i class="far fa-file-excel fa-2x text-success"></i
-          ></a>
-        </div>
-        <div class="col" sec:authorize="hasRole('ROLE_SYSADMIN')">
-          <a
-            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{/prestamos/reportes/} + ${'pdf'}"
-            data-toggle="tooltip"
-            data-placement="top"
-            th:title="'Exportar en formato PDF'"
-            ><i class="fas fa-file-pdf fa-2x text-danger"></i
-          ></a>
-        </div>
-        <div class="col" sec:authorize="hasRole('ROLE_SYSADMIN')">
-          <a
-            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{/prestamos/reportes/} + ${'xlsx'}"
-            data-toggle="tooltip"
-            data-placement="top"
-            th:title="'Exportar en formato Xlsx'"
-            ><i class="fas fa-file-excel fa-2x text-success"></i
           ></a>
         </div>
       </div>

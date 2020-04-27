@@ -1,9 +1,14 @@
 package com.biblioteca2020.controllers;
 
+import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -15,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
@@ -30,6 +36,7 @@ import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.IPrestamoLogService;
 import com.biblioteca2020.models.service.IPrestamoService;
 import com.biblioteca2020.models.service.IUsuarioService;
+import com.biblioteca2020.view.pdf.GenerarReportePDF;
 
 @Controller
 @RequestMapping("/prestamos")
@@ -53,9 +60,6 @@ public class PrestamoController {
 
 	@Autowired
 	private EmailSenderService emailSenderService;
-
-	/*@Autowired
-	private ReporteService reporteService;*/
 
 	// ############################ ADMIN, EMPLEADO ############################
 	// LISTADO POR ROLES
@@ -83,40 +87,35 @@ public class PrestamoController {
 		return "/prestamos/listar";
 	}
 
-	/*@GetMapping("/reportes/{formato}")
-	public String generarReportePrestamos(@PathVariable String formato, String role, Authentication authentication,
-			RedirectAttributes flash) {
-		try {
-			// OBTENER USUARIO LOGUEADO ACTUALMENTE
-			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-			role = userDetails.getAuthorities().toString();
-			switch (role) {
-				case "[ROLE_ADMIN]":
-					if (formato.equalsIgnoreCase("pdf")) {
-						flash.addFlashAttribute("success",
-								reporteService.exportarReportePrestamos(formato, role, authentication));
-					}
-					if (formato.equalsIgnoreCase("xlsx")) {
-						flash.addFlashAttribute("success",
-								reporteService.exportarReportePrestamos(formato, role, authentication));
-					}
-					break;
-				case "[ROLE_EMPLEADO]":
-					if (formato.equalsIgnoreCase("pdf")) {
-						flash.addFlashAttribute("success",
-								reporteService.exportarReportePrestamos(formato, role, authentication));
-					}
-					if (formato.equalsIgnoreCase("xlsx")) {
-						flash.addFlashAttribute("success",
-								reporteService.exportarReportePrestamos(formato, role, authentication));
-					}
-					break;
-			}
-		} catch (FileNotFoundException | JRException e) {
-			flash.addFlashAttribute("error", "Lo sentimos, hubo un error a la hora de generar el archivo pdf. Inténtalo mas tarde.");
+	// MÈTODO PARA GENERAR PDF DESDE EL CONTROLADOR (PUEDO PASAR PARAMETROS)
+	@RequestMapping(value = "/reportes/prestamos-total", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosTotal(Authentication authentication) {
+
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Prestamo> prestamos = null;
+		// DECIDO EL ORIGEN DE DATOS SEGUN EL ROL
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
+				break;
+			case "[ROLE_EMPLEADO]":
+				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
+				break;
 		}
-		return "redirect:/prestamos/listar";
-	}*/
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			bis = GenerarReportePDF.prestamosTotales(prestamos);
+			headers.add("Content-Disposition", "inline; filename=prestamos-total-reporte.pdf");
+
+			return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+					.body(new InputStreamResource(bis));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
 	@GetMapping(value = "/cancelar")
