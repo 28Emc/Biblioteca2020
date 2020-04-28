@@ -22,6 +22,33 @@
 			</div>
 		</div>
 
+		<div
+        class="row py-3 float-md-right float-xs-none"
+        th:if="${not #lists.isEmpty(empleados)}"
+      >
+        <div class="col">
+          <a
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/empleados/reportes/empleados-total'}"
+            target="_blank"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Exportar a PDF'"
+            ><i class="far fa-file-pdf fa-2x text-danger"></i
+          ></a>
+        </div>
+        <div class="col">
+          <a
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/empleados/listar'(format=xlsx)}"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Exportar en formato Xlsx'"
+            ><i class="far fa-file-excel fa-2x text-success"></i
+          ></a>
+        </div>
+      </div>
+
 		<h2 th:if="${#lists.isEmpty(empleados)}">No hay empleados</h2>
 
 		<table class="table table-responsive table-borderless"

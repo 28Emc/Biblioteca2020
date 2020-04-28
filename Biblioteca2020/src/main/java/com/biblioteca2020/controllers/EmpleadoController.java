@@ -1,5 +1,6 @@
 package com.biblioteca2020.controllers;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +12,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +26,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
@@ -33,6 +39,7 @@ import com.biblioteca2020.models.service.IEmpleadoLogService;
 import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.ILocalService;
 import com.biblioteca2020.models.service.IRoleService;
+import com.biblioteca2020.view.pdf.GenerarReportePDF;
 
 @Controller
 @RequestMapping("/empleados")
@@ -284,19 +291,54 @@ public class EmpleadoController {
 
 	// ############################## ROLE ADMIN
 	// LISTADO DE EMPLEADOS
-	// SI SOY ADMIN, VEO MI REGISTRO
-	// SI NO, LO OCULTO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	// SI SOY ADMIN, VEO MI REGISTRO Y LOS DE MI LOCAL
+	// SI SOY SYSADMIN, LO OCULTO Y VEO TODOS LOS EMPLEADOS
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping("/listar")
 	public String listarEmpleados(Model model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		model.addAttribute("empleados",
-				empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getId()));
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_SYSADMIN]":
+				model.addAttribute("empleados", empleadoService.findAll());
+				break;
+			case "[ROLE_ADMIN]":
+				model.addAttribute("empleados",
+						empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getId()));
+				model.addAttribute("titulo",
+						"Listado de Empleados de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
+				break;
+		}
 		model.addAttribute("empleado", new Empleado());
-		model.addAttribute("titulo",
-				"Listado de Empleados de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
 		return "/empleados/listar";
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/empleados-total", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfEmpleadosTotal(Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Empleado> empleados = null;
+
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_SYSADMIN]":
+				empleados = empleadoService.findAll();
+				break;
+			case "[ROLE_ADMIN]":
+				empleados = empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getId());
+				break;
+		}
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			bis = GenerarReportePDF.empleadosTotales(empleados);
+			headers.add("Content-Disposition", "inline; filename=empleados-total-reporte.pdf");
+
+			return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+					.body(new InputStreamResource(bis));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
@@ -538,8 +580,8 @@ public class EmpleadoController {
 					empleadoOld.getEmail(), empleado.getEmail(), empleadoOld.getCelular(), empleado.getCelular(),
 					empleadoOld.getFecha_registro(), empleado.getFecha_registro(), empleadoOld.getUsername(),
 					empleado.getUsername(), empleadoOld.getPassword(), empleado.getPassword(), empleadoOld.getEstado(),
-					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(), "UPDATE BY ADMIN",
-					null, new Date(), null));
+					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(),
+					"UPDATE BY ADMIN", null, new Date(), null));
 
 			flash.addFlashAttribute("warning",
 					"El empleado con código " + empleado.getId() + " ha sido actualizado en la base de datos.");

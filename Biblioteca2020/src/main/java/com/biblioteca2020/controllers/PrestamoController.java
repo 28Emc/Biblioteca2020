@@ -88,6 +88,7 @@ public class PrestamoController {
 	}
 
 	// MÈTODO PARA GENERAR PDF DESDE EL CONTROLADOR (PUEDO PASAR PARAMETROS)
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/prestamos-total", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfPrestamosTotal(Authentication authentication) {
 

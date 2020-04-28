@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,10 +20,15 @@ import java.util.Arrays;
 import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
@@ -29,6 +36,7 @@ import com.biblioteca2020.models.entity.Local;
 import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.ILocalService;
+import com.biblioteca2020.view.pdf.GenerarReportePDF;
 
 @Controller
 @SessionAttributes("libro")
@@ -222,7 +230,7 @@ public class LibroController {
 	// ************************ ROLE ADMIN ************************
 	// LISTADO DE LIBROS POR LOCAL Y USUARIO LOGUEADO (DESDE TABLA LOCAL)
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@GetMapping("/locales/libros/listar")
+	@GetMapping(value = "/locales/libros/listar")
 	public String listarLibrosPorLocalAdmin(Model model, Authentication authentication) {
 		// BUSCA EL EMPLEADO LOGUEADO
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -233,6 +241,29 @@ public class LibroController {
 				empleado.getId());
 		model.addAttribute("libros", libros);
 		return "/libros/listar";
+	}
+
+	// MÈTODO PARA GENERAR PDF DESDE EL CONTROLADOR (PUEDO PASAR PARAMETROS)
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/locales/libros/reportes/libros-total", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfLibrosUnicos(Authentication authentication) {
+
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Libro> libros = null;
+		libros = libroService.fetchByIdWithLocalesWithEmpleado(empleado.getLocal().getId(), empleado.getId());
+
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			bis = GenerarReportePDF.librosUnicos(libros);
+			headers.add("Content-Disposition", "inline; filename=libros-total-reporte.pdf");
+
+			return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+					.body(new InputStreamResource(bis));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")

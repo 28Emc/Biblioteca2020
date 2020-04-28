@@ -1,5 +1,6 @@
 package com.biblioteca2020.controllers;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,7 +17,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.expression.ParseException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -53,6 +58,7 @@ import com.biblioteca2020.models.service.IPrestamoService;
 import com.biblioteca2020.models.service.IRoleService;
 import com.biblioteca2020.models.service.IUsuarioLogService;
 import com.biblioteca2020.models.service.IUsuarioService;
+import com.biblioteca2020.view.pdf.GenerarReportePDF;
 
 @Controller
 @RequestMapping("/usuarios")
@@ -742,12 +748,33 @@ public class UsuarioController {
 	// ############################
 	// LISTADO DE USUARIOS
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@GetMapping("/listar")
+	@GetMapping(value = "/listar")
 	public String listarUsuarios(Model model) {
 		model.addAttribute("usuario", new Usuario());
 		model.addAttribute("usuarios", usuarioService.findAll());
 		model.addAttribute("titulo", "Listado de Usuarios");
-		return "usuarios/listar";
+		return "/usuarios/listar";
+	}
+
+	// MÈTODO PARA GENERAR PDF DESDE EL CONTROLADOR (PUEDO PASAR PARAMETROS)
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/usuarios-total", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfUsuariosTotal() {
+
+		List<Usuario> usuarios = null;
+		usuarios = usuarioService.findAll();
+
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			bis = GenerarReportePDF.usuariosTotales(usuarios);
+			headers.add("Content-Disposition", "inline; filename=usuarios-total-reporte.pdf");
+
+			return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+					.body(new InputStreamResource(bis));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
