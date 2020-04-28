@@ -87,6 +87,13 @@ public class PrestamoController {
 		return "/prestamos/listar";
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@GetMapping(value = "/reportes")
+	public String crearReporte(Model model, Authentication authentication) {
+		model.addAttribute("titulo", "Creación de Reportes");
+		return "/prestamos/crear_reporte";
+	}
+
 	// MÈTODO PARA GENERAR PDF DESDE EL CONTROLADOR (PUEDO PASAR PARAMETROS)
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/prestamos-total", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)

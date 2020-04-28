@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:replace="layout/layout :: head"></head>
+
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
+
+    <div class="container my-3 px-5">
+      <h1 class="py-4" th:text="${titulo}"></h1>
+
+      <div class="form-group row py-1">
+        <div class="col-12">
+          <h3>Reporte General</h3>
+        </div>
+        <div class="col-10 col-md-10 col-lg-9">
+          <h4 class="text-muted">Listado de todos los préstamos</h4>
+        </div>
+        <div class="col-2 col-md-2 col-xl-3">
+          <a
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            target="_blank"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Exportar a PDF'"
+            ><i class="fas fa-file-pdf fa-2x text-danger"></i
+          ></a>
+        </div>
+	  </div>
+	  
+	  <div class="form-group row py-1">
+        <div class="col-12">
+          <h3>Prèstamos Pendientes</h3>
+        </div>
+        <div class="col-10 col-md-10 col-lg-9">
+          <h4 class="text-muted">Listado de préstamos pendientes</h4>
+        </div>
+        <div class="col-2 col-md-2 col-xl-3">
+          <a
+            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            target="_blank"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Exportar a PDF'"
+            ><i class="fas fa-file-pdf fa-2x text-danger"></i
+          ></a>
+        </div>
+	  </div>
+	  
+	  <div class="form-group row py-1">
+        <div class="col-12">
+          <h3>Prèstamos Terminados</h3>
+        </div>
+        <div class="col-10 col-md-10 col-lg-9">
+          <h4 class="text-muted">Listado de préstamos terminados o anulados</h4>
+        </div>
+        <div class="col-2 col-md-2 col-xl-3">
+          <a
+            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            target="_blank"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Exportar a PDF'"
+            ><i class="fas fa-file-pdf fa-2x text-danger"></i
+          ></a>
+        </div>
+      </div>
+
+      <div class="form-group row py-1">
+        <div class="col-12">
+          <h3>Filtrar Por Empleado</h3>
+        </div>
+        <div class="col-10 col-md-10 col-lg-9">
+          <input
+            type="number"
+            name="nroDocumentoEmpleado"
+            id="nroDocumentoEmpleado"
+            class="form-control rounded-0 shadow-none"
+            placeholder="Buscar empleado por su DNI"
+          />
+        </div>
+        <div class="col-2 col-md-2 col-xl-3">
+          <a
+            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            target="_blank"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Exportar a PDF'"
+            ><i class="fas fa-file-pdf fa-2x text-danger"></i
+          ></a>
+        </div>
+	  </div>
+	  
+	  <div class="form-group row py-1">
+        <div class="col-12">
+          <h3>Filtrar Por Usuario</h3>
+        </div>
+        <div class="col-10 col-md-10 col-lg-9">
+          <input
+            type="number"
+            name="nroDocumentoUsuario"
+            id="nroDocumentoUsuario"
+            class="form-control rounded-0 shadow-none"
+            placeholder="Buscar usuario por su DNI"
+          />
+        </div>
+        <div class="col-2 col-md-2 col-xl-3">
+          <a
+            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            target="_blank"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Exportar a PDF'"
+            ><i class="fas fa-file-pdf fa-2x text-danger"></i
+          ></a>
+        </div>
+      </div>
+
+      <div class="form-group row py-4">
+        <!-- WEB -->
+        <div class="col-sm-12 col-md-12 py-2">
+          <a
+            class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+            th:href="@{'/prestamos/cancelar'}"
+            >CANCELAR</a>
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="layout/layout :: footer"></footer>
+    <script th:replace="layout/autocomplete-libros :: javascript"></script>
+    <script th:replace="layout/autocomplete-usuarios :: javascript"></script>
+	<script th:replace="layout/autocomplete-empleados :: javascript"></script>
+	
+  </body>
+</html>
