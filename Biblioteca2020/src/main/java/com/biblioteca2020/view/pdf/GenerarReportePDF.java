@@ -22,14 +22,14 @@ import com.lowagie.text.Font;
 public class GenerarReportePDF {
 
     // ################ PRESTAMOS
-    public static ByteArrayInputStream prestamosTotales(List<Prestamo> prestamos) throws Exception {
+    public static ByteArrayInputStream crearReportePrestamos(String titulo, List<Prestamo> prestamos) throws Exception {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         // INICIO A ARMAR MI DOCUMENTO PDF
         PdfWriter.getInstance(document, out);
         document.setMargins(39f, 39f, 0f, 0f);
         document.open();
-        document.addTitle("Biblioteca2020 || Reporte de Préstamos");
+        document.addTitle("Biblioteca2020 || " + titulo);
         // TABLA PARA LA CABECERA
         PdfPTable tablaCabecera = new PdfPTable(2);
         tablaCabecera.setWidthPercentage(120);
@@ -37,7 +37,7 @@ public class GenerarReportePDF {
         PdfPCell cellCabecera = null;
         // TITULO
         Font fontTitulo = new Font(new Font(Font.BOLD, 25, Font.NORMAL, new Color(255, 255, 255)));
-        cellCabecera = new PdfPCell(new Phrase("Reporte de Préstamos", fontTitulo));
+        cellCabecera = new PdfPCell(new Phrase(titulo, fontTitulo));
         cellCabecera.setBorderWidth(0);
         cellCabecera.setNoWrap(true);
         cellCabecera.setPaddingTop(35f);
@@ -61,7 +61,7 @@ public class GenerarReportePDF {
         // ARMO LA TABLA PRINCIPAL QUE VA A ALBERGAR MI LISTADO
         PdfPTable tabla = new PdfPTable(7);
         // ALGUNAS PROPIEDADES
-        tabla.setWidths(new float[] { 1, 2.5f, 3, 3, 2.5f, 2.5f, 2 });
+        tabla.setWidths(new float[] { 1, 2.5f, 3, 3, 2.5f, 2.5f, 2.5f });
         tabla.setWidthPercentage(110);
         PdfPCell cell = null;
         // ARMO UNA CELDA DE CABECERA PARA CADA TIPO DE DATO DEL PRÉSTAMO

@@ -9,8 +9,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class MvcConfig implements WebMvcConfigurer {
 
 	public void addViewControllers(ViewControllerRegistry registry) {
-		// MÉTODO PARA REGISTRAR COMO VISTA PERSONALIZADA LA DEL ERROR 403
+		// MÉTODO PARA REGISTRAR COMO VISTA PERSONALIZADA LOS ERRORES
 		registry.addViewController("/error_403").setViewName("error_403");
+		registry.addViewController("/error_reporte").setViewName("error_reporte");
 	}
 
 	@Override

@@ -15,58 +15,90 @@
         <div class="col-12">
           <h3>Reporte General</h3>
         </div>
-        <div class="col-10 col-md-10 col-lg-9">
+        <div class="col-10 col-md-10 col-lg-10">
           <h4 class="text-muted">Listado de todos los préstamos</h4>
         </div>
-        <div class="col-2 col-md-2 col-xl-3">
+        <div class="col-1 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            th:href="@{'/prestamos/reportes/pdf/prestamos-totales'}"
             target="_blank"
             data-toggle="tooltip"
-            data-placement="top"
-            th:title="'Exportar a PDF'"
+            data-placement="auto"
+            th:title="'Exportar PDF'"
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
           ></a>
         </div>
-	  </div>
-	  
-	  <div class="form-group row py-1">
+        <div class="col-1 col-md-1 col-xl-1">
+          <a
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/xlsx/prestamos-totales'(format=xlsx)}"
+            data-toggle="tooltip"
+            data-placement="auto"
+            th:title="'Exportar XLSX'"
+            ><i class="fas fa-file-excel fa-2x text-success"></i
+          ></a>
+        </div>
+      </div>
+
+      <div class="form-group row py-1">
         <div class="col-12">
           <h3>Prèstamos Pendientes</h3>
         </div>
-        <div class="col-10 col-md-10 col-lg-9">
+        <div class="col-10 col-md-10 col-lg-10">
           <h4 class="text-muted">Listado de préstamos pendientes</h4>
         </div>
-        <div class="col-2 col-md-2 col-xl-3">
+        <div class="col-1 col-md-1 col-xl-1">
           <a
-            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/pdf/prestamos-pendientes'}"
             target="_blank"
             data-toggle="tooltip"
-            data-placement="top"
-            th:title="'Exportar a PDF'"
+            data-placement="auto"
+            th:title="'Exportar PDF'"
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
           ></a>
         </div>
-	  </div>
-	  
-	  <div class="form-group row py-1">
+        <div class="col-1 col-md-1 col-xl-1">
+          <a
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/xlsx/prestamos-pendientes'(format=xlsx)}"
+            data-toggle="tooltip"
+            data-placement="auto"
+            th:title="'Exportar XLSX'"
+            ><i class="fas fa-file-excel fa-2x text-success"></i
+          ></a>
+        </div>
+      </div>
+
+      <div class="form-group row py-1">
         <div class="col-12">
           <h3>Prèstamos Terminados</h3>
         </div>
-        <div class="col-10 col-md-10 col-lg-9">
-          <h4 class="text-muted">Listado de préstamos terminados o anulados</h4>
+        <div class="col-10 col-md-10 col-lg-10">
+          <h4 class="text-muted">
+            Listado de préstamos terminados y/o anulados
+          </h4>
         </div>
-        <div class="col-2 col-md-2 col-xl-3">
+        <div class="col-1 col-md-1 col-xl-1">
           <a
-            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/pdf/prestamos-completados'}"
             target="_blank"
             data-toggle="tooltip"
-            data-placement="top"
-            th:title="'Exportar a PDF'"
+            data-placement="auto"
+            th:title="'Exportar PDF'"
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
+          ></a>
+        </div>
+        <div class="col-1 col-md-1 col-xl-1">
+          <a
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/xlsx/prestamos-completados'(format=xlsx)}"
+            data-toggle="tooltip"
+            data-placement="auto"
+            th:title="'Exportar XLSX'"
+            ><i class="fas fa-file-excel fa-2x text-success"></i
           ></a>
         </div>
       </div>
@@ -75,7 +107,7 @@
         <div class="col-12">
           <h3>Filtrar Por Empleado</h3>
         </div>
-        <div class="col-10 col-md-10 col-lg-9">
+        <div class="col-10 col-md-10 col-lg-10">
           <input
             type="number"
             name="nroDocumentoEmpleado"
@@ -84,24 +116,34 @@
             placeholder="Buscar empleado por su DNI"
           />
         </div>
-        <div class="col-2 col-md-2 col-xl-3">
+        <div class="col-1 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            th:href="@{'/prestamos/reportes/pdf/prestamos-por-empleado'}"
             target="_blank"
             data-toggle="tooltip"
-            data-placement="top"
-            th:title="'Exportar a PDF'"
+            data-placement="auto"
+            th:title="'Exportar PDF'"
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
           ></a>
         </div>
-	  </div>
-	  
-	  <div class="form-group row py-1">
+        <div class="col-1 col-md-1 col-xl-1">
+          <a
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/xlsx/prestamos-por-empleado'(format=xlsx)}"
+            data-toggle="tooltip"
+            data-placement="auto"
+            th:title="'Exportar XLSX'"
+            ><i class="fas fa-file-excel fa-2x text-success"></i
+          ></a>
+        </div>
+      </div>
+
+      <div class="form-group row py-1">
         <div class="col-12">
           <h3>Filtrar Por Usuario</h3>
         </div>
-        <div class="col-10 col-md-10 col-lg-9">
+        <div class="col-10 col-md-10 col-lg-10">
           <input
             type="number"
             name="nroDocumentoUsuario"
@@ -110,15 +152,25 @@
             placeholder="Buscar usuario por su DNI"
           />
         </div>
-        <div class="col-2 col-md-2 col-xl-3">
+        <div class="col-1 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/prestamos-total'}"
+            th:href="@{'/prestamos/reportes/pdf/prestamos-por-usuario'}"
             target="_blank"
             data-toggle="tooltip"
-            data-placement="top"
-            th:title="'Exportar a PDF'"
+            data-placement="auto"
+            th:title="'Exportar'"
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
+          ></a>
+        </div>
+        <div class="col-1 col-md-1 col-xl-1">
+          <a
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/prestamos/reportes/xlsx/prestamos-por-usuario'(format=xlsx)}"
+            data-toggle="tooltip"
+            data-placement="auto"
+            th:title="'Exportar XLSX'"
+            ><i class="fas fa-file-excel fa-2x text-success"></i
           ></a>
         </div>
       </div>
@@ -129,7 +181,8 @@
           <a
             class="btn btn-transparent btn-block shadow-none font-weight-bolder"
             th:href="@{'/prestamos/cancelar'}"
-            >CANCELAR</a>
+            >CANCELAR</a
+          >
         </div>
       </div>
     </div>
@@ -137,7 +190,6 @@
     <footer th:replace="layout/layout :: footer"></footer>
     <script th:replace="layout/autocomplete-libros :: javascript"></script>
     <script th:replace="layout/autocomplete-usuarios :: javascript"></script>
-	<script th:replace="layout/autocomplete-empleados :: javascript"></script>
-	
+    <script th:replace="layout/autocomplete-empleados :: javascript"></script>
   </body>
 </html>

@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -94,11 +95,109 @@ public class PrestamoController {
 		return "/prestamos/crear_reporte";
 	}
 
-	// MÈTODO PARA GENERAR PDF DESDE EL CONTROLADOR (PUEDO PASAR PARAMETROS)
+	// REPORTE EXCEL PRESTAMOS TOTALES
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/reportes/prestamos-total", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<InputStreamResource> generarPdfPrestamosTotal(Authentication authentication) {
+	@GetMapping(value = "/reportes/xlsx/prestamos-totales")
+	public String listarPrestamosTotales(Model model, Authentication authentication, RedirectAttributes flash) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Prestamo> prestamos = null;
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
+				break;
+			case "[ROLE_EMPLEADO]":
+				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
+				break;
+		}
+		if (prestamos.size() != 0) {
+			model.addAttribute("prestamos", prestamos);
+			model.addAttribute("tituloReporte", "Reporte de Préstamos Totales");
+			model.addAttribute("nombreReporte", "listado-prestamos-totales");
+			return "/prestamos/listar";
+		} else {
+			model.addAttribute("error", "Lo sentimos, el reporte seleccionado no está disponible en este momento");
+			return "/prestamos/error_reporte";
+		}
+	}
 
+	// EXPERIMENTO
+	/*@PostMapping(value = "/excelexport")
+    public ResponseEntity<InputStreamResource> subVaribleExcel(@RequestBody SubVariable variable) throws IOException {
+        List<SubVariableExcel> subVariableExcels = subVariableRepository.findAllForExcel(variable.getVariable_id());
+        ByteArrayInputStream in = SubVariableExcelReport.subVariableExcel(subVariableExcels);
+        // return IO ByteArray(in);
+        HttpHeaders headers = new HttpHeaders();
+        // set filename in header
+        headers.add("Content-Disposition", "attachment; filename=subVariables.xlsx");
+        return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+    }*/
+
+	// REPORTE EXCEL PRESTAMOS PENDIENTES
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@GetMapping(value = "/reportes/xlsx/prestamos-pendientes")
+	public String listarPrestamosPendientes(Model model, Authentication authentication, RedirectAttributes flash) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Prestamo> prestamos = null;
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
+				break;
+			case "[ROLE_EMPLEADO]":
+				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
+				break;
+		}
+		if (prestamos.size() != 0) {
+			// FILTRO SOLAMENTE LOS PRESTAMOS PENDIENTES
+			for (int i = 0; i < prestamos.size(); i++) {
+				prestamos.removeIf(n -> n.getDevolucion().equals(true));
+			}
+			model.addAttribute("prestamos", prestamos);
+			model.addAttribute("tituloReporte", "Reporte de Préstamos Pendientes");
+			model.addAttribute("nombreReporte", "listado-prestamos-pendientes");
+			return "/prestamos/listar";
+		} else {
+			model.addAttribute("error", "Lo sentimos, el reporte seleccionado no está disponible en este momento");
+			return "/prestamos/error_reporte";
+		}
+	}
+
+	// REPORTE EXCEL PRESTAMOS COMPLETADOS
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@GetMapping(value = "/reportes/xlsx/prestamos-completados")
+	public String listarPrestamosCompletados(Model model, Authentication authentication, RedirectAttributes flash) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Prestamo> prestamos = null;
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
+				break;
+			case "[ROLE_EMPLEADO]":
+				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
+				break;
+		}
+		if (prestamos.size() != 0) {
+			// FILTRO SOLAMENTE LOS PRESTAMOS COMPLETADOS
+			for (int i = 0; i < prestamos.size(); i++) {
+				prestamos.removeIf(n -> n.getDevolucion().equals(false));
+			}
+			model.addAttribute("prestamos", prestamos);
+			model.addAttribute("tituloReporte", "Reporte de Préstamos Completados");
+			model.addAttribute("nombreReporte", "listado-prestamos-completados");
+			return "/prestamos/listar";
+		} else {
+			model.addAttribute("error", "Lo sentimos, el reporte seleccionado no está disponible en este momento");
+			return "redirect:/error_reporte";
+		}
+
+	}
+
+	// MÈTODO PARA GENERAR PDF DE PRESTAMOS TOTALES
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/pdf/prestamos-totales", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosTotal(Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		List<Prestamo> prestamos = null;
@@ -115,11 +214,107 @@ public class PrestamoController {
 		ByteArrayInputStream bis;
 		var headers = new HttpHeaders();
 		try {
-			bis = GenerarReportePDF.prestamosTotales(prestamos);
-			headers.add("Content-Disposition", "inline; filename=prestamos-total-reporte.pdf");
+			if (prestamos.size() != 0) {
+				bis = GenerarReportePDF.crearReportePrestamos("Reporte de Préstamos Totales", prestamos);
+				headers.add("Content-Disposition", "inline; filename=prestamos-total-reporte.pdf");
 
-			return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
-					.body(new InputStreamResource(bis));
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
+	// MÈTODO PARA GENERAR PDF DE PRESTAMOS PENDIENTES
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/pdf/prestamos-pendientes", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosPendientes(Authentication authentication) {
+
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Prestamo> prestamosTotales = null;
+		// DECIDO EL ORIGEN DE DATOS SEGUN EL ROL
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				prestamosTotales = prestamoService
+						.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
+				break;
+			case "[ROLE_EMPLEADO]":
+				prestamosTotales = prestamoService
+						.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
+				break;
+		}
+		// FILTRO SOLAMENTE LOS PRESTAMOS PENDIENTES
+		for (int i = 0; i < prestamosTotales.size(); i++) {
+			prestamosTotales.removeIf(n -> n.getDevolucion().equals(true));
+		}
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamosTotales.size() != 0) {
+				bis = GenerarReportePDF.crearReportePrestamos("Reporte de Préstamos Pendientes", prestamosTotales);
+				headers.add("Content-Disposition", "inline; filename=prestamos-pendientes-reporte.pdf");
+
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
+	// MÈTODO PARA GENERAR PDF DE PRESTAMOS COMPLETADOS
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/pdf/prestamos-completados", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosCompletados(Authentication authentication) {
+
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Prestamo> prestamosTotales = null;
+		// DECIDO EL ORIGEN DE DATOS SEGUN EL ROL
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				prestamosTotales = prestamoService
+						.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
+				break;
+			case "[ROLE_EMPLEADO]":
+				prestamosTotales = prestamoService
+						.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
+				break;
+		}
+		// FILTRO SOLAMENTE LOS PRESTAMOS COMPLETADOS
+		for (int i = 0; i < prestamosTotales.size(); i++) {
+			prestamosTotales.removeIf(n -> n.getDevolucion().equals(false));
+		}
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamosTotales.size() != 0) {
+				bis = GenerarReportePDF.crearReportePrestamos("Reporte de Préstamos Completados", prestamosTotales);
+				headers.add("Content-Disposition", "inline; filename=prestamos-completados-reporte.pdf");
+
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				// ENCONTRAR LA MANERA DE MANDAR UN ERROR PERSONALIZADO
+				// return ResponseEntity.badRequest().build();
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().build();
 		}
