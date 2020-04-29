@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.expression.ParseException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -59,6 +60,7 @@ import com.biblioteca2020.models.service.IRoleService;
 import com.biblioteca2020.models.service.IUsuarioLogService;
 import com.biblioteca2020.models.service.IUsuarioService;
 import com.biblioteca2020.view.pdf.GenerarReportePDF;
+import com.biblioteca2020.view.xlsx.GenerarReporteExcel;
 
 @Controller
 @RequestMapping("/usuarios")
@@ -580,8 +582,8 @@ public class UsuarioController {
 					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
 					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
 					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
-					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "CHANGE PASSWORD BY USER", null, new Date(),
-					null));
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "CHANGE PASSWORD BY USER", null,
+					new Date(), null));
 
 		} catch (Exception e) {
 			model.addAttribute("cambiarPassword", cambiarPassword);
@@ -756,24 +758,61 @@ public class UsuarioController {
 		return "/usuarios/listar";
 	}
 
-	// MÈTODO PARA GENERAR PDF DESDE EL CONTROLADOR (PUEDO PASAR PARAMETROS)
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
-	@RequestMapping(value = "/reportes/usuarios-total", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<InputStreamResource> generarPdfUsuariosTotal() {
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@GetMapping(value = "/reportes")
+	public String crearReporte(Model model, Authentication authentication) {
+		model.addAttribute("titulo", "Creación de Reportes");
+		return "/usuarios/crear_reporte";
+	}
 
+	// REPORTE PDF USUARIOS TOTALES
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/pdf/usuarios-totales", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfUsuariosTotal() {
 		List<Usuario> usuarios = null;
 		usuarios = usuarioService.findAll();
-
 		ByteArrayInputStream bis;
 		var headers = new HttpHeaders();
 		try {
-			bis = GenerarReportePDF.usuariosTotales(usuarios);
-			headers.add("Content-Disposition", "inline; filename=usuarios-total-reporte.pdf");
-
-			return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
-					.body(new InputStreamResource(bis));
+			if (usuarios.size() != 0) {
+				bis = GenerarReportePDF.generarPDFUsuariosTotales(usuarios);
+				headers.add("Content-Disposition", "inline; filename=listado-usuarios-totales.pdf");
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	// REPORTE EXCEL USUARIOS TOTALES
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/xlsx/usuarios-totales", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> generarExcelUsuariosTotal() {
+		List<Usuario> usuarios = null;
+		usuarios = usuarioService.findAll();
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			if (usuarios.size() != 0) {
+				bis = GenerarReporteExcel.generarExcelUsuarios("Reporte de Usuarios Totales", usuarios);
+				headers.add("Content-Disposition", "attachment; filename=listado-usuarios-totales.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 		}
 	}
 

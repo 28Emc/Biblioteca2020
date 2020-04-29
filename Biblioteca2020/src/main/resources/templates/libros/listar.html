@@ -1,164 +1,208 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:replace="layout/layout :: head"></head>
 
-<head th:replace="layout/layout :: head"></head>
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
 
-<body class="bg-light">
+    <div class="container-fluid my-3 px-5">
+      <h1 class="py-2" th:text="${titulo}"></h1>
 
-	<header th:replace="layout/layout :: header"></header>
+      <h1 hidden th:text="${idLocal}"></h1>
 
-	<div class="container-fluid my-3 px-5">
+      <div class="row pt-5 pb-4" sec:authorize="hasRole('ROLE_SYSADMIN')">
+        <div class="col-sm-3 col-md-2 col-xl-1">
+          <a
+            class="btn btn-primary btn-block rounded-0 border-0 py-2"
+            th:href="@{/libros/crear}"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Nuevo'"
+            ><i class="fas fa-plus fa-lg"></i
+          ></a>
+        </div>
+      </div>
 
-		<h1 class="py-2" th:text="${titulo}"></h1>
-
-		<h1 hidden th:text="${idLocal}"></h1>
-
-		<div class="row pt-5 pb-4" sec:authorize="hasRole('ROLE_SYSADMIN')">
-			<div class="col-sm-3 col-md-2 col-xl-1">
-				<a class="btn btn-primary btn-block rounded-0 border-0 py-2"
-					th:href="@{/libros/crear}" data-toggle="tooltip"
-					data-placement="top" th:title="'Nuevo'"><i
-					class="fas fa-plus fa-lg"></i></a>
-			</div>
-		</div>
-
-		<div class="row pt-5 pb-4" sec:authorize="hasRole('ROLE_ADMIN')">
-			<div class="col-sm-3 col-md-2 col-xl-1">
-				<a class="btn btn-primary btn-block rounded-0 border-0 py-2"
-					th:href="@{/locales/libros/crear}" data-toggle="tooltip"
-					data-placement="top" th:title="'Nuevo'"><i
-					class="fas fa-plus fa-lg"></i></a>
-			</div>
-		</div>
-		<div
+      <div class="row pt-5 pb-4" sec:authorize="hasRole('ROLE_ADMIN')">
+        <div class="col-sm-3 col-md-2 col-xl-1">
+          <a
+            class="btn btn-primary btn-block rounded-0 border-0 py-2"
+            th:href="@{/locales/libros/crear}"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Nuevo'"
+            ><i class="fas fa-plus fa-lg"></i
+          ></a>
+        </div>
+      </div>
+      <div
         class="row py-3 float-md-right float-xs-none"
         th:if="${not #lists.isEmpty(libros)}"
       >
-		<div class="col">
-			<a
-			  class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-			  th:href="@{'/locales/libros/reportes/libros-total'}"
-			  target="_blank"
-			  data-toggle="tooltip"
-			  data-placement="top"
-			  th:title="'Exportar a PDF'"
-			  ><i class="far fa-file-pdf fa-2x text-danger"></i
-			></a>
-		  </div>
-		  <div class="col">
-			<a
-			  class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-			  th:href="@{'/locales/libros/listar'(format=xlsx)}"
-			  data-toggle="tooltip"
-			  data-placement="top"
-			  th:title="'Exportar en formato Xlsx'"
-			  ><i class="far fa-file-excel fa-2x text-success"></i
-			></a>
-		  </div>
-		</div>
-	</div>
-		<h2 th:if="${#lists.isEmpty(libros)}">No hay libros en este local</h2>
+        <div class="col">
+          <a
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/locales/libros/reportes'}"
+            data-toggle="tooltip"
+            data-placement="auto"
+            th:title="'Generar reportes'"
+            ><i class="fas fa-clipboard-list fa-2x"></i
+          ></a>
+        </div>
+      </div>
+      <h2 th:if="${#lists.isEmpty(libros)}">No hay libros en este local</h2>
 
-		<table class="table table-responsive table-borderless"
-			th:if="${not #lists.isEmpty(libros)}">
-			<caption class="py-4" th:text="'Total: ' + ${#lists.size(libros)}"></caption>		
-			<thead class="table-dark">
-				<tr>
-					<th hidden>Id</th>
-					<th>Titulo</th>
-					<th>Autor</th>
-					<th>Categoría</th>
-					<th>Fecha Publicación</th>
-					<th>Fecha Registro</th>
-					<th>Stock</th>
-					<th>Estado</th>
-					<th colspan="2" sec:authorize="hasRole('ROLE_ADMIN')"
-						class="text-center">Opciones</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr th:each="libro: ${libros}">
-					<td class="align-middle" th:text="${libro.id}" hidden></td>
-					<td class="align-middle" th:text="${libro.titulo}"></td>
-					<td class="align-middle" th:text="${libro.autor}"></td>
-					<td class="align-middle" th:text="${libro.categoria.nombre}"></td>
-					<td class="align-middle" th:text="${libro.fechaPublicacion}"></td>
-					<td class="align-middle" th:text="${libro.fechaRegistro}"></td>
-					<td class="align-middle" th:text="${libro.stock}"></td>
+      <table
+        class="table table-responsive table-borderless"
+        th:if="${not #lists.isEmpty(libros)}"
+      >
+        <caption
+          class="py-4"
+          th:text="'Total: ' + ${#lists.size(libros)}"
+        ></caption>
+        <thead class="table-dark">
+          <tr>
+            <th hidden>Id</th>
+            <th>Titulo</th>
+            <th>Autor</th>
+            <th>Categoría</th>
+            <th>Fecha Publicación</th>
+            <th>Fecha Registro</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th
+              colspan="2"
+              sec:authorize="hasRole('ROLE_ADMIN')"
+              class="text-center"
+            >
+              Opciones
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="libro: ${libros}">
+            <td class="align-middle" th:text="${libro.id}" hidden></td>
+            <td class="align-middle" th:text="${libro.titulo}"></td>
+            <td class="align-middle" th:text="${libro.autor}"></td>
+            <td class="align-middle" th:text="${libro.categoria.nombre}"></td>
+            <td class="align-middle" th:text="${libro.fechaPublicacion}"></td>
+            <td class="align-middle" th:text="${libro.fechaRegistro}"></td>
+            <td class="align-middle" th:text="${libro.stock}"></td>
 
-					<th:block th:with="estado=${libro.estado}">
-						
-						<th:block th:if="${estado}">
-							<td class="align-middle pl-2">
-								<h5>
-									<span
-										class="badge badge-transparent text-success font-weight-bold"
-										th:text="'Activo'"></span>
-								</h5>
-							</td>
-							<td class="align-middle" sec:authorize="hasRole('ROLE_SYSADMIN')"><a
-								class="btn btn-transparent btn-block rounded-0 shadow-none"
-								th:href="@{'/libros/editar/'}+${libro.id}" data-toggle="tooltip"
-								data-placement="bottom" th:title="'Editar'"><i
-									class="far fa-edit fa-lg text-warning"></i></a></td>
-							<td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')"><a
-								class="btn btn-transparent btn-block rounded-0 shadow-none"
-								th:href="@{'/locales/libros/editar/'}+${libro.id}"
-								data-toggle="tooltip" data-placement="bottom"
-								th:title="'Editar'"> <i
-									class="far fa-edit fa-lg text-warning"></i>
-							</a></td>
-							<td class="align-middle" sec:authorize="hasRole('ROLE_SYSADMIN')"><a
-								class="btn btn-transparent btn-block rounded-0 shadow-none"
-								th:href="@{'/libros/deshabilitar/'}+${libro.id}"
-								onclick="return confirm('Seguro de querer deshabilitar el libro?');"
-								data-toggle="tooltip" data-placement="bottom"
-								th:title="'Deshabilitar'"><i
-									class="fas fa-ban fa-lg text-info"></i></a></td>
-							<td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')"><a
-								class="btn btn-transparent btn-block rounded-0 shadow-none"
-								th:href="@{'/locales/libros/deshabilitar/'}+${libro.id}"
-								onclick="return confirm('Seguro de querer deshabilitar el libro?');"
-								data-toggle="tooltip" data-placement="bottom"
-								th:title="'Deshabilitar'"><i
-									class="fas fa-ban fa-lg text-info"></i></a></td>
-						</th:block>
-						
-						<th:block th:unless="${estado}">
-							<td class="align-middle pl-2">
-								<h5>
-									<span
-										class="badge badge-transparent text-danger font-weight-bold"
-										th:text="'Inactivo'"></span>
-								</h5>
-							</td>
-							<td class="align-middle" sec:authorize="hasRole('ROLE_SYSADMIN')"><a
-								class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
-								th:href="'#'"><i class="far fa-edit fa-lg text-secondary"></i>
-							</a></td>
-							<td class="align-middle" sec:authorize="hasRole('ROLE_SYSADMIN')"><a
-								class=" disabled btn btn-transparent btn-block rounded-0 shadow-none"
-								th:href="'#'"><i class="fas fa-ban fa-lg text-secondary"></i>
-							</a></td>
-							<td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')"><a
-								class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
-								th:href="'#'"><i class="far fa-edit fa-lg text-secondary"></i>
-							</a></td>
-							<td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')"><a
-								class=" disabled btn btn-transparent btn-block rounded-0 shadow-none"
-								th:href="'#'"><i class="fas fa-ban fa-lg text-secondary"></i>
-							</a></td>
-						</th:block>
-						
-					</th:block>
-				</tr>
-			</tbody>
-		</table>
+            <th:block th:with="estado=${libro.estado}">
+              <th:block th:if="${estado}">
+                <td class="align-middle pl-2">
+                  <h5>
+                    <span
+                      class="badge badge-transparent text-success font-weight-bold"
+                      th:text="'Activo'"
+                    ></span>
+                  </h5>
+                </td>
+                <td
+                  class="align-middle"
+                  sec:authorize="hasRole('ROLE_SYSADMIN')"
+                >
+                  <a
+                    class="btn btn-transparent btn-block rounded-0 shadow-none"
+                    th:href="@{'/libros/editar/'}+${libro.id}"
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    th:title="'Editar'"
+                    ><i class="far fa-edit fa-lg text-warning"></i
+                  ></a>
+                </td>
+                <td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')">
+                  <a
+                    class="btn btn-transparent btn-block rounded-0 shadow-none"
+                    th:href="@{'/locales/libros/editar/'}+${libro.id}"
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    th:title="'Editar'"
+                  >
+                    <i class="far fa-edit fa-lg text-warning"></i>
+                  </a>
+                </td>
+                <td
+                  class="align-middle"
+                  sec:authorize="hasRole('ROLE_SYSADMIN')"
+                >
+                  <a
+                    class="btn btn-transparent btn-block rounded-0 shadow-none"
+                    th:href="@{'/libros/deshabilitar/'}+${libro.id}"
+                    onclick="return confirm('Seguro de querer deshabilitar el libro?');"
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    th:title="'Deshabilitar'"
+                    ><i class="fas fa-ban fa-lg text-info"></i
+                  ></a>
+                </td>
+                <td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')">
+                  <a
+                    class="btn btn-transparent btn-block rounded-0 shadow-none"
+                    th:href="@{'/locales/libros/deshabilitar/'}+${libro.id}"
+                    onclick="return confirm('Seguro de querer deshabilitar el libro?');"
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    th:title="'Deshabilitar'"
+                    ><i class="fas fa-ban fa-lg text-info"></i
+                  ></a>
+                </td>
+              </th:block>
 
-	</div>
+              <th:block th:unless="${estado}">
+                <td class="align-middle pl-2">
+                  <h5>
+                    <span
+                      class="badge badge-transparent text-danger font-weight-bold"
+                      th:text="'Inactivo'"
+                    ></span>
+                  </h5>
+                </td>
+                <td
+                  class="align-middle"
+                  sec:authorize="hasRole('ROLE_SYSADMIN')"
+                >
+                  <a
+                    class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
+                    th:href="'#'"
+                    ><i class="far fa-edit fa-lg text-secondary"></i>
+                  </a>
+                </td>
+                <td
+                  class="align-middle"
+                  sec:authorize="hasRole('ROLE_SYSADMIN')"
+                >
+                  <a
+                    class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
+                    th:href="'#'"
+                    ><i class="fas fa-ban fa-lg text-secondary"></i>
+                  </a>
+                </td>
+                <td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')">
+                  <a
+                    class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
+                    th:href="'#'"
+                    ><i class="far fa-edit fa-lg text-secondary"></i>
+                  </a>
+                </td>
+                <td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')">
+                  <a
+                    class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
+                    th:href="'#'"
+                    ><i class="fas fa-ban fa-lg text-secondary"></i>
+                  </a>
+                </td>
+              </th:block>
+            </th:block>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-	<footer th:replace="layout/layout :: footer"></footer>
-
-</body>
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
 </html>

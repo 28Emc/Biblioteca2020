@@ -1,6 +1,7 @@
 package com.biblioteca2020.controllers;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import javax.validation.Valid;
@@ -38,6 +39,7 @@ import com.biblioteca2020.models.service.IPrestamoLogService;
 import com.biblioteca2020.models.service.IPrestamoService;
 import com.biblioteca2020.models.service.IUsuarioService;
 import com.biblioteca2020.view.pdf.GenerarReportePDF;
+import com.biblioteca2020.view.xlsx.GenerarReporteExcel;
 
 @Controller
 @RequestMapping("/prestamos")
@@ -97,8 +99,9 @@ public class PrestamoController {
 
 	// REPORTE EXCEL PRESTAMOS TOTALES
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@GetMapping(value = "/reportes/xlsx/prestamos-totales")
-	public String listarPrestamosTotales(Model model, Authentication authentication, RedirectAttributes flash) {
+	@RequestMapping(value = "/reportes/xlsx/prestamos-totales")
+	public ResponseEntity<InputStreamResource> repPrestamosTotales(Model model, Authentication authentication,
+			RedirectAttributes flash) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		List<Prestamo> prestamos = null;
@@ -110,33 +113,30 @@ public class PrestamoController {
 				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
 				break;
 		}
-		if (prestamos.size() != 0) {
-			model.addAttribute("prestamos", prestamos);
-			model.addAttribute("tituloReporte", "Reporte de Préstamos Totales");
-			model.addAttribute("nombreReporte", "listado-prestamos-totales");
-			return "/prestamos/listar";
-		} else {
-			model.addAttribute("error", "Lo sentimos, el reporte seleccionado no está disponible en este momento");
-			return "/prestamos/error_reporte";
+		ByteArrayInputStream in;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamos.size() != 0) {
+				in = GenerarReporteExcel.generarExcelPrestamos("Reporte de Préstamos Totales", prestamos);
+				headers.add("Content-Disposition", "attachment; filename=listado-prestamos-totales.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (IOException e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 		}
 	}
-
-	// EXPERIMENTO
-	/*@PostMapping(value = "/excelexport")
-    public ResponseEntity<InputStreamResource> subVaribleExcel(@RequestBody SubVariable variable) throws IOException {
-        List<SubVariableExcel> subVariableExcels = subVariableRepository.findAllForExcel(variable.getVariable_id());
-        ByteArrayInputStream in = SubVariableExcelReport.subVariableExcel(subVariableExcels);
-        // return IO ByteArray(in);
-        HttpHeaders headers = new HttpHeaders();
-        // set filename in header
-        headers.add("Content-Disposition", "attachment; filename=subVariables.xlsx");
-        return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
-    }*/
 
 	// REPORTE EXCEL PRESTAMOS PENDIENTES
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/reportes/xlsx/prestamos-pendientes")
-	public String listarPrestamosPendientes(Model model, Authentication authentication, RedirectAttributes flash) {
+	public ResponseEntity<InputStreamResource> repPrestamosPendientes(Model model, Authentication authentication,
+			RedirectAttributes flash) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		List<Prestamo> prestamos = null;
@@ -148,25 +148,35 @@ public class PrestamoController {
 				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
 				break;
 		}
-		if (prestamos.size() != 0) {
-			// FILTRO SOLAMENTE LOS PRESTAMOS PENDIENTES
-			for (int i = 0; i < prestamos.size(); i++) {
-				prestamos.removeIf(n -> n.getDevolucion().equals(true));
-			}
-			model.addAttribute("prestamos", prestamos);
-			model.addAttribute("tituloReporte", "Reporte de Préstamos Pendientes");
-			model.addAttribute("nombreReporte", "listado-prestamos-pendientes");
-			return "/prestamos/listar";
-		} else {
-			model.addAttribute("error", "Lo sentimos, el reporte seleccionado no está disponible en este momento");
-			return "/prestamos/error_reporte";
+		// FILTRO SOLAMENTE LOS PRESTAMOS PENDIENTES
+		for (int i = 0; i < prestamos.size(); i++) {
+			prestamos.removeIf(n -> n.getDevolucion().equals(true));
 		}
+		ByteArrayInputStream in;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamos.size() != 0) {
+				in = GenerarReporteExcel.generarExcelPrestamos("Reporte de Préstamos Pendientes", prestamos);
+				headers.add("Content-Disposition", "attachment; filename=listado-prestamos-pendientes.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (IOException e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+
 	}
 
 	// REPORTE EXCEL PRESTAMOS COMPLETADOS
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/reportes/xlsx/prestamos-completados")
-	public String listarPrestamosCompletados(Model model, Authentication authentication, RedirectAttributes flash) {
+	public ResponseEntity<InputStreamResource> repPrestamosCompletados(Model model, Authentication authentication,
+			RedirectAttributes flash) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		List<Prestamo> prestamos = null;
@@ -178,20 +188,27 @@ public class PrestamoController {
 				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
 				break;
 		}
-		if (prestamos.size() != 0) {
-			// FILTRO SOLAMENTE LOS PRESTAMOS COMPLETADOS
-			for (int i = 0; i < prestamos.size(); i++) {
-				prestamos.removeIf(n -> n.getDevolucion().equals(false));
-			}
-			model.addAttribute("prestamos", prestamos);
-			model.addAttribute("tituloReporte", "Reporte de Préstamos Completados");
-			model.addAttribute("nombreReporte", "listado-prestamos-completados");
-			return "/prestamos/listar";
-		} else {
-			model.addAttribute("error", "Lo sentimos, el reporte seleccionado no está disponible en este momento");
-			return "redirect:/error_reporte";
+		// FILTRO SOLAMENTE LOS PRESTAMOS PENDIENTES
+		for (int i = 0; i < prestamos.size(); i++) {
+			prestamos.removeIf(n -> n.getDevolucion().equals(false));
 		}
-
+		ByteArrayInputStream in;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamos.size() != 0) {
+				in = GenerarReporteExcel.generarExcelPrestamos("Reporte de Préstamos Completados", prestamos);
+				headers.add("Content-Disposition", "attachment; filename=listado-prestamos-completados.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (IOException e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
 	}
 
 	// MÈTODO PARA GENERAR PDF DE PRESTAMOS TOTALES
@@ -215,7 +232,7 @@ public class PrestamoController {
 		var headers = new HttpHeaders();
 		try {
 			if (prestamos.size() != 0) {
-				bis = GenerarReportePDF.crearReportePrestamos("Reporte de Préstamos Totales", prestamos);
+				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Totales", prestamos);
 				headers.add("Content-Disposition", "inline; filename=prestamos-total-reporte.pdf");
 
 				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
@@ -259,7 +276,7 @@ public class PrestamoController {
 		var headers = new HttpHeaders();
 		try {
 			if (prestamosTotales.size() != 0) {
-				bis = GenerarReportePDF.crearReportePrestamos("Reporte de Préstamos Pendientes", prestamosTotales);
+				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Pendientes", prestamosTotales);
 				headers.add("Content-Disposition", "inline; filename=prestamos-pendientes-reporte.pdf");
 
 				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
@@ -303,7 +320,7 @@ public class PrestamoController {
 		var headers = new HttpHeaders();
 		try {
 			if (prestamosTotales.size() != 0) {
-				bis = GenerarReportePDF.crearReportePrestamos("Reporte de Préstamos Completados", prestamosTotales);
+				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Completados", prestamosTotales);
 				headers.add("Content-Disposition", "inline; filename=prestamos-completados-reporte.pdf");
 
 				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)

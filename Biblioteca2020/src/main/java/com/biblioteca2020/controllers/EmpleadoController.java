@@ -14,6 +14,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,6 +41,7 @@ import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.ILocalService;
 import com.biblioteca2020.models.service.IRoleService;
 import com.biblioteca2020.view.pdf.GenerarReportePDF;
+import com.biblioteca2020.view.xlsx.GenerarReporteExcel;
 
 @Controller
 @RequestMapping("/empleados")
@@ -314,12 +316,19 @@ public class EmpleadoController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
-	@RequestMapping(value = "/reportes/empleados-total", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	@GetMapping(value = "/reportes")
+	public String crearReporte(Model model, Authentication authentication) {
+		model.addAttribute("titulo", "Creación de Reportes");
+		return "/empleados/crear_reporte";
+	}
+
+	// REPORTE PDF EMPLEADOS TOTALES
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/pdf/empleados-totales", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfEmpleadosTotal(Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		List<Empleado> empleados = null;
-
 		switch (userDetails.getAuthorities().toString()) {
 			case "[ROLE_SYSADMIN]":
 				empleados = empleadoService.findAll();
@@ -331,13 +340,55 @@ public class EmpleadoController {
 		ByteArrayInputStream bis;
 		var headers = new HttpHeaders();
 		try {
-			bis = GenerarReportePDF.empleadosTotales(empleados);
-			headers.add("Content-Disposition", "inline; filename=empleados-total-reporte.pdf");
+			if (empleados.size() != 0) {
+				bis = GenerarReportePDF.generarPDFEmpleadosTotales(empleados);
+				headers.add("Content-Disposition", "inline; filename=listado-empleados-totales.pdf");
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
 
-			return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
-					.body(new InputStreamResource(bis));
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	// REPORTE EXCEL EMPLEADOS TOTALES
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/xlsx/empleados-totales", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> generarExcelEmpleadosTotal(Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Empleado> empleados = null;
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_SYSADMIN]":
+				empleados = empleadoService.findAll();
+				break;
+			case "[ROLE_ADMIN]":
+				empleados = empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getId());
+				break;
+		}
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			if (empleados.size() != 0) {
+				bis = GenerarReporteExcel.generarExcelEmpleados("Reporte de Empleados Totales", empleados);
+				headers.add("Content-Disposition", "attachment; filename=listado-empleados-totales.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 		}
 	}
 

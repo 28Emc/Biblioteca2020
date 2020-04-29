@@ -16,12 +16,12 @@
           <h3>Reporte General</h3>
         </div>
         <div class="col-10 col-md-10 col-lg-10">
-          <h4 class="text-muted">Listado de todos los préstamos</h4>
+          <h4 class="text-muted">Listado de todos los libros</h4>
         </div>
         <div class="col-1 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/pdf/prestamos-totales'}"
+            th:href="@{'/locales/libros/reportes/pdf/libros-unicos'}"
             target="_blank"
             data-toggle="tooltip"
             data-placement="auto"
@@ -32,7 +32,7 @@
         <div class="col-1 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/xlsx/prestamos-totales'}"
+            th:href="@{'/locales/libros/reportes/xlsx/libros-unicos'}"
             data-toggle="tooltip"
             data-placement="auto"
             th:title="'Exportar XLSX'"
@@ -43,83 +43,21 @@
 
       <div class="form-group row py-1">
         <div class="col-12">
-          <h3>Prèstamos Pendientes</h3>
-        </div>
-        <div class="col-10 col-md-10 col-lg-10">
-          <h4 class="text-muted">Listado de préstamos pendientes</h4>
-        </div>
-        <div class="col-1 col-md-1 col-xl-1">
-          <a
-            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/pdf/prestamos-pendientes'}"
-            target="_blank"
-            data-toggle="tooltip"
-            data-placement="auto"
-            th:title="'Exportar PDF'"
-            ><i class="fas fa-file-pdf fa-2x text-danger"></i
-          ></a>
-        </div>
-        <div class="col-1 col-md-1 col-xl-1">
-          <a
-            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/xlsx/prestamos-pendientes'}"
-            data-toggle="tooltip"
-            data-placement="auto"
-            th:title="'Exportar XLSX'"
-            ><i class="fas fa-file-excel fa-2x text-success"></i
-          ></a>
-        </div>
-      </div>
-
-      <div class="form-group row py-1">
-        <div class="col-12">
-          <h3>Prèstamos Terminados</h3>
-        </div>
-        <div class="col-10 col-md-10 col-lg-10">
-          <h4 class="text-muted">
-            Listado de préstamos terminados y/o anulados
-          </h4>
-        </div>
-        <div class="col-1 col-md-1 col-xl-1">
-          <a
-            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/pdf/prestamos-completados'}"
-            target="_blank"
-            data-toggle="tooltip"
-            data-placement="auto"
-            th:title="'Exportar PDF'"
-            ><i class="fas fa-file-pdf fa-2x text-danger"></i
-          ></a>
-        </div>
-        <div class="col-1 col-md-1 col-xl-1">
-          <a
-            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/xlsx/prestamos-completados'}"
-            data-toggle="tooltip"
-            data-placement="auto"
-            th:title="'Exportar XLSX'"
-            ><i class="fas fa-file-excel fa-2x text-success"></i
-          ></a>
-        </div>
-      </div>
-
-      <div class="form-group row py-1">
-        <div class="col-12">
-          <h3>Filtrar Por Empleado</h3>
+          <h3>Filtrar Por Categoría</h3>
         </div>
         <div class="col-10 col-md-10 col-lg-10">
           <input
             type="number"
-            name="nroDocumentoEmpleado"
-            id="nroDocumentoEmpleado"
+            name="categoriaLibro"
+            id="categoriaLibro"
             class="form-control rounded-0 shadow-none"
-            placeholder="Buscar empleado por su DNI"
+            placeholder="Escribir la Categoría"
           />
         </div>
         <div class="col-1 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/pdf/prestamos-por-empleado'}"
+            th:href="@{'/locales/libros/reportes/pdf/libros-por-categoria'}"
             target="_blank"
             data-toggle="tooltip"
             data-placement="auto"
@@ -127,10 +65,11 @@
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
           ></a>
         </div>
+
         <div class="col-1 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/xlsx/prestamos-por-empleado'}"
+            th:href="@{'/locales/libros/reportes/xlsx/libros-por-categoria'}"
             data-toggle="tooltip"
             data-placement="auto"
             th:title="'Exportar XLSX'"
@@ -141,32 +80,69 @@
 
       <div class="form-group row py-1">
         <div class="col-12">
-          <h3>Filtrar Por Usuario</h3>
+          <h3>Filtrar Por Stock</h3>
         </div>
         <div class="col-10 col-md-10 col-lg-10">
           <input
             type="number"
-            name="nroDocumentoUsuario"
-            id="nroDocumentoUsuario"
+            name="stockLibro"
+            id="stockLibro"
             class="form-control rounded-0 shadow-none"
-            placeholder="Buscar usuario por su DNI"
+            placeholder="Escribir el Stock"
           />
         </div>
         <div class="col-1 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/pdf/prestamos-por-usuario'}"
+            th:href="@{'/locales/libros/reportes/pdf/libros-por-stock'}"
             target="_blank"
             data-toggle="tooltip"
             data-placement="auto"
-            th:title="'Exportar'"
+            th:title="'Exportar PDF'"
+            ><i class="fas fa-file-pdf fa-2x text-danger"></i
+          ></a>
+        </div>
+        
+        <div class="col-1 col-md-1 col-xl-1">
+          <a
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/locales/libros/reportes/xlsx/libros-por-stock'}"
+            data-toggle="tooltip"
+            data-placement="auto"
+            th:title="'Exportar XLSX'"
+            ><i class="fas fa-file-excel fa-2x text-success"></i
+          ></a>
+        </div>
+      </div>
+
+      <div class="form-group row py-1">
+        <div class="col-12">
+          <h3>Filtrar Por Estado</h3>
+        </div>
+        <div class="col-10 col-md-10 col-lg-10">
+          <input
+            type="number"
+            name="estadoLibro"
+            id="estadoLibro"
+            class="form-control rounded-0 shadow-none"
+            placeholder="Escojer Estado"
+          />
+        </div>
+        <div class="col-1 col-md-1 col-xl-1">
+          <a
+            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
+            th:href="@{'/locales/libros/reportes/pdf/libros-por-estado'}"
+            target="_blank"
+            data-toggle="tooltip"
+            data-placement="auto"
+            th:title="'Exportar PDF'"
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
           ></a>
         </div>
         <div class="col-1 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/xlsx/prestamos-por-usuario'}"
+            th:href="@{'/locales/libros/reportes/xlsx/libros-por-estado'}"
             data-toggle="tooltip"
             data-placement="auto"
             th:title="'Exportar XLSX'"

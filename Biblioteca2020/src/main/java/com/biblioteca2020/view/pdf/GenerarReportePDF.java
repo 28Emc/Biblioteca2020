@@ -22,7 +22,7 @@ import com.lowagie.text.Font;
 public class GenerarReportePDF {
 
     // ################ PRESTAMOS
-    public static ByteArrayInputStream crearReportePrestamos(String titulo, List<Prestamo> prestamos) throws Exception {
+    public static ByteArrayInputStream generarPDFPrestamos(String titulo, List<Prestamo> prestamos) throws Exception {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         // INICIO A ARMAR MI DOCUMENTO PDF
@@ -135,7 +135,7 @@ public class GenerarReportePDF {
     }
 
     // ################ LIBROS
-    public static ByteArrayInputStream librosUnicos(List<Libro> libros) throws Exception {
+    public static ByteArrayInputStream generarPDFLibrosUnicos(List<Libro> libros) throws Exception {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -236,7 +236,7 @@ public class GenerarReportePDF {
     }
 
     // ################ USUARIOS
-    public static ByteArrayInputStream usuariosTotales(List<Usuario> usuarios) throws Exception {
+    public static ByteArrayInputStream generarPDFUsuariosTotales(List<Usuario> usuarios) throws Exception {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -332,7 +332,7 @@ public class GenerarReportePDF {
     }
 
     // ################ EMPLEADOS
-    public static ByteArrayInputStream empleadosTotales(List<Empleado> empleados) throws Exception {
+    public static ByteArrayInputStream generarPDFEmpleadosTotales(List<Empleado> empleados) throws Exception {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
