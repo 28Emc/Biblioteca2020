@@ -26,10 +26,14 @@ public interface IEmpleadoDao extends CrudRepository<Empleado, Long> {
 	// USADO
 	@Query("select e from Empleado e where e.username like ?1 and e.local.id=?2")
 	public Empleado findByUsernameAndLocal(String username, Long id_local);
-	
+
 	// USADO
 	@Query("select e from Empleado e join fetch e.roles r where r.authority like ?1 and e.local.id=?2")
 	public Empleado findByRoleAndLocal(String role, Long id_local);
+
+	// USADO
+	@Query("select e from Empleado e join fetch e.roles r where r.authority in ('ROLE_EMPLEADO') and e.local.id=?1")
+	public Empleado findByRoleAndLocalNotAdmin(Long id_local);
 
 	// USADO
 	@Query("select e from Empleado e join fetch e.roles r join fetch e.local l join fetch l.empresa em where l.id=?1 and r.authority not in ('ROLE_PRUEBA')")
@@ -42,6 +46,14 @@ public interface IEmpleadoDao extends CrudRepository<Empleado, Long> {
 	// USADO
 	@Query("select e from Empleado e join fetch e.roles r where r.authority='ROLE_EMPLEADO'")
 	public List<Empleado> fetchByIdWithRoles();
+
+	// USADO
+	@Query("select e from Empleado e join fetch e.roles r where r.authority in ('ROLE_ADMIN', 'ROLE_EMPLEADO') and e.nroDocumento like ?1")
+	public List<Empleado> fetchByIdWithRoles(String term);
+
+	// USADO
+	@Query("select e from Empleado e join fetch e.roles r where e.username NOT LIKE '%Prueba%' and e.nroDocumento like ?1")
+	public List<Empleado> fetchByIdWithRolesSysAdmin(String term);
 
 	// USADO
 	public Empleado findByCelular(String celular);

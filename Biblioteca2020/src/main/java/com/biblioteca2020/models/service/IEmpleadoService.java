@@ -18,7 +18,16 @@ public interface IEmpleadoService {
 	public List<Empleado> fetchByIdWithLocalWithEmpresaNotAdmin(Long id);
 
 	// USADO
+	public Empleado findByRoleAndLocalNotAdmin(Long id_local);
+
+	// USADO
 	public List<Empleado> fetchByIdWithRoles();
+
+	// USADO
+	public List<Empleado> fetchByIdWithRoles(String term);
+
+	// USADO
+	public List<Empleado> fetchByIdWithRolesSysAdmin(String term);
 
 	// USADO
 	public Empleado findById(Long id) throws Exception;

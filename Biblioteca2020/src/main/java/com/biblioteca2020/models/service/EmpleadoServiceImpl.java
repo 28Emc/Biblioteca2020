@@ -81,8 +81,8 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
-	public List<Empleado> fetchByIdWithRoles() {
-		return empleadoDao.fetchByIdWithRoles();
+	public List<Empleado> fetchByIdWithRoles(String term) {
+		return empleadoDao.fetchByIdWithRoles("%" + term + "%");
 	}
 
 	// USADO
@@ -203,5 +203,26 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	@Transactional(readOnly = true)
 	public Empleado findByRoleAndLocal(String role, Long id_local) {
 		return empleadoDao.findByRoleAndLocal("%" + role + "%", id_local);
+	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Empleado> fetchByIdWithRolesSysAdmin(String term) {
+		return empleadoDao.fetchByIdWithRolesSysAdmin("%" + term + "%");
+	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public Empleado findByRoleAndLocalNotAdmin(Long id_local) {
+		return empleadoDao.findByRoleAndLocalNotAdmin(id_local);
+	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Empleado> fetchByIdWithRoles() {
+		return empleadoDao.fetchByIdWithRoles();
 	}
 }

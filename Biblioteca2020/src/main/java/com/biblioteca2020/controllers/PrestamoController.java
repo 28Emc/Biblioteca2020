@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
@@ -90,11 +91,234 @@ public class PrestamoController {
 		return "/prestamos/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN','ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/reportes")
-	public String crearReporte(Model model, Authentication authentication) {
+	public String crearReporte(Model model) {
 		model.addAttribute("titulo", "Creación de Reportes");
+		model.addAttribute("enable", false);
+		model.addAttribute("empleado", new Empleado());
+		model.addAttribute("usuario", new Usuario());
 		return "/prestamos/crear_reporte";
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/buscar-empleado", method = RequestMethod.GET)
+	public String buscarEmpleadoParaReporte(@RequestParam String nroDocumentoEmpleado, Model model,
+			Authentication authentication, RedirectAttributes flash) {
+		model.addAttribute("titulo", "Reporte Por Empleado");
+		model.addAttribute("enable", true);
+		Empleado empleado;
+		try {
+			empleado = empleadoService.findByNroDocumento(nroDocumentoEmpleado);
+			if (empleado == null) {
+				flash.addFlashAttribute("error", "Error, el DNI es incorrecto o el empleado no está disponible");
+				return "redirect:/prestamos/reportes";
+			}
+			model.addAttribute("empleado", empleado);
+		} catch (Exception e) {
+			flash.addFlashAttribute("error", "Error, el DNI es incorrecto o el empleado no está disponible");
+			return "redirect:/prestamos/reportes";
+		}
+		return "/prestamos/busqueda_empleado";
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/buscar-usuario", method = RequestMethod.GET)
+	public String buscarUsuarioParaReporte(@RequestParam String nroDocumentoUsuario, Model model,
+			Authentication authentication, RedirectAttributes flash) {
+		model.addAttribute("titulo", "Reporte Por Usuario");
+		model.addAttribute("enable", true);
+		Usuario usuario;
+		try {
+			usuario = usuarioService.findByNroDocumento(nroDocumentoUsuario);
+			if (usuario == null) {
+				flash.addFlashAttribute("error", "Error, el DNI es incorrecto o el usuario no está disponible");
+				return "redirect:/prestamos/reportes";
+			}
+			model.addAttribute("usuario", usuario);
+		} catch (Exception e) {
+			flash.addFlashAttribute("error", "Error, el DNI es incorrecto o el usuario no está disponible");
+			return "redirect:/prestamos/reportes";
+		}
+		return "/prestamos/busqueda_usuario";
+	}
+
+	// MÈTODO PARA GENERAR PDF DE PRESTAMOS TOTALES
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/pdf/prestamos-totales", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosTotal(Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Prestamo> prestamos = null;
+		// DECIDO EL ORIGEN DE DATOS SEGUN EL ROL
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
+				break;
+			case "[ROLE_EMPLEADO]":
+				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
+				break;
+		}
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamos.size() != 0) {
+				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Totales", prestamos);
+				headers.add("Content-Disposition", "inline; filename=prestamos-total-reporte.pdf");
+
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
+	// MÈTODO PARA GENERAR PDF DE PRESTAMOS PENDIENTES
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/pdf/prestamos-pendientes", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosPendientes(Authentication authentication) {
+
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Prestamo> prestamosTotales = null;
+		// DECIDO EL ORIGEN DE DATOS SEGUN EL ROL
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				prestamosTotales = prestamoService
+						.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
+				break;
+			case "[ROLE_EMPLEADO]":
+				prestamosTotales = prestamoService
+						.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
+				break;
+		}
+		// FILTRO SOLAMENTE LOS PRESTAMOS PENDIENTES
+		for (int i = 0; i < prestamosTotales.size(); i++) {
+			prestamosTotales.removeIf(n -> n.getDevolucion().equals(true));
+		}
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamosTotales.size() != 0) {
+				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Pendientes", prestamosTotales);
+				headers.add("Content-Disposition", "inline; filename=prestamos-pendientes-reporte.pdf");
+
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
+	// MÈTODO PARA GENERAR PDF DE PRESTAMOS COMPLETADOS
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/pdf/prestamos-completados", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosCompletados(Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Prestamo> prestamosTotales = null;
+		// DECIDO EL ORIGEN DE DATOS SEGUN EL ROL
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_ADMIN]":
+				prestamosTotales = prestamoService
+						.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
+				break;
+			case "[ROLE_EMPLEADO]":
+				prestamosTotales = prestamoService
+						.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
+				break;
+		}
+		// FILTRO SOLAMENTE LOS PRESTAMOS COMPLETADOS
+		for (int i = 0; i < prestamosTotales.size(); i++) {
+			prestamosTotales.removeIf(n -> n.getDevolucion().equals(false));
+		}
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamosTotales.size() != 0) {
+				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Completados", prestamosTotales);
+				headers.add("Content-Disposition", "inline; filename=prestamos-completados-reporte.pdf");
+
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				// ENCONTRAR LA MANERA DE MANDAR UN ERROR PERSONALIZADO
+				// return ResponseEntity.badRequest().build();
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
+	// MÈTODO PARA GENERAR PDF DE PRESTAMOS POR EMPLEADO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/pdf/prestamos-por-empleado/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosPorEmpleado(@PathVariable("id") String id) {
+		List<Prestamo> prestamos = null;
+		// BUSCAR LOS REPORTES POR EL ID
+		prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(Long.parseLong(id));
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamos.size() != 0) {
+				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Por Empleado", prestamos);
+				headers.add("Content-Disposition", "inline; filename=prestamos-por-empleado-reporte.pdf");
+
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
+	// MÈTODO PARA GENERAR PDF DE PRESTAMOS POR USUARIO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/pdf/prestamos-por-usuario/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosPorUsuario(@PathVariable("id") String id) {
+		List<Prestamo> prestamos = null;
+		// BUSCAR LOS REPORTES POR EL ID
+		prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserAll(Long.parseLong(id));
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamos.size() != 0) {
+				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Por Usuario", prestamos);
+				headers.add("Content-Disposition", "inline; filename=prestamos-por-usuario-reporte.pdf");
+
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 	// REPORTE EXCEL PRESTAMOS TOTALES
@@ -211,129 +435,53 @@ public class PrestamoController {
 		}
 	}
 
-	// MÈTODO PARA GENERAR PDF DE PRESTAMOS TOTALES
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/reportes/pdf/prestamos-totales", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<InputStreamResource> generarPdfPrestamosTotal(Authentication authentication) {
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+	// REPORTE EXCEL PRESTAMOS POR EMPLEADO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN','ROLE_ADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/xlsx/prestamos-por-empleado/{id}", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> repPrestamosPorEmpleado(@PathVariable("id") String id) {
 		List<Prestamo> prestamos = null;
-		// DECIDO EL ORIGEN DE DATOS SEGUN EL ROL
-		switch (userDetails.getAuthorities().toString()) {
-			case "[ROLE_ADMIN]":
-				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
-				break;
-			case "[ROLE_EMPLEADO]":
-				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
-				break;
-		}
-		// GENERO EL REPORTE
-		ByteArrayInputStream bis;
+		prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(Long.parseLong(id));
+		ByteArrayInputStream in;
 		var headers = new HttpHeaders();
 		try {
 			if (prestamos.size() != 0) {
-				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Totales", prestamos);
-				headers.add("Content-Disposition", "inline; filename=prestamos-total-reporte.pdf");
-
-				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
-						.body(new InputStreamResource(bis));
+				in = GenerarReporteExcel.generarExcelPrestamos("Reporte de Préstamos Por Empleado", prestamos);
+				headers.add("Content-Disposition", "attachment; filename=listado-prestamos-por-empleado.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
 			} else {
 				headers.clear();
 				headers.add("Location", "/error_reporte");
 				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 			}
-
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
+		} catch (IOException e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 		}
 	}
 
-	// MÈTODO PARA GENERAR PDF DE PRESTAMOS PENDIENTES
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/reportes/pdf/prestamos-pendientes", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<InputStreamResource> generarPdfPrestamosPendientes(Authentication authentication) {
-
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		List<Prestamo> prestamosTotales = null;
-		// DECIDO EL ORIGEN DE DATOS SEGUN EL ROL
-		switch (userDetails.getAuthorities().toString()) {
-			case "[ROLE_ADMIN]":
-				prestamosTotales = prestamoService
-						.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
-				break;
-			case "[ROLE_EMPLEADO]":
-				prestamosTotales = prestamoService
-						.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
-				break;
-		}
-		// FILTRO SOLAMENTE LOS PRESTAMOS PENDIENTES
-		for (int i = 0; i < prestamosTotales.size(); i++) {
-			prestamosTotales.removeIf(n -> n.getDevolucion().equals(true));
-		}
-		// GENERO EL REPORTE
-		ByteArrayInputStream bis;
+	// REPORTE EXCEL PRESTAMOS POR USUARIO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN','ROLE_ADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/xlsx/prestamos-por-usuario/{id}", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> repPrestamosPorUsuario(@PathVariable("id") String id) {
+		List<Prestamo> prestamos = null;
+		prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserAll(Long.parseLong(id));
+		ByteArrayInputStream in;
 		var headers = new HttpHeaders();
 		try {
-			if (prestamosTotales.size() != 0) {
-				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Pendientes", prestamosTotales);
-				headers.add("Content-Disposition", "inline; filename=prestamos-pendientes-reporte.pdf");
-
-				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
-						.body(new InputStreamResource(bis));
+			if (prestamos.size() != 0) {
+				in = GenerarReporteExcel.generarExcelPrestamos("Reporte de Préstamos Por Usuario", prestamos);
+				headers.add("Content-Disposition", "attachment; filename=listado-prestamos-por-usuario.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
 			} else {
 				headers.clear();
 				headers.add("Location", "/error_reporte");
 				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 			}
-
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
-		}
-	}
-
-	// MÈTODO PARA GENERAR PDF DE PRESTAMOS COMPLETADOS
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/reportes/pdf/prestamos-completados", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<InputStreamResource> generarPdfPrestamosCompletados(Authentication authentication) {
-
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		List<Prestamo> prestamosTotales = null;
-		// DECIDO EL ORIGEN DE DATOS SEGUN EL ROL
-		switch (userDetails.getAuthorities().toString()) {
-			case "[ROLE_ADMIN]":
-				prestamosTotales = prestamoService
-						.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId());
-				break;
-			case "[ROLE_EMPLEADO]":
-				prestamosTotales = prestamoService
-						.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId());
-				break;
-		}
-		// FILTRO SOLAMENTE LOS PRESTAMOS COMPLETADOS
-		for (int i = 0; i < prestamosTotales.size(); i++) {
-			prestamosTotales.removeIf(n -> n.getDevolucion().equals(false));
-		}
-		// GENERO EL REPORTE
-		ByteArrayInputStream bis;
-		var headers = new HttpHeaders();
-		try {
-			if (prestamosTotales.size() != 0) {
-				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Completados", prestamosTotales);
-				headers.add("Content-Disposition", "inline; filename=prestamos-completados-reporte.pdf");
-
-				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
-						.body(new InputStreamResource(bis));
-			} else {
-				// ENCONTRAR LA MANERA DE MANDAR UN ERROR PERSONALIZADO
-				// return ResponseEntity.badRequest().build();
-				headers.clear();
-				headers.add("Location", "/error_reporte");
-				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
-			}
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
+		} catch (IOException e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 		}
 	}
 
@@ -358,10 +506,47 @@ public class PrestamoController {
 		return usuarioService.findByNroDocumentoAndEstado(term, true);
 	}
 
+	// MÉTODO PARA REALIZAR LA BUSQUEDA DE USUARIOS ACTIVOS MEDIANTE AUTOCOMPLETADO
+	// EN EL REPORTE
+	@RequestMapping(value = "/cargar-usuarios-reporte/{term}", produces = { "application/json" })
+	public @ResponseBody List<Usuario> cargarUsuariosReporte(@PathVariable String term) {
+		return usuarioService.findByNroDocumentoAndEstado(term, true);
+	}
+
 	// MÉTODO PARA REALIZAR LA BUSQUEDA DE EMPLEADOS MEDIANTE AUTOCOMPLETADO
 	@RequestMapping(value = "/cargar-empleados/{term}", produces = { "application/json" })
 	public @ResponseBody List<Empleado> cargarEmpleados(@PathVariable String term) {
 		return empleadoService.findAllByNroDocumentoAndEstado(term, true);
+	}
+
+	// MÉTODO PARA REALIZAR LA BUSQUEDA DE EMPLEADOS MEDIANTE AUTOCOMPLETADO EN EL
+	// REPORTE
+	@RequestMapping(value = "/cargar-empleados-reporte/{term}", produces = { "application/json" })
+	public @ResponseBody List<Empleado> cargarEmpleadosReporte(@PathVariable String term,
+			Authentication authentication) {
+		List<Empleado> empleados = null;
+		// OBTENER USUARIO LOGUEADO ACTUALMENTE
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		// MOSTRAR LISTADO DE ACUERDO A ROL
+		switch (userDetails.getAuthorities().toString()) {
+			// ADMIN: VE EMPLEADOS DEL LOCAL ENTERO
+			case "[ROLE_SYSADMIN]":
+				empleados = empleadoService.fetchByIdWithRolesSysAdmin(term);
+				break;
+			case "[ROLE_ADMIN]":
+				// BUSCO LOS ADMIN Y LOS QUITO DE MI LISTA
+				empleados = empleadoService.fetchByIdWithRoles(term);
+				for (Empleado empleadoItem : empleados) {
+					if (empleadoItem.getRoles().iterator().next().getAuthority().equals("ROLE_ADMIN")) {
+						empleados.removeIf(n -> !n.getUsername().equals(userDetails.getUsername()));
+					}
+				}
+				break;
+			default:
+				return null;
+		}
+
+		return empleados;
 	}
 
 	// CARGA DE FORMULARIO DE CREACIÓN DE PRÉSTAMOS

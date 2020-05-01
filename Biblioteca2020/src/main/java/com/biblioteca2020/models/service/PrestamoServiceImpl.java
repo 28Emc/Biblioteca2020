@@ -87,4 +87,11 @@ public class PrestamoServiceImpl implements IPrestamoService {
 		Prestamo prestamo = findById(id);
 		prestamoDao.delete(prestamo);
 	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserAll(Long id) {
+		return prestamoDao.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserAll(id);
+	}
 }

@@ -5,12 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Prestamo;
 import com.biblioteca2020.models.entity.Usuario;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;

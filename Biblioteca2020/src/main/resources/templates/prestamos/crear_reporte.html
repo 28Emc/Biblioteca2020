@@ -18,7 +18,7 @@
         <div class="col-10 col-md-10 col-lg-10">
           <h4 class="text-muted">Listado de todos los préstamos</h4>
         </div>
-        <div class="col-1 col-md-1 col-xl-1">
+        <div class="col-6 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
             th:href="@{'/prestamos/reportes/pdf/prestamos-totales'}"
@@ -29,7 +29,7 @@
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
           ></a>
         </div>
-        <div class="col-1 col-md-1 col-xl-1">
+        <div class="col-6 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
             th:href="@{'/prestamos/reportes/xlsx/prestamos-totales'}"
@@ -48,7 +48,7 @@
         <div class="col-10 col-md-10 col-lg-10">
           <h4 class="text-muted">Listado de préstamos pendientes</h4>
         </div>
-        <div class="col-1 col-md-1 col-xl-1">
+        <div class="col-6 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
             th:href="@{'/prestamos/reportes/pdf/prestamos-pendientes'}"
@@ -59,7 +59,7 @@
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
           ></a>
         </div>
-        <div class="col-1 col-md-1 col-xl-1">
+        <div class="col-6 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
             th:href="@{'/prestamos/reportes/xlsx/prestamos-pendientes'}"
@@ -73,14 +73,14 @@
 
       <div class="form-group row py-1">
         <div class="col-12">
-          <h3>Prèstamos Terminados</h3>
+          <h3>Prèstamos Completados</h3>
         </div>
         <div class="col-10 col-md-10 col-lg-10">
           <h4 class="text-muted">
             Listado de préstamos terminados y/o anulados
           </h4>
         </div>
-        <div class="col-1 col-md-1 col-xl-1">
+        <div class="col-6 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
             th:href="@{'/prestamos/reportes/pdf/prestamos-completados'}"
@@ -91,7 +91,7 @@
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
           ></a>
         </div>
-        <div class="col-1 col-md-1 col-xl-1">
+        <div class="col-6 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
             th:href="@{'/prestamos/reportes/xlsx/prestamos-completados'}"
@@ -103,77 +103,67 @@
         </div>
       </div>
 
-      <div class="form-group row py-1">
-        <div class="col-12">
-          <h3>Filtrar Por Empleado</h3>
+      <form
+        th:action="@{/prestamos/reportes/buscar-empleado}"
+        sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+        method="GET"
+      >
+        <div class="form-group row">
+          <div class="col-12">
+            <h3>Filtrar Por Empleado</h3>
+          </div>
         </div>
-        <div class="col-10 col-md-10 col-lg-10">
-          <input
-            type="number"
-            name="nroDocumentoEmpleado"
-            id="nroDocumentoEmpleado"
-            class="form-control rounded-0 shadow-none"
-            placeholder="Buscar empleado por su DNI"
-          />
+        <div class="form-group row pb-3">
+          <div class="col-sm-12 col-md-8 col-xl-8 py-2">
+            <input
+              type="number"
+              name="nroDocumentoEmpleado"
+              id="nroDocumentoEmpleado"
+              class="form-control rounded-0 shadow-none"
+              placeholder="Buscar empleado por su DNI"
+              th:value="nroDocumentoEmpleado"
+            />
+          </div>
+          <div class="col-sm-12 col-md-4 col-xl-4 py-2">
+            <input
+              type="submit"
+              th:value="'Verificar Disponibilidad'"
+              class="btn btn-info btn-block rounded-0 border-0"
+            />
+          </div>
         </div>
-        <div class="col-1 col-md-1 col-xl-1">
-          <a
-            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/pdf/prestamos-por-empleado'}"
-            target="_blank"
-            data-toggle="tooltip"
-            data-placement="auto"
-            th:title="'Exportar PDF'"
-            ><i class="fas fa-file-pdf fa-2x text-danger"></i
-          ></a>
-        </div>
-        <div class="col-1 col-md-1 col-xl-1">
-          <a
-            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/xlsx/prestamos-por-empleado'}"
-            data-toggle="tooltip"
-            data-placement="auto"
-            th:title="'Exportar XLSX'"
-            ><i class="fas fa-file-excel fa-2x text-success"></i
-          ></a>
-        </div>
-      </div>
+      </form>
 
-      <div class="form-group row py-1">
-        <div class="col-12">
-          <h3>Filtrar Por Usuario</h3>
+      <form
+        th:action="@{/prestamos/reportes/buscar-usuario}"
+        sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+        method="GET"
+      >
+        <div class="form-group row">
+          <div class="col-12">
+            <h3>Filtrar Por Usuario</h3>
+          </div>
         </div>
-        <div class="col-10 col-md-10 col-lg-10">
-          <input
-            type="number"
-            name="nroDocumentoUsuario"
-            id="nroDocumentoUsuario"
-            class="form-control rounded-0 shadow-none"
-            placeholder="Buscar usuario por su DNI"
-          />
+        <div class="form-group row pb-3">
+          <div class="col-sm-12 col-md-8 col-xl-8 py-2">
+            <input
+              type="number"
+              name="nroDocumentoUsuario"
+              id="nroDocumentoUsuario"
+              class="form-control rounded-0 shadow-none"
+              placeholder="Buscar usuario por su DNI"
+              th:value="nroDocumentoUsuario"
+            />
+          </div>
+          <div class="col-sm-12 col-md-4 col-xl-4 py-2">
+            <input
+              type="submit"
+              th:value="'Verificar Disponibilidad'"
+              class="btn btn-info btn-block rounded-0 border-0"
+            />
+          </div>
         </div>
-        <div class="col-1 col-md-1 col-xl-1">
-          <a
-            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/pdf/prestamos-por-usuario'}"
-            target="_blank"
-            data-toggle="tooltip"
-            data-placement="auto"
-            th:title="'Exportar'"
-            ><i class="fas fa-file-pdf fa-2x text-danger"></i
-          ></a>
-        </div>
-        <div class="col-1 col-md-1 col-xl-1">
-          <a
-            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/prestamos/reportes/xlsx/prestamos-por-usuario'}"
-            data-toggle="tooltip"
-            data-placement="auto"
-            th:title="'Exportar XLSX'"
-            ><i class="fas fa-file-excel fa-2x text-success"></i
-          ></a>
-        </div>
-      </div>
+      </form>
 
       <div class="form-group row py-4">
         <!-- WEB -->
@@ -189,7 +179,11 @@
 
     <footer th:replace="layout/layout :: footer"></footer>
     <script th:replace="layout/autocomplete-libros :: javascript"></script>
-    <script th:replace="layout/autocomplete-usuarios :: javascript"></script>
-    <script th:replace="layout/autocomplete-empleados :: javascript"></script>
+    <script
+      th:replace="layout/autocomplete-empleados-reporte :: javascript"
+    ></script>
+    <script
+      th:replace="layout/autocomplete-usuarios-reporte :: javascript"
+    ></script>
   </body>
 </html>
