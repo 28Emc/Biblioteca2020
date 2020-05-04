@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.validation.Valid;
@@ -30,9 +31,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.biblioteca2020.models.entity.Categoria;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
 import com.biblioteca2020.models.entity.Local;
+import com.biblioteca2020.models.service.ICategoriaService;
 import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.ILocalService;
@@ -45,6 +49,9 @@ public class LibroController {
 
 	@Autowired
 	private ILibroService libroService;
+
+	@Autowired
+	private ICategoriaService categoriaService;
 
 	@Autowired
 	private ILocalService localService;
@@ -248,7 +255,19 @@ public class LibroController {
 	@GetMapping(value = "/locales/libros/reportes")
 	public String crearReporte(Model model, Authentication authentication) {
 		model.addAttribute("titulo", "Creación de Reportes");
+		model.addAttribute("libro", new Libro());
+		ArrayList<Boolean> estados = new ArrayList<Boolean>();
+		estados.add(true);
+		estados.add(false);
+		model.addAttribute("estados", estados);
 		return "/libros/crear_reporte";
+	}
+
+	// MÉTODO PARA REALIZAR LA BUSQUEDA CATEGORIAS POR SU NOMBRE MEDIANTE
+	// AUTOCOMPLETADO
+	@RequestMapping(value = "/libros/cargar-categorias/{term}", produces = { "application/json" })
+	public @ResponseBody List<Categoria> cargarCategorias(@PathVariable String term) {
+		return categoriaService.findByNombreLikeIgnoreCase(term);
 	}
 
 	// REPORTE PDF LIBROS UNICOS
@@ -263,7 +282,7 @@ public class LibroController {
 		var headers = new HttpHeaders();
 		try {
 			if (libros.size() != 0) {
-				bis = GenerarReportePDF.generarPDFLibrosUnicos(libros);
+				bis = GenerarReportePDF.generarPDFLibros("Reporte de Libros Únicos", libros);
 				headers.add("Content-Disposition", "inline; filename=listado-libros-unicos.pdf");
 				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
 						.body(new InputStreamResource(bis));
@@ -272,6 +291,112 @@ public class LibroController {
 				headers.add("Location", "/error_reporte");
 				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 			}
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/locales/libros/reportes/buscar-libros-por-categoria", method = RequestMethod.GET)
+	public String buscarCategoriaParaReporte(@RequestParam String categoria_libro, Model model,
+			Authentication authentication, RedirectAttributes flash) {
+		model.addAttribute("titulo", "Reporte Por Categoría");
+		model.addAttribute("enable", true);
+		Categoria categoria;
+		try {
+			if (categoria_libro.length() == 0 || categoria_libro.length() > 100) {
+				flash.addFlashAttribute("error", "Error, la categoría es incorrecta");
+				return "redirect:/locales/libros/reportes";
+			}
+			categoria = categoriaService.findByNombre(categoria_libro);
+			if (categoria == null) {
+				flash.addFlashAttribute("error", "Error, la categoría no está disponible");
+				return "redirect:/locales/libros/reportes";
+			}
+			model.addAttribute("categoria", categoria);
+		} catch (Exception e) {
+			flash.addFlashAttribute("error", "Error, la categoría es incorrecta o no está disponible");
+			return "redirect:/locales/libros/reportes";
+		}
+		return "/libros/busqueda_libros_por_categoria";
+	}
+
+	// REPORTE PDF LIBROS POR CATEGORÍA
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/locales/libros/reportes/pdf/libros-por-categoria/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfLibrosPorCategoria(@PathVariable("id") String id,
+			Authentication authentication, Model model) {
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+			Categoria categoria = categoriaService.findOne(Long.parseLong(id));
+			List<Libro> libros = null;
+
+			libros = libroService.findByCategoriaAndLocal(categoria.getNombre(), empleado.getLocal().getId());
+			if (libros.size() != 0) {
+				bis = GenerarReportePDF.generarPDFLibros("Reporte de Libros Por Categoría", libros);
+				headers.add("Content-Disposition", "inline; filename=listado-libros-por-categoria.pdf");
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	// REPORTE PDF LIBROS POR ESTADO
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/locales/libros/reportes/pdf/libros-por-estado/{estado}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfLibrosPorEstado(@PathVariable("estado") String estado,
+			Model model, Authentication authentication) {
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		try {
+			List<Libro> libros = null;
+			String titulo = "";
+			String tituloPdf = "";
+			// USO UN STRING EN VEZ DE UN BOOLEAN PARA HACER SALTAR LA EXCEPCION
+			if (estado.equals("true")) {
+				libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), true);
+				titulo = "listado-libros-disponibles";
+				tituloPdf = "Reporte de Libros Disponibles";
+			} else if (estado.equals("false")) {
+				libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), false);
+				titulo = "listado-libros-no-disponibles";
+				tituloPdf = "Reporte de Libros No Disponibles";
+			} else if (!estado.equals("true") || estado.equals("false")) {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+			if (libros.size() != 0) {
+				bis = GenerarReportePDF.generarPDFLibros(tituloPdf, libros);
+				headers.add("Content-Disposition", "inline; filename=" + titulo + ".pdf");
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				headers.set("errorMessage", "Error, el reporte solicitado no existe.");
+				model.addAttribute("errorMessage", "Error, el reporte solicitado no existe.");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (IllegalArgumentException ex) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 		} catch (Exception e) {
 			headers.clear();
 			headers.add("Location", "/error_reporte");
@@ -294,6 +419,78 @@ public class LibroController {
 				bis = GenerarReporteExcel.generarExcelLibros("Reporte de Libros Unicos", libros);
 				headers.add("Content-Disposition", "attachment; filename=listado-libros-unicos.xlsx");
 				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	// REPORTE EXCEL LIBROS POR CATEGORÍA
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/locales/libros/reportes/xlsx/libros-por-categoria/{id}", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> repLibrosPorCategoria(@PathVariable("id") String id,
+			Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Libro> libros = null;
+		ByteArrayInputStream in;
+		var headers = new HttpHeaders();
+		try {
+			Categoria categoria = categoriaService.findOne(Long.parseLong(id));
+			libros = libroService.findByCategoriaAndLocal(categoria.getNombre(), empleado.getLocal().getId());
+			if (libros.size() != 0) {
+				in = GenerarReporteExcel.generarExcelLibros("Reporte de Libros Por Categoría", libros);
+				headers.add("Content-Disposition", "attachment; filename=listado-libros-por-categoria.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	// REPORTE EXCEL LIBROS POR ESTADO
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/locales/libros/reportes/xlsx/libros-por-estado/{estado}", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> repLibrosPorEstado(@PathVariable("estado") String estado,
+			Authentication authentication) {
+		List<Libro> libros = null;
+		ByteArrayInputStream in;
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		var headers = new HttpHeaders();
+		try {
+			String titulo = "";
+			String tituloExcel = "";
+			// USO UN STRING EN VEZ DE UN BOOLEAN PARA HACER SALTAR LA EXCEPCION
+			if (estado.equals("true")) {
+				libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), true);
+				titulo = "listado-libros-disponibles";
+				tituloExcel = "Reporte de Libros Disponibles";
+			} else if (estado.equals("false")) {
+				libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), false);
+				titulo = "listado-libros-no-disponibles";
+				tituloExcel = "Reporte de Libros No Disponibles";
+			} else if (!estado.equals("true") || estado.equals("false")) {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+			if (libros.size() != 0) {
+				in = GenerarReporteExcel.generarExcelLibros(tituloExcel, libros);
+				headers.add("Content-Disposition", "attachment; filename=" + titulo + ".xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
 			} else {
 				headers.clear();
 				headers.add("Location", "/error_reporte");

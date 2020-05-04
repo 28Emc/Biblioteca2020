@@ -341,7 +341,7 @@ public class EmpleadoController {
 		var headers = new HttpHeaders();
 		try {
 			if (empleados.size() != 0) {
-				bis = GenerarReportePDF.generarPDFEmpleadosTotales(empleados);
+				bis = GenerarReportePDF.generarPDFEmpleados("Reporte de Empleados Totales", empleados);
 				headers.add("Content-Disposition", "inline; filename=listado-empleados-totales.pdf");
 				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
 						.body(new InputStreamResource(bis));

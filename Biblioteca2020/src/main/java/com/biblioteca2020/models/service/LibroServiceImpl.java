@@ -75,4 +75,25 @@ public class LibroServiceImpl implements ILibroService {
 	public Libro findByTituloAndLocalAndEstado(String term, Long id, Boolean estado) {
 		return libroDao.findByTituloAndLocalAndEstado(term, id, estado);
 	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Libro> findByCategoriaAndLocal(String categoria, Long localId) {
+		return libroDao.findByCategoriaAndLocal("%" + categoria + "%", localId);
+	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Libro> findByEstado(boolean estado) {
+		return libroDao.findByEstado(estado);
+	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Libro> findByLocalAndEstado(Long idLocal, boolean estado) {
+		return libroDao.findByLocalAndEstado(idLocal, estado);
+	}
 }

@@ -775,7 +775,7 @@ public class UsuarioController {
 		var headers = new HttpHeaders();
 		try {
 			if (usuarios.size() != 0) {
-				bis = GenerarReportePDF.generarPDFUsuariosTotales(usuarios);
+				bis = GenerarReportePDF.generarPDFUsuarios("Reporte de Usuarios Totales", usuarios);
 				headers.add("Content-Disposition", "inline; filename=listado-usuarios-totales.pdf");
 				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
 						.body(new InputStreamResource(bis));

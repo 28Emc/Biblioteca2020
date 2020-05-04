@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Usuario;
 import com.biblioteca2020.models.service.IEmpleadoService;

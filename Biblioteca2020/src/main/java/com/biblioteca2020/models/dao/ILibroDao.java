@@ -13,6 +13,17 @@ public interface ILibroDao extends CrudRepository<Libro, Long> {
 	public List<Libro> findByTituloGroup();
 
 	// USADO
+	public List<Libro> findByEstado(boolean estado);
+
+	// USADO
+	@Query("select l from Libro l join fetch l.local ll where ll.id=?1 and l.estado=?2")
+	public List<Libro> findByLocalAndEstado(Long idLocal, boolean estado);
+
+	// USADO
+	@Query("select l from Libro l join fetch l.categoria lc join fetch l.local ll where lc.nombre like ?1 and ll.id=?2")
+	public List<Libro> findByCategoriaAndLocal(String categoria, Long localId);
+
+	// USADO
 	// VER DISPONIBILIDAD LIBRO POR TITULO Y LOCAL
 	@Query("select l from Libro l join fetch l.local lo where l.titulo like ?1")
 	public List<Libro> findByTituloLikeIgnoreCase(String titulo);

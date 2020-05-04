@@ -135,21 +135,21 @@ public class GenerarReportePDF {
     }
 
     // ################ LIBROS
-    public static ByteArrayInputStream generarPDFLibrosUnicos(List<Libro> libros) throws Exception {
+    public static ByteArrayInputStream generarPDFLibros(String titulo, List<Libro> libros) throws Exception {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         PdfWriter.getInstance(document, out);
         document.setMargins(39f, 39f, 0f, 0f);
         document.open();
-        document.addTitle("Biblioteca2020 || Reporte de Libros");
+        document.addTitle("Biblioteca2020 || " + titulo);
 
         PdfPTable tablaCabecera = new PdfPTable(2);
         tablaCabecera.setWidthPercentage(120);
         tablaCabecera.setSpacingAfter(20f);
         PdfPCell cellCabecera = null;
         Font fontTitulo = new Font(new Font(Font.BOLD, 25, Font.NORMAL, new Color(255, 255, 255)));
-        cellCabecera = new PdfPCell(new Phrase("Reporte de Libros", fontTitulo));
+        cellCabecera = new PdfPCell(new Phrase(titulo, fontTitulo));
         cellCabecera.setBorderWidth(0);
         cellCabecera.setNoWrap(true);
         cellCabecera.setPaddingTop(35f);
@@ -169,7 +169,7 @@ public class GenerarReportePDF {
         document.add(tablaCabecera);
 
         PdfPTable tabla = new PdfPTable(8);
-        tabla.setWidths(new float[] { 1, 2.5f, 2.3f, 2.3f, 2.5f, 2.3f, 1.3f, 1.5f });
+        tabla.setWidths(new float[] { 1, 2.5f, 2.3f, 2.3f, 2.5f, 2.3f, 1.3f, 1.8f });
         tabla.setWidthPercentage(110);
         PdfPCell cell = null;
         Font fontCabeceraTabla = new Font(new Font(Font.BOLD, 11, Font.NORMAL, new Color(255, 255, 255)));
@@ -236,14 +236,14 @@ public class GenerarReportePDF {
     }
 
     // ################ USUARIOS
-    public static ByteArrayInputStream generarPDFUsuariosTotales(List<Usuario> usuarios) throws Exception {
+    public static ByteArrayInputStream generarPDFUsuarios(String titulo, List<Usuario> usuarios) throws Exception {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         PdfWriter.getInstance(document, out);
         document.setMargins(39f, 39f, 0f, 0f);
         document.open();
-        document.addTitle("Biblioteca2020 || Reporte de Usuarios");
+        document.addTitle("Biblioteca2020 || " + titulo);
 
         PdfPTable tablaCabecera = new PdfPTable(2);
         tablaCabecera.setWidthPercentage(120);
@@ -332,14 +332,14 @@ public class GenerarReportePDF {
     }
 
     // ################ EMPLEADOS
-    public static ByteArrayInputStream generarPDFEmpleadosTotales(List<Empleado> empleados) throws Exception {
+    public static ByteArrayInputStream generarPDFEmpleados(String titulo, List<Empleado> empleados) throws Exception {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         PdfWriter.getInstance(document, out);
         document.setMargins(39f, 39f, 0f, 0f);
         document.open();
-        document.addTitle("Biblioteca2020 || Reporte de Empleados");
+        document.addTitle("Biblioteca2020 || " + titulo);
 
         PdfPTable tablaCabecera = new PdfPTable(2);
         tablaCabecera.setWidthPercentage(120);

@@ -39,4 +39,11 @@ public class CategoriaServiceImpl implements ICategoriaService {
 	public void save(Categoria categoria) throws Exception {
 		categoriaDao.save(categoria);
 	}
+
+	// USADO
+	@Override
+	@Transactional
+	public Categoria findByNombre(String categoria) {
+		return categoriaDao.findByNombre(categoria);
+	}
 }

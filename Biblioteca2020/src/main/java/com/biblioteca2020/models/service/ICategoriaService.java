@@ -11,8 +11,12 @@ public interface ICategoriaService {
 	public Categoria findOne(Long id) throws Exception;
 
 	// USADO
+	public Categoria findByNombre(String categoria);
+
+	// USADO
 	public List<Categoria> findByNombreLikeIgnoreCase(String string);
 
 	// USADO
 	public void save(Categoria categoria) throws Exception;
+
 }

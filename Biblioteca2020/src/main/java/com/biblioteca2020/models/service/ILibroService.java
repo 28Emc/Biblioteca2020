@@ -14,6 +14,15 @@ public interface ILibroService {
 	public Libro findOne(Long id) throws Exception;
 
 	// USADO
+	public List<Libro> findByCategoriaAndLocal(String categoria, Long localId);
+
+	// USADO
+	public List<Libro> findByEstado(boolean estado);
+
+	// USADO
+	public List<Libro> findByLocalAndEstado(Long idLocal, boolean estado);
+
+	// USADO
 	public List<Libro> findByTituloGroup();
 
 	// USADO
