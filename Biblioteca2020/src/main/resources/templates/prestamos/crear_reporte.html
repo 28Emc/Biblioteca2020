@@ -136,7 +136,7 @@
 
       <form
         th:action="@{/prestamos/reportes/buscar-usuario}"
-        sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+        sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
         method="GET"
       >
         <div class="form-group row">
@@ -153,6 +153,36 @@
               class="form-control rounded-0 shadow-none"
               placeholder="Buscar usuario por su DNI"
               th:value="nroDocumentoUsuario"
+            />
+          </div>
+          <div class="col-sm-12 col-md-4 col-xl-4 py-2">
+            <input
+              type="submit"
+              th:value="'Verificar Disponibilidad'"
+              class="btn btn-info btn-block rounded-0 border-0"
+            />
+          </div>
+        </div>
+      </form>
+
+      <form
+        th:action="@{/prestamos/reportes/buscar-libro}"
+        sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+        method="GET"
+      >
+        <div class="form-group row">
+          <div class="col-12">
+            <h3>Filtrar Por Libro</h3>
+          </div>
+        </div>
+        <div class="form-group row pb-3">
+          <div class="col-sm-12 col-md-8 col-xl-8 py-2">
+            <input
+              type="text"
+              name="buscar_libro"
+              id="buscar_libro"
+              class="form-control rounded-0 shadow-none"
+              placeholder="Buscar libro por su titulo"
             />
           </div>
           <div class="col-sm-12 col-md-4 col-xl-4 py-2">

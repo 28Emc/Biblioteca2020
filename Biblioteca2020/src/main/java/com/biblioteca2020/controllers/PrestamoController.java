@@ -67,20 +67,16 @@ public class PrestamoController {
 
 	// ############################ ADMIN, EMPLEADO ############################
 	// LISTADO POR ROLES
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/listar")
 	public String listarPrestamosPorRol(Model model, Authentication authentication) {
-		// OBTENER USUARIO LOGUEADO ACTUALMENTE
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		// MOSTRAR LISTADO DE ACUERDO A ROL
 		switch (userDetails.getAuthorities().toString()) {
-			// ADMIN: VE PRESTAMOS DEL LOCAL ENTERO
 			case "[ROLE_ADMIN]":
 				model.addAttribute("prestamos",
 						prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId()));
 				break;
-			// EMPLEADO: VE PRESTAMOS REALIZADOS A SU NOMBRE
 			case "[ROLE_EMPLEADO]":
 				model.addAttribute("prestamos",
 						prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId()));
@@ -101,7 +97,7 @@ public class PrestamoController {
 		return "/prestamos/crear_reporte";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/buscar-empleado", method = RequestMethod.GET)
 	public String buscarEmpleadoParaReporte(@RequestParam String nroDocumentoEmpleado, Model model,
 			Authentication authentication, RedirectAttributes flash) {
@@ -109,9 +105,13 @@ public class PrestamoController {
 		model.addAttribute("enable", true);
 		Empleado empleado;
 		try {
+			if (nroDocumentoEmpleado.length() == 0 || nroDocumentoEmpleado.length() > 8) {
+				flash.addFlashAttribute("error", "Error, el DNI es incorrecto");
+				return "redirect:/prestamos/reportes";
+			}
 			empleado = empleadoService.findByNroDocumento(nroDocumentoEmpleado);
 			if (empleado == null) {
-				flash.addFlashAttribute("error", "Error, el DNI es incorrecto o el empleado no está disponible");
+				flash.addFlashAttribute("error", "Error, el empleado no está disponible");
 				return "redirect:/prestamos/reportes";
 			}
 			model.addAttribute("empleado", empleado);
@@ -122,7 +122,7 @@ public class PrestamoController {
 		return "/prestamos/busqueda_empleado";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/buscar-usuario", method = RequestMethod.GET)
 	public String buscarUsuarioParaReporte(@RequestParam String nroDocumentoUsuario, Model model,
 			Authentication authentication, RedirectAttributes flash) {
@@ -130,9 +130,13 @@ public class PrestamoController {
 		model.addAttribute("enable", true);
 		Usuario usuario;
 		try {
+			if (nroDocumentoUsuario.length() == 0 || nroDocumentoUsuario.length() > 8) {
+				flash.addFlashAttribute("error", "Error, el DNI es incorrecto");
+				return "redirect:/prestamos/reportes";
+			}
 			usuario = usuarioService.findByNroDocumento(nroDocumentoUsuario);
 			if (usuario == null) {
-				flash.addFlashAttribute("error", "Error, el DNI es incorrecto o el usuario no está disponible");
+				flash.addFlashAttribute("error", "Error, el usuario no está disponible");
 				return "redirect:/prestamos/reportes";
 			}
 			model.addAttribute("usuario", usuario);
@@ -143,8 +147,35 @@ public class PrestamoController {
 		return "/prestamos/busqueda_usuario";
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/buscar-libro", method = RequestMethod.GET)
+	public String buscarLibroParaReporte(@RequestParam String buscar_libro, Model model, Authentication authentication,
+			RedirectAttributes flash) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		model.addAttribute("titulo", "Reporte Por Libro");
+		model.addAttribute("enable", true);
+		Libro libro;
+		try {
+			if (buscar_libro.length() == 0 || buscar_libro.length() > 100) {
+				flash.addFlashAttribute("error", "Error, el titulo del libro es incorrecto");
+				return "redirect:/prestamos/reportes";
+			}
+			libro = libroService.findByTituloAndLocalAndEstado(buscar_libro, empleado.getLocal().getId(), true);
+			if (libro == null) {
+				flash.addFlashAttribute("error", "Error, el libro no está disponible");
+				return "redirect:/prestamos/reportes";
+			}
+			model.addAttribute("libro", libro);
+		} catch (Exception e) {
+			flash.addFlashAttribute("error", "Error, el titulo es incorrecto o el libro no está disponible");
+			return "redirect:/prestamos/reportes";
+		}
+		return "/prestamos/busqueda_libro";
+	}
+
 	// MÈTODO PARA GENERAR PDF DE PRESTAMOS TOTALES
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/pdf/prestamos-totales", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfPrestamosTotal(Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -180,10 +211,9 @@ public class PrestamoController {
 	}
 
 	// MÈTODO PARA GENERAR PDF DE PRESTAMOS PENDIENTES
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/pdf/prestamos-pendientes", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfPrestamosPendientes(Authentication authentication) {
-
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		List<Prestamo> prestamosTotales = null;
@@ -217,14 +247,13 @@ public class PrestamoController {
 				headers.add("Location", "/error_reporte");
 				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 			}
-
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().build();
 		}
 	}
 
 	// MÈTODO PARA GENERAR PDF DE PRESTAMOS COMPLETADOS
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/pdf/prestamos-completados", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfPrestamosCompletados(Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -257,7 +286,6 @@ public class PrestamoController {
 						.body(new InputStreamResource(bis));
 			} else {
 				// ENCONTRAR LA MANERA DE MANDAR UN ERROR PERSONALIZADO
-				// return ResponseEntity.badRequest().build();
 				headers.clear();
 				headers.add("Location", "/error_reporte");
 				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
@@ -321,8 +349,34 @@ public class PrestamoController {
 		}
 	}
 
+	// MÈTODO PARA GENERAR PDF DE PRESTAMOS POR LIBRO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/pdf/prestamos-por-libro/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosPorLibro(@PathVariable("id") String id) {
+		List<Prestamo> prestamos = null;
+		// BUSCAR LOS REPORTES POR EL ID LIBRO
+		prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibro(Long.parseLong(id));
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamos.size() != 0) {
+				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de Préstamos Por Libro", prestamos);
+				headers.add("Content-Disposition", "inline; filename=prestamos-por-libro-reporte.pdf");
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
 	// REPORTE EXCEL PRESTAMOS TOTALES
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/xlsx/prestamos-totales")
 	public ResponseEntity<InputStreamResource> repPrestamosTotales(Model model, Authentication authentication,
 			RedirectAttributes flash) {
@@ -357,7 +411,7 @@ public class PrestamoController {
 	}
 
 	// REPORTE EXCEL PRESTAMOS PENDIENTES
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/reportes/xlsx/prestamos-pendientes")
 	public ResponseEntity<InputStreamResource> repPrestamosPendientes(Model model, Authentication authentication,
 			RedirectAttributes flash) {
@@ -397,7 +451,7 @@ public class PrestamoController {
 	}
 
 	// REPORTE EXCEL PRESTAMOS COMPLETADOS
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/reportes/xlsx/prestamos-completados")
 	public ResponseEntity<InputStreamResource> repPrestamosCompletados(Model model, Authentication authentication,
 			RedirectAttributes flash) {
@@ -436,7 +490,7 @@ public class PrestamoController {
 	}
 
 	// REPORTE EXCEL PRESTAMOS POR EMPLEADO
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN','ROLE_ADMIN', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN','ROLE_ADMIN')")
 	@RequestMapping(value = "/reportes/xlsx/prestamos-por-empleado/{id}", method = RequestMethod.GET)
 	public ResponseEntity<InputStreamResource> repPrestamosPorEmpleado(@PathVariable("id") String id) {
 		List<Prestamo> prestamos = null;
@@ -461,7 +515,7 @@ public class PrestamoController {
 	}
 
 	// REPORTE EXCEL PRESTAMOS POR USUARIO
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN','ROLE_ADMIN', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN','ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/xlsx/prestamos-por-usuario/{id}", method = RequestMethod.GET)
 	public ResponseEntity<InputStreamResource> repPrestamosPorUsuario(@PathVariable("id") String id) {
 		List<Prestamo> prestamos = null;
@@ -485,7 +539,32 @@ public class PrestamoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
+	// REPORTE EXCEL PRESTAMOS POR LIBRO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN','ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/xlsx/prestamos-por-libro/{id}", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> repPrestamosPorLibro(@PathVariable("id") String id) {
+		List<Prestamo> prestamos = null;
+		prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibro(Long.parseLong(id));
+		ByteArrayInputStream in;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamos.size() != 0) {
+				in = GenerarReporteExcel.generarExcelPrestamos("Reporte de Préstamos Por Libro", prestamos);
+				headers.add("Content-Disposition", "attachment; filename=listado-prestamos-por-libro.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (IOException e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
 	@GetMapping(value = "/cancelar")
 	public String cancelar() {
 		return "redirect:/prestamos/listar";
@@ -545,7 +624,6 @@ public class PrestamoController {
 			default:
 				return null;
 		}
-
 		return empleados;
 	}
 
@@ -609,14 +687,12 @@ public class PrestamoController {
 		// DEVOLUCION
 		prestamo.setDevolucion(false);
 		prestamoService.save(prestamo);
-
 		// JUSTO DESPUES DE REGISTRAR EL PRÉSTAMO, INSERTO EL REGISTRO EN MI TABLA LOG
 		prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamo.getEmpleado().getId(), null,
 				prestamo.getLibro().getId(), null, prestamo.getUsuario().getId(), null, "INSERT EMPLOYEE",
 				empleadoPrestamo.getUsername().concat(" (Cod. Empleado: " + empleadoPrestamo.getId() + ")"),
 				prestamo.getFecha_despacho(), null, prestamo.getFecha_devolucion(), null, prestamo.getDevolucion(),
 				null, prestamo.getObservaciones(), null, new Date(), null, null));
-
 		flash.addFlashAttribute("success", "Orden de prestamo creada correctamente.");
 		flash.addFlashAttribute("confirma", true);
 		status.setComplete();
@@ -642,7 +718,6 @@ public class PrestamoController {
 						+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código empleado "
 						+ empleado.getId() + ")");
 				prestamoService.save(prestamo);
-
 				// JUSTO DESPUES DE CONFIRMAR LA ORDEN DE PRÉSTAMO, INSERTO EL REGISTRO EN MI
 				// TABLA LOG
 				prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamoOld.getEmpleado().getId(),
@@ -654,7 +729,6 @@ public class PrestamoController {
 						prestamoOld.getFecha_devolucion(), prestamo.getFecha_devolucion(), prestamoOld.getDevolucion(),
 						prestamo.getDevolucion(), prestamoOld.getObservaciones(), prestamo.getObservaciones(), null,
 						new Date(), null));
-
 				flash.addFlashAttribute("info", "La orden del libro '" + prestamo.getLibro().getTitulo()
 						+ "' ha sido confirmada (còdigo " + prestamo.getId() + ").");
 				flash.addFlashAttribute("confirma", true);
@@ -697,7 +771,6 @@ public class PrestamoController {
 					+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código empleado "
 					+ empleado.getId() + ")");
 			prestamoService.save(prestamo);
-
 			// JUSTO DESPUES DE DEVOLVER EL LIBRO, INSERTO EL REGISTRO EN MI
 			// TABLA LOG
 			prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamoOld.getEmpleado().getId(),
@@ -708,7 +781,6 @@ public class PrestamoController {
 					prestamoOld.getFecha_despacho(), prestamo.getFecha_despacho(), prestamoOld.getFecha_devolucion(),
 					prestamo.getFecha_devolucion(), prestamoOld.getDevolucion(), prestamo.getDevolucion(),
 					prestamoOld.getObservaciones(), prestamo.getObservaciones(), null, new Date(), null));
-
 			flash.addFlashAttribute("info", "El libro '" + prestamo.getLibro().getTitulo() + "' ha sido devuelto.");
 			flash.addFlashAttribute("confirma", true);
 		}
@@ -727,7 +799,6 @@ public class PrestamoController {
 		if (id > 0) {
 			prestamo = prestamoService.findById(id);
 			Prestamo prestamoOld = prestamo;
-
 			// EMPLEADO
 			prestamo.setEmpleado(empleado);
 			// ESTADO DEVOLUCION
@@ -747,7 +818,6 @@ public class PrestamoController {
 					+ "), ha sido anulado el día " + prestamo.getFecha_devolucion() + ", por el empleado: "
 					+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código empleado "
 					+ empleado.getId() + ")");
-
 			// ENVIO DE MAIL DE CONFIRMACIÓN DE ANULACION AL USUARIO CON MIMEMESSAGE
 			try {
 				String message = "<html><head>" + "<meta charset='UTF-8' />"
@@ -769,9 +839,7 @@ public class PrestamoController {
 						+ "</html>";
 				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", prestamo.getUsuario().getEmail(),
 						"Préstamo Anulado | Biblioteca2020", message);
-
 				prestamoService.save(prestamo);
-
 				// JUSTO DESPUES DE DEVOLVER EL LIBRO, INSERTO EL REGISTRO EN MI
 				// TABLA LOG
 				prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamoOld.getEmpleado().getId(),
@@ -783,7 +851,6 @@ public class PrestamoController {
 						prestamoOld.getFecha_devolucion(), prestamo.getFecha_devolucion(), prestamoOld.getDevolucion(),
 						prestamo.getDevolucion(), prestamoOld.getObservaciones(), prestamo.getObservaciones(), null,
 						new Date(), null));
-
 				flash.addFlashAttribute("warning",
 						"El préstamo del libro '" + prestamo.getLibro().getTitulo() + "' ha sido anulado.");
 				flash.addFlashAttribute("confirma", true);
@@ -840,35 +907,6 @@ public class PrestamoController {
 	}
 
 	// ANULACIÒN DE PRÉSTAMO POR PARTE DEL USUARIO
-	/*
-	 * @PreAuthorize("hasAnyRole('ROLE_USER')")
-	 * 
-	 * @GetMapping(value = "/anular-orden/{id}") public String
-	 * anularPrestamoUsuario(@PathVariable(value = "id") Long id, RedirectAttributes
-	 * flash, Authentication authentication, Model model) { if (id > 0) { Prestamo
-	 * prestamo = prestamoService.findById(id); // ACTUALIZACIÓN DE STOCK int
-	 * stockNuevo = prestamo.getLibro().getStock(); try { Libro libro =
-	 * libroService.findOne(prestamo.getLibro().getId()); libro.setStock(stockNuevo
-	 * + 1); } catch (Exception e) { model.addAttribute("error", e.getMessage());
-	 * return "redirect:/prestamos/prestamos-pendientes"; } UserDetails userDetails
-	 * = (UserDetails) authentication.getPrincipal(); Usuario usuario =
-	 * usuarioService.findByUsernameAndEstado(userDetails.getUsername().toString(),
-	 * true); prestamo.setUsuario(usuario); prestamo.setDevolucion(true);
-	 * prestamo.setObservaciones("El préstamo del libro: " +
-	 * prestamo.getLibro().getTitulo() + " (código " + id +
-	 * "), ha sido anulado el día " + prestamo.getFecha_devolucion() +
-	 * ", por el usuario: " + prestamo.getUsuario().getNombres().concat(", " +
-	 * prestamo.getUsuario().getApellidos()) + " (código usuario " +
-	 * prestamo.getUsuario().getId() + ")"); // prestamoService.delete(id);
-	 * prestamoService.save(prestamo); model.addAttribute("prestamos",
-	 * prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(
-	 * usuario.getId())); flash.addFlashAttribute("error", "El préstamo del libro '"
-	 * + prestamo.getLibro().getTitulo() + "' ha sido anulado.");
-	 * flash.addFlashAttribute("confirma", true); } return
-	 * "redirect:/prestamos/historial-user"; }
-	 */
-
-	// ANULACIÒN DE PRÉSTAMO POR PARTE DEL USUARIO
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@GetMapping(value = "/anular-orden/{id}")
 	public String anularPrestamoUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash,
@@ -898,7 +936,6 @@ public class PrestamoController {
 					+ "), ha sido anulado el día " + prestamo.getFecha_devolucion() + ", por el usuario: "
 					+ prestamo.getUsuario().getNombres().concat(", " + prestamo.getUsuario().getApellidos())
 					+ " (código usuario " + prestamo.getUsuario().getId() + ")");
-
 			// ENVIO DE MAIL DE CONFIRMACIÓN DE ANULACION AL USUARIO CON MIMEMESSAGE
 			try {
 				String message = "<html><head>" + "<meta charset='UTF-8' />"
@@ -919,9 +956,7 @@ public class PrestamoController {
 						+ "</html>";
 				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", prestamo.getUsuario().getEmail(),
 						"Préstamo Anulado | Biblioteca2020", message);
-
 				prestamoService.save(prestamo);
-
 				// JUSTO DESPUES DE ANULAR EL PRÉSTAMO, INSERTO EL REGISTRO EN MI
 				// TABLA LOG
 				prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamoOld.getEmpleado().getId(),
@@ -933,7 +968,6 @@ public class PrestamoController {
 						prestamoOld.getFecha_devolucion(), prestamo.getFecha_devolucion(), prestamoOld.getDevolucion(),
 						prestamo.getDevolucion(), prestamoOld.getObservaciones(), prestamo.getObservaciones(), null,
 						new Date(), null));
-
 				model.addAttribute("prestamos",
 						prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerUserPendientes(usuario.getId()));
 				flash.addFlashAttribute("error",
