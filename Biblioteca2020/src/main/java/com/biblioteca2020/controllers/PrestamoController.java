@@ -861,24 +861,6 @@ public class PrestamoController {
 		return "redirect:/prestamos/listar";
 	}
 
-	// ANULACIÒN DE PRÉSTAMO, ELIMINACION DE LA BD
-	/*
-	 * @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	 * 
-	 * @GetMapping(value = "/anular-prestamo/{id}") public String
-	 * anularPrestamoDelete(@PathVariable(value = "id") Long id, RedirectAttributes
-	 * flash, Model model) { if (id > 0) { Prestamo prestamo =
-	 * prestamoService.findById(id); // ACTUALIZACIÓN DE STOCK int stockNuevo =
-	 * prestamo.getLibro().getStock(); Libro libro; try { libro =
-	 * libroService.findOne(prestamo.getLibro().getId()); libro.setStock(stockNuevo
-	 * + 1); } catch (Exception e) { model.addAttribute("error", e.getMessage()); //
-	 * return "redirect:/prestamos/listar"; } flash.addFlashAttribute("warning",
-	 * "El préstamo del libro '" + prestamo.getLibro().getTitulo() +
-	 * "' ha sido anulado."); prestamoService.delete(id);
-	 * flash.addFlashAttribute("confirma", true); } return
-	 * "redirect:/prestamos/listar"; }
-	 */
-
 	// ############################ USUARIO ############################
 	// HISTORIAL DE PRESTAMOS DE USUARIO
 	@PreAuthorize("hasAnyRole('ROLE_USER')")

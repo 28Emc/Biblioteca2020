@@ -29,6 +29,7 @@
       <div
         class="row py-3 float-md-right float-xs-none"
         th:if="${not #lists.isEmpty(prestamos)}"
+        sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
       >
         <div class="col">
           <a

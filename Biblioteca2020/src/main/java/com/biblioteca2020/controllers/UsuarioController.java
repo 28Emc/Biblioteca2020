@@ -134,10 +134,15 @@ public class UsuarioController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO', 'ROLE_USER')")
 	@GetMapping("/biblioteca/solicitar-libro/{id}/{titulo}")
 	public String solicitarLibroForm(@PathVariable("titulo") String titulo, @PathVariable("id") Long id_local,
-			Model model, Authentication authentication) {
+			Model model, RedirectAttributes flash, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Usuario usuario = usuarioService.findByUsernameAndEstado(userDetails.getUsername(), true);
 		Libro libro = libroService.findByTituloAndLocalAndEstado(titulo, id_local, true);
+		if (libro == null) {
+			flash.addFlashAttribute("error",
+					"Lo sentimos, el libro solicitado no está disponible en esos momentos. Inténtelo más tarde.");
+			return "redirect:/usuarios/biblioteca";
+		}
 		model.addAttribute("titulo", "Solicitar Libro");
 		model.addAttribute("libro", libro);
 		model.addAttribute("titulo_libro", titulo);
