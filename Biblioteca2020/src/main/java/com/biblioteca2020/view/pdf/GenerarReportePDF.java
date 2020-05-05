@@ -250,7 +250,7 @@ public class GenerarReportePDF {
         tablaCabecera.setSpacingAfter(20f);
         PdfPCell cellCabecera = null;
         Font fontTitulo = new Font(new Font(Font.BOLD, 25, Font.NORMAL, new Color(255, 255, 255)));
-        cellCabecera = new PdfPCell(new Phrase("Reporte de Usuarios", fontTitulo));
+        cellCabecera = new PdfPCell(new Phrase(titulo, fontTitulo));
         cellCabecera.setBorderWidth(0);
         cellCabecera.setNoWrap(true);
         cellCabecera.setPaddingTop(35f);
@@ -346,7 +346,7 @@ public class GenerarReportePDF {
         tablaCabecera.setSpacingAfter(20f);
         PdfPCell cellCabecera = null;
         Font fontTitulo = new Font(new Font(Font.BOLD, 25, Font.NORMAL, new Color(255, 255, 255)));
-        cellCabecera = new PdfPCell(new Phrase("Reporte de Empleados", fontTitulo));
+        cellCabecera = new PdfPCell(new Phrase(titulo, fontTitulo));
         cellCabecera.setBorderWidth(0);
         cellCabecera.setNoWrap(true);
         cellCabecera.setPaddingTop(35f);

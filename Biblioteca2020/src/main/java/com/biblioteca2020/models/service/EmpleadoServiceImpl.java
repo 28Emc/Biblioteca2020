@@ -225,4 +225,11 @@ public class EmpleadoServiceImpl implements IEmpleadoService {
 	public List<Empleado> fetchByIdWithRoles() {
 		return empleadoDao.fetchByIdWithRoles();
 	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Empleado> findByLocal(Long id_local) {
+		return empleadoDao.findByLocal(id_local);
+	}
 }

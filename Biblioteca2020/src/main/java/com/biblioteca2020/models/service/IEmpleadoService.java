@@ -36,6 +36,9 @@ public interface IEmpleadoService {
 	public Empleado findByUsername(String username);
 
 	// USADO
+	public List<Empleado> findByLocal(Long id_local);
+
+	// USADO
 	public Empleado findByUsernameAndLocal(String username, Long id_local);
 
 	// USADO

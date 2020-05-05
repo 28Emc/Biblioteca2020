@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +38,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.dto.CambiarPassword;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.EmpleadoLog;
+import com.biblioteca2020.models.entity.Local;
 import com.biblioteca2020.models.service.IEmpleadoLogService;
 import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.ILocalService;
@@ -316,10 +319,56 @@ public class EmpleadoController {
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@GetMapping("/empleados/cancelar")
+	public String cancelarReporte() {
+		return "redirect:/empleados/listar";
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping(value = "/reportes")
 	public String crearReporte(Model model, Authentication authentication) {
 		model.addAttribute("titulo", "Creación de Reportes");
+		model.addAttribute("empleado", new Empleado());
+		ArrayList<Boolean> estados = new ArrayList<Boolean>();
+		estados.add(true);
+		estados.add(false);
+		model.addAttribute("estados", estados);
 		return "/empleados/crear_reporte";
+	}
+
+	// MÉTODO PARA REALIZAR LA BUSQUEDA DE LOCALES ACTIVOS POR SU DIRECCION Y ESTADO
+	// MEDIANTE AUTOCOMPLETADO
+	@RequestMapping(value = "/cargar-locales-reporte/{term}", produces = { "application/json" })
+	public @ResponseBody List<Local> cargarLocalesActivos(@PathVariable String term) {
+		List<Local> localesActivos = localService.findByDireccionLikeIgnoreCase("%" + term + "%");
+		for (int i = 0; i < localesActivos.size(); i++) {
+			localesActivos.removeIf(n -> n.getEstado().equals(false));
+		}
+		return localesActivos;
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/buscar-empleados-por-local", method = RequestMethod.GET)
+	public String buscarEmpleadosParaReporte(@RequestParam String buscar_local, Model model,
+			Authentication authentication, RedirectAttributes flash) {
+		model.addAttribute("titulo", "Reporte Por Local");
+		model.addAttribute("enable", true);
+		Local local = localService.findByDireccion(buscar_local);
+		try {
+			if (buscar_local.length() == 0 || buscar_local.length() > 200) {
+				flash.addFlashAttribute("error", "Error, el local es incorrecto");
+				return "redirect:/empleados/reportes";
+			}
+			if (local == null) {
+				flash.addFlashAttribute("error", "Error, el local no está disponible");
+				return "redirect:/empleados/reportes";
+			}
+			model.addAttribute("local", local);
+		} catch (Exception e) {
+			flash.addFlashAttribute("error", "Error, el local es incorrecto o el local no está disponible");
+			return "redirect:/empleados/reportes";
+		}
+		return "/empleados/busqueda_empleados_por_local";
 	}
 
 	// REPORTE PDF EMPLEADOS TOTALES
@@ -358,6 +407,90 @@ public class EmpleadoController {
 		}
 	}
 
+	// REPORTE PDF LIBROS POR ESTADO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/pdf/empleados-por-estado/{estado}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfLibrosPorEstado(@PathVariable("estado") String estado,
+			Model model, Authentication authentication) {
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		try {
+			List<Empleado> empleados = empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getId());
+			String titulo = "";
+			String tituloPdf = "";
+			// USO UN STRING EN VEZ DE UN BOOLEAN PARA HACER SALTAR LA EXCEPCION
+			if (estado.equals("true")) {
+				// FILTRO SOLAMENTE LOS EMPLEADOS ACTIVOS
+				for (int i = 0; i < empleados.size(); i++) {
+					empleados.removeIf(n -> n.getEstado().equals(false));
+				}
+				titulo = "listado-empleados-disponibles";
+				tituloPdf = "Reporte de Empleados Disponibles";
+			} else if (estado.equals("false")) {
+				// FILTRO SOLAMENTE LOS EMPLEADOS INACTIVOS
+				for (int i = 0; i < empleados.size(); i++) {
+					empleados.removeIf(n -> n.getEstado().equals(true));
+				}
+				titulo = "listado-empleados-no-disponibles";
+				tituloPdf = "Reporte de Empleados No Disponibles";
+			} else if (!estado.equals("true") || estado.equals("false")) {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+			if (empleados.size() != 0) {
+				bis = GenerarReportePDF.generarPDFEmpleados(tituloPdf, empleados);
+				headers.add("Content-Disposition", "inline; filename=" + titulo + ".pdf");
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				headers.set("errorMessage", "Error, el reporte solicitado no existe.");
+				model.addAttribute("errorMessage", "Error, el reporte solicitado no existe.");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (IllegalArgumentException ex) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	// MÈTODO PARA GENERAR PDF DE EMPLEADOS POR LOCAL
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/pdf/empleados-por-local/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfEmpleadosPorLocal(@PathVariable("id") String id,
+			Authentication authentication) {
+		List<Empleado> empleados = null;
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			empleados = empleadoService
+					.fetchByIdWithLocalWithEmpresa(localService.findById(Long.parseLong(id)).getId());
+			if (empleados.size() != 0) {
+				bis = GenerarReportePDF.generarPDFEmpleados("Reporte de Empleados Por Local", empleados);
+				headers.add("Content-Disposition", "inline; filename=empleados-por-local-reporte.pdf");
+
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
 	// REPORTE EXCEL EMPLEADOS TOTALES
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@RequestMapping(value = "/reportes/xlsx/empleados-totales", method = RequestMethod.GET)
@@ -392,7 +525,80 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	// REPORTE EXCEL EMPLEADOS POR LOCAL
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/xlsx/empleados-por-local/{id}", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> repEmpleadosPorLocal(@PathVariable("id") String id) {
+		List<Empleado> empleados = null;
+		ByteArrayInputStream in;
+		var headers = new HttpHeaders();
+		try {
+			empleados = empleadoService
+					.fetchByIdWithLocalWithEmpresa(localService.findById(Long.parseLong(id)).getId());
+			if (empleados.size() != 0) {
+				in = GenerarReporteExcel.generarExcelEmpleados("Reporte de Empleados Por Local", empleados);
+				headers.add("Content-Disposition", "attachment; filename=listado-empleados-por-local.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	// REPORTE EXCEL EMPLEADOS POR ESTADO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/reportes/xlsx/empleados-por-estado/{estado}", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> repEmpleadosPorEstado(@PathVariable("estado") String estado,
+			Authentication authentication) {
+		ByteArrayInputStream in;
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Empleado> empleados = empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getId());
+		var headers = new HttpHeaders();
+		try {
+			String titulo = "";
+			String tituloExcel = "";
+			// USO UN STRING EN VEZ DE UN BOOLEAN PARA HACER SALTAR LA EXCEPCION
+			if (estado.equals("true")) {
+				for (int i = 0; i < empleados.size(); i++) {
+					empleados.removeIf(n -> n.getEstado().equals(false));
+				}
+				titulo = "listado-empleados-disponibles";
+				tituloExcel = "Reporte de Empleados Disponibles";
+			} else if (estado.equals("false")) {
+				for (int i = 0; i < empleados.size(); i++) {
+					empleados.removeIf(n -> n.getEstado().equals(true));
+				}
+				titulo = "listado-empleados-no-disponibles";
+				tituloExcel = "Reporte de Empleados No Disponibles";
+			} else if (!estado.equals("true") || estado.equals("false")) {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+			if (empleados.size() != 0) {
+				in = GenerarReporteExcel.generarExcelEmpleados(tituloExcel, empleados);
+				headers.add("Content-Disposition", "attachment; filename=" + titulo + ".xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping("/cancelar")
 	public String cancelar() {
 		return "redirect:/empleados/listar";

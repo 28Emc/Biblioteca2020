@@ -16,6 +16,9 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,12 +36,13 @@ public class Local implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	// @JsonIgnore
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "empresa_id", nullable = false)
 	private Empresa empresa;
 	
 	// LOCAL(1):EMPLEADO(*)
+	@JsonIgnore
 	@OneToMany(mappedBy = "local", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Empleado> empleados;
 

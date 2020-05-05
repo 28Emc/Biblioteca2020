@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:replace="layout/layout :: head"></head>
+
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
+
+    <div class="container my-3 px-5">
+      <h1 class="py-4" th:text="${titulo}"></h1>
+
+      <div class="form-group row">
+        <div class="col-12">
+          <h3>Datos del local</h3>
+        </div>
+      </div>
+      <form method="GET">
+        <div class="form-group row py-2">
+          <div class="col-sm-12 col-md-4 col-xl-4">
+            <input
+              type="number"
+              name="id_local"
+              id="id_local"
+              placeholder="Id"
+              class="form-control rounded-0 shadow-none"
+              th:attr="value=${local.id}"
+              readonly
+            />
+          </div>
+          <div class="col-sm-12 col-md-6 col-xl-6 pb-4">
+            <input
+              type="text"
+              name="direccion_local"
+              id="direccion_local"
+              placeholder="Dirección Local"
+              class="form-control rounded-0 shadow-none"
+              th:attr="value=${local.direccion}"
+              readonly
+            />
+          </div>
+          <div class="col-6 col-md-1 col-xl-1">
+            <a
+              role="button"
+              th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
+              th:href="@{'/empleados/reportes/pdf/empleados-por-local/'}+${local.id}"
+              target="_blank"
+              data-toggle="tooltip"
+              data-placement="auto"
+              th:title="'Exportar PDF'"
+              ><i class="fas fa-file-pdf fa-2x text-danger"></i
+            ></a>
+          </div>
+          <div class="col-6 col-md-1 col-xl-1">
+            <a
+              role="button"
+              th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
+              th:href="@{'/empleados/reportes/xlsx/empleados-por-local/'}+${local.id}"
+              data-toggle="tooltip"
+              data-placement="auto"
+              th:title="'Exportar XLSX'"
+              ><i class="fas fa-file-excel fa-2x text-success"></i
+            ></a>
+          </div>
+        </div>
+      </form>
+
+      <div class="form-group row py-4">
+        <!-- WEB -->
+        <div class="col-sm-12 col-md-12 py-2">
+          <a
+            class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+            th:href="@{'/empleados/reportes'}"
+            >CANCELAR</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
+</html>

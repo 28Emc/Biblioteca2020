@@ -41,23 +41,19 @@
         </div>
       </div>
 
-      <div class="form-group row py-1" sec:authorize="hasRole('ROLE_SYSADMIN')">
+      <div class="form-group row py-1">
         <div class="col-12">
-          <h3>Filtrar Por Local</h3>
+          <h3>Filtrar Por Estado</h3>
         </div>
-        <div class="col-10 col-md-10 col-lg-10">
-          <input
-            type="number"
-            name="localEmpleado"
-            id="localEmpleado"
-            class="form-control rounded-0 shadow-none"
-            placeholder="Buscar empleado por su local"
-          />
-        </div>
-        <div class="col-1 col-md-1 col-xl-1">
+      </div>
+      <div class="form-group row" th:each="estado, index : ${estados}">
+        <h4 class="col-12 col-sm-12 col-md-10 text-muted">
+          Empleados [[${estado}?'Disponibles':'No Disponibles']]
+        </h4>
+        <div class="col-6 col-sm-6 col-md-1 col-xl-1 text-center">
           <a
-            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
-            th:href="@{'/empleados/reportes/pdf/empleados-por-local'}"
+            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
+            th:href="@{'/empleados/reportes/pdf/empleados-por-estado/'}+${estado}"
             target="_blank"
             data-toggle="tooltip"
             data-placement="auto"
@@ -65,10 +61,10 @@
             ><i class="fas fa-file-pdf fa-2x text-danger"></i
           ></a>
         </div>
-        <div class="col-1 col-md-1 col-xl-1">
+        <div class="col-6 col-sm-6 col-md-1 col-xl-1 text-center">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/empleados/reportes/xlsx/empleados-por-local'}"
+            th:href="@{'/empleados/reportes/xlsx/empleados-por-estado/'}+${estado}"
             data-toggle="tooltip"
             data-placement="auto"
             th:title="'Exportar XLSX'"
@@ -77,48 +73,42 @@
         </div>
       </div>
 
-      <div class="form-group row py-1" sec:authorize="hasRole('ROLE_SYSADMIN')">
-        <div class="col-12">
-          <h3>Filtrar Por Estado</h3>
+      <form
+        th:action="@{/empleados/reportes/buscar-empleados-por-local}"
+        
+        method="GET"
+      >
+        <div class="form-group row">
+          <div class="col-12">
+            <h3>Filtrar Por Local</h3>
+          </div>
         </div>
-        <div class="col-10 col-md-10 col-lg-10">
-          <input
-            type="number"
-            name="estadoEmpleado"
-            id="estadoEmpleado"
-            class="form-control rounded-0 shadow-none"
-            placeholder="Buscar empleado por su estado"
-          />
+        <div class="form-group row pb-3">
+          <div class="col-sm-12 col-md-8 col-xl-8 py-2">
+            <input
+              type="text"
+              name="buscar_local"
+              id="buscar_local"
+              class="form-control rounded-0 shadow-none"
+              placeholder="Buscar empleados por su local"
+            />
+          </div>
+          <div class="col-sm-12 col-md-4 col-xl-4 py-2">
+            <input
+              type="submit"
+              th:value="'Verificar Disponibilidad'"
+              class="btn btn-info btn-block rounded-0 border-0"
+            />
+          </div>
         </div>
-        <div class="col-1 col-md-1 col-xl-1">
-          <a
-            class="btn btn-transparent disabled btn-block rounded-0 border-0 py-1"
-            th:href="@{'/empleados/reportes/pdf/empleados-por-estado'}"
-            target="_blank"
-            data-toggle="tooltip"
-            data-placement="auto"
-            th:title="'Exportar PDF'"
-            ><i class="fas fa-file-pdf fa-2x text-danger"></i
-          ></a>
-        </div>
-        <div class="col-1 col-md-1 col-xl-1">
-          <a
-            class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/empleados/reportes/xlsx/empleados-por-estado'}"
-            data-toggle="tooltip"
-            data-placement="auto"
-            th:title="'Exportar XLSX'"
-            ><i class="fas fa-file-excel fa-2x text-success"></i
-          ></a>
-        </div>
-      </div>
+      </form>
 
       <div class="form-group row py-4">
         <!-- WEB -->
         <div class="col-sm-12 col-md-12 py-2">
           <a
             class="btn btn-transparent btn-block shadow-none font-weight-bolder"
-            th:href="@{'/prestamos/cancelar'}"
+            th:href="@{'/empleados/cancelar'}"
             >CANCELAR</a
           >
         </div>
@@ -126,8 +116,6 @@
     </div>
 
     <footer th:replace="layout/layout :: footer"></footer>
-    <script th:replace="layout/autocomplete-libros :: javascript"></script>
-    <script th:replace="layout/autocomplete-usuarios :: javascript"></script>
-    <script th:replace="layout/autocomplete-empleados :: javascript"></script>
+    <script th:replace="layout/autocomplete-locales :: javascript"></script>
   </body>
 </html>

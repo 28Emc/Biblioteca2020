@@ -1,43 +1,37 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
-<body>
-	<script type="text/javascript" th:fragment="javascript">
-		$(document).ready(function() {
-
-			$("#buscar_local").autocomplete({
-
-				source : function(request, response) {
-					$.ajax({
-						url : "/libros/cargar-locales/" + request.term,
-						minLength : 2,
-						dataType : "json",
-						data : {
-							term : request.term
-						},
-						success : function(data) {
-							response($.map(data, function(item) {
-								return {
-									value : item.id,
-									label : item.nombre,
-									direccion : item.direccion
-								};
-							}));
-						}
-					});
-				},
-				focus : function(event, ui) {
-					event.preventDefault();
-				},
-				select : function(event, ui) {
-					$("#buscar_local").val(ui.item.label);
-					$("#id_local").val(ui.item.value);
-					$("#direccion_local").val(ui.item.direccion);
-					return false;
-				}
-			});
-		});
-	</script>
-</body>
-
+  <body>
+    <script type="text/javascript" th:fragment="javascript">
+      $(document).ready(function () {
+        $("#buscar_local").autocomplete({
+          source: function (request, response) {
+            $.ajax({
+              url: "/empleados/cargar-locales-reporte/" + request.term,
+              minLength: 2,
+              dataType: "json",
+              data: {
+                term: request.term,
+              },
+              success: function (data) {
+                response(
+                  $.map(data, function (item) {
+                    return {
+                      value: item.direccion,
+                    };
+                  })
+                );
+              },
+            });
+          },
+          focus: function (event, ui) {
+            event.preventDefault();
+          },
+          select: function (event, ui) {
+            $("#buscar_local").val(ui.item.value);
+            return false;
+          },
+        });
+      });
+    </script>
+  </body>
 </html>
