@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -758,15 +759,20 @@ public class UsuarioController {
 		return "/usuarios/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/reportes")
 	public String crearReporte(Model model, Authentication authentication) {
 		model.addAttribute("titulo", "Creación de Reportes");
+		model.addAttribute("usuario", new Usuario());
+		ArrayList<Boolean> estados = new ArrayList<Boolean>();
+		estados.add(true);
+		estados.add(false);
+		model.addAttribute("estados", estados);
 		return "/usuarios/crear_reporte";
 	}
 
 	// REPORTE PDF USUARIOS TOTALES
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/pdf/usuarios-totales", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfUsuariosTotal() {
 		List<Usuario> usuarios = null;
@@ -791,12 +797,65 @@ public class UsuarioController {
 		}
 	}
 
+	// REPORTE PDF USUARIOS POR ESTADO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/pdf/usuarios-por-estado/{estado}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfUsuariosPorEstado(@PathVariable("estado") String estado,
+			Model model) {
+		ByteArrayInputStream bis;
+		var headers = new HttpHeaders();
+		try {
+			List<Usuario> usuarios = usuarioService.findAll();
+			String titulo = "";
+			String tituloPdf = "";
+			// USO UN STRING EN VEZ DE UN BOOLEAN PARA HACER SALTAR LA EXCEPCION
+			if (estado.equals("true")) {
+				// FILTRO SOLAMENTE LOS USUARIOS ACTIVOS
+				for (int i = 0; i < usuarios.size(); i++) {
+					usuarios.removeIf(n -> n.getEstado().equals(false));
+				}
+				titulo = "listado-usuarios-disponibles";
+				tituloPdf = "Reporte de Usuarios Disponibles";
+			} else if (estado.equals("false")) {
+				// FILTRO SOLAMENTE LOS USUARIOS INACTIVOS
+				for (int i = 0; i < usuarios.size(); i++) {
+					usuarios.removeIf(n -> n.getEstado().equals(true));
+				}
+				titulo = "listado-usuarios-no-disponibles";
+				tituloPdf = "Reporte de Usuarios No Disponibles";
+			} else if (!estado.equals("true") || estado.equals("false")) {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+			if (usuarios.size() != 0) {
+				bis = GenerarReportePDF.generarPDFUsuarios(tituloPdf, usuarios);
+				headers.add("Content-Disposition", "inline; filename=" + titulo + ".pdf");
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				headers.set("errorMessage", "Error, el reporte solicitado no existe.");
+				model.addAttribute("errorMessage", "Error, el reporte solicitado no existe.");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (IllegalArgumentException ex) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
 	// REPORTE EXCEL USUARIOS TOTALES
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/xlsx/usuarios-totales", method = RequestMethod.GET)
 	public ResponseEntity<InputStreamResource> generarExcelUsuariosTotal() {
-		List<Usuario> usuarios = null;
-		usuarios = usuarioService.findAll();
+		List<Usuario> usuarios = usuarioService.findAll();
 		ByteArrayInputStream bis;
 		var headers = new HttpHeaders();
 		try {
@@ -816,7 +875,51 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// REPORTE EXCEL USUARIOS POR ESTADO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/xlsx/usuarios-por-estado/{estado}", method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> repUsuariosPorEstado(@PathVariable("estado") String estado) {
+		ByteArrayInputStream in;
+		List<Usuario> usuarios = usuarioService.findAll();
+		var headers = new HttpHeaders();
+		try {
+			String titulo = "";
+			String tituloExcel = "";
+			// USO UN STRING EN VEZ DE UN BOOLEAN PARA HACER SALTAR LA EXCEPCION
+			if (estado.equals("true")) {
+				for (int i = 0; i < usuarios.size(); i++) {
+					usuarios.removeIf(n -> n.getEstado().equals(false));
+				}
+				titulo = "listado-usuarios-disponibles";
+				tituloExcel = "Reporte de Usuarios Disponibles";
+			} else if (estado.equals("false")) {
+				for (int i = 0; i < usuarios.size(); i++) {
+					usuarios.removeIf(n -> n.getEstado().equals(true));
+				}
+				titulo = "listado-usuarios-no-disponibles";
+				tituloExcel = "Reporte de Usuarios No Disponibles";
+			} else if (!estado.equals("true") || estado.equals("false")) {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+			if (usuarios.size() != 0) {
+				in = GenerarReporteExcel.generarExcelUsuarios(tituloExcel, usuarios);
+				headers.add("Content-Disposition", "attachment; filename=" + titulo + ".xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/cancelar")
 	public String cancelar() {
 		return "redirect:/usuarios/listar";
