@@ -1,10 +1,8 @@
 package com.biblioteca2020.util.scheduler;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import com.biblioteca2020.models.entity.Prestamo;
@@ -21,7 +19,7 @@ import org.springframework.stereotype.Component;
 @EnableScheduling
 public class Scheduler {
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    //private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
     // private static final String correoDiego = "luis290613@gmail.com";
 
     @Autowired
@@ -31,26 +29,24 @@ public class Scheduler {
     private EmailSenderService emailSenderService;
 
     // PRUEBA 1: MOSTRAR HORA ACTUAL EN CONSOLA CADA SEGUNDO
-    @Scheduled(cron = "* * * ? * *", zone = "America/Lima")
-    public void prueba1() {
-        System.out.println("Hora actual: " + dateFormat.format(new Date()));
-    }
+    /*
+     * @Scheduled(cron = "* * * ? * *", zone = "America/Lima") public void prueba1()
+     * { System.out.println("Hora actual: " + dateFormat.format(new Date())); }
+     */
 
     // PRUEBA 2: ENVIAR CORREO DE PRÉSTAMOS TOTALES CADA 3 MINUTOS
-    @Scheduled(cron = "0 */3 * ? * *", zone = "America/Lima")
+    @Scheduled(cron = "0 */5 * ? * *", zone = "America/Lima")
     public void prueba2() {
-        System.out.println("APAREZCO CADA 3 MINUTOS!!!");
+        System.out.println("APAREZCO CADA 5 MINUTOS!!!");
     }
 
     // ENVIAR CORREO DE PRÉSTAMOS TOTALES CADA MES AL ADMIN
-    // SE ENVÍA CADA ÚLTIMO DIA DEL MES A LAS 11 PM
-    @Scheduled(cron = "0 0 8 L * ?", zone = "America/Lima")
+    // SE ENVÍA CADA DIA A LAS 12 AM (MEDIANOCHE)
+    @Scheduled(cron = "0 0 0 * * ?", zone = "America/Lima")
     public void enviarEmailPrestamosTotalesMensuales() {
         // ESTABLECER DATASOURCE
         List<Prestamo> prestamos = prestamoService.fetchWithLibroWithUsuarioWithEmpleado();
-
         if (prestamos.size() > 0) {
-
             // FILTRAR SOLO LOS RESULTADOS DEL ULTIMO MES
             // O MEJOR DICHO, DEJO SOLAMENTE LOS RESULTADOS DEL ULTIMO MES
             Locale esp = new Locale("es", "PE");
@@ -59,7 +55,6 @@ public class Scheduler {
             calUltimoDiaMes.add(Calendar.MONTH, -1);
             System.out.println(
                     "FECHA DEL ULTIMO DIA DEL MES ANTERIOR: " + calUltimoDiaMes.getTime().toString().toUpperCase());
-
             for (int i = 0; i < prestamos.size(); i++) {
                 prestamos.removeIf(n -> n.getFecha_despacho().before(calUltimoDiaMes.getTime()));
                 if (prestamos.size() == 0) {
@@ -72,13 +67,10 @@ public class Scheduler {
                             + LocalDate.now().getYear() + ": " + prestamos.get(i).getId());
                 }
             }
-
             List<Prestamo> prestamosMesAnterior = prestamos;
-
             System.out.println("NRO DE PRESTAMOS DE "
                     + LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, esp).toUpperCase() + " "
                     + LocalDate.now().getYear() + ": " + prestamosMesAnterior.size());
-
             // CREAR EMAIL Y ENVIAR AL SYSADMIN
             try {
                 String message = "<html><head>" + "<meta charset='UTF-8' />"
@@ -111,7 +103,6 @@ public class Scheduler {
             } catch (MailException ex) {
                 System.out.println(ex.getMessage());
             }
-
         } else {
             System.out.println("NRO DE PRESTAMOS TOTALES: " + prestamos.size());
         }
