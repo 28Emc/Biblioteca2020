@@ -61,7 +61,7 @@ public class GenerarReportePDF {
         // ARMO LA TABLA PRINCIPAL QUE VA A ALBERGAR MI LISTADO
         PdfPTable tabla = new PdfPTable(7);
         // ALGUNAS PROPIEDADES
-        tabla.setWidths(new float[] { 1, 2.5f, 3, 3, 2.5f, 2.5f, 2.5f });
+        tabla.setWidths(new float[] { 1, 2.8f, 3, 3, 2.5f, 2.5f, 2.5f });
         tabla.setWidthPercentage(110);
         PdfPCell cell = null;
         // ARMO UNA CELDA DE CABECERA PARA CADA TIPO DE DATO DEL PRÉSTAMO

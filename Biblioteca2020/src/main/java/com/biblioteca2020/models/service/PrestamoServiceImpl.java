@@ -101,4 +101,18 @@ public class PrestamoServiceImpl implements IPrestamoService {
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibro(Long idLibro) {
 		return prestamoDao.fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibro(idLibro);
 	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Prestamo> findAll() {
+		return (List<Prestamo>) prestamoDao.findAll();
+	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Prestamo> fetchWithLibroWithUsuarioWithEmpleado() {
+		return prestamoDao.fetchWithLibroWithUsuarioWithEmpleado();
+	}
 }

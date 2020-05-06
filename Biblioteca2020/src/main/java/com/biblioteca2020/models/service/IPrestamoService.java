@@ -8,6 +8,12 @@ public interface IPrestamoService {
 	public Prestamo findById(Long id);
 
 	// USADO
+	public List<Prestamo> findAll();
+
+	// USADO
+	public List<Prestamo> fetchWithLibroWithUsuarioWithEmpleado();
+
+	// USADO
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleado(Long id_local);
 
 	// USADO

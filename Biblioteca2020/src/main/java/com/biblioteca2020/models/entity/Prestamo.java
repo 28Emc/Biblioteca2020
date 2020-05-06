@@ -32,18 +32,18 @@ public class Prestamo implements Serializable {
 	private Long id;
 
 	// PRESTAMOS(*):USER(1)
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "usuario_id", nullable = false)
 	@Valid
 	private Usuario usuario;
 
 	// PRESTAMOS(*):EMPLEADO(1)
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "empleado_id")
 	private Empleado empleado;
 
 	// PRESTAMOS(*):LIBRO(1)
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "libro_id", nullable = false)
 	@Valid
 	private Libro libro;

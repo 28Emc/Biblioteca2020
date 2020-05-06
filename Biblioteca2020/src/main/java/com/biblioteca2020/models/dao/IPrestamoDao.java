@@ -6,7 +6,10 @@ import org.springframework.data.repository.CrudRepository;
 import com.biblioteca2020.models.entity.Prestamo;
 
 public interface IPrestamoDao extends CrudRepository<Prestamo, Long> {
-
+	// USADO
+	@Query("select p from Prestamo p join fetch p.usuario pe join fetch p.libro li join fetch p.empleado em")
+	public List<Prestamo> fetchWithLibroWithUsuarioWithEmpleado();
+	
 	// TODOS LOS PRESTAMOS CON LIBROS, USUARIOS Y EMPLEADOS FILTRADOS POR LOCAL DEL
 	// ADMIN
 	// USADO
