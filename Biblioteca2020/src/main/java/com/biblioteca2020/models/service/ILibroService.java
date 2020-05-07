@@ -35,6 +35,9 @@ public interface ILibroService {
 	public Libro findByTituloAndLocalAndEstado(String term, Long id, Boolean estado);
 
 	// USADO
+	public List<Libro> fetchWithCategoriaWithLocal();
+
+	// USADO
 	public List<Libro> fetchByIdWithLocalesWithEmpleado(Long id, Long idEmpleado);
 
 	// USADO

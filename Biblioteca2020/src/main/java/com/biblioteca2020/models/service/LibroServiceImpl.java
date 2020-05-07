@@ -96,4 +96,11 @@ public class LibroServiceImpl implements ILibroService {
 	public List<Libro> findByLocalAndEstado(Long idLocal, boolean estado) {
 		return libroDao.findByLocalAndEstado(idLocal, estado);
 	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Libro> fetchWithCategoriaWithLocal() {
+		return libroDao.fetchWithCategoriaWithLocal();
+	}
 }

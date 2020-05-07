@@ -37,6 +37,10 @@ public interface ILibroDao extends CrudRepository<Libro, Long> {
 	public Libro findByTituloAndLocalAndEstado(String term, Long id, Boolean estado);
 
 	// USADO
+	@Query("select l from Libro l join fetch l.categoria lc join fetch l.local ll")
+	public List<Libro> fetchWithCategoriaWithLocal();
+
+	// USADO
 	@Query("select l from Libro l join fetch l.local lo join fetch lo.empleados em where lo.id=?1 and em.id=?2")
 	public List<Libro> fetchByIdWithLocalesWithEmpleado(Long id, Long idEmpleado);
 }

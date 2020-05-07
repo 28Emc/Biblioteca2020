@@ -169,7 +169,12 @@ public class GenerarReportePDF {
         document.add(tablaCabecera);
 
         PdfPTable tabla = new PdfPTable(8);
-        tabla.setWidths(new float[] { 1, 2.5f, 2.3f, 2.3f, 2.5f, 2.3f, 1.3f, 1.8f });
+        if (titulo.contains("stock")) {
+            tabla = new PdfPTable(7);
+            tabla.setWidths(new float[] { 1, 2.5f, 2.3f, 2.3f, 3f, 1.3f, 1.8f });
+        } else {
+            tabla.setWidths(new float[] { 1, 2.5f, 2.3f, 2.3f, 2.5f, 2.3f, 1.3f, 1.8f });
+        }
         tabla.setWidthPercentage(110);
         PdfPCell cell = null;
         Font fontCabeceraTabla = new Font(new Font(Font.BOLD, 11, Font.NORMAL, new Color(255, 255, 255)));
@@ -179,8 +184,12 @@ public class GenerarReportePDF {
         listCabecera.add("Titulo");
         listCabecera.add("Autor");
         listCabecera.add("Categoría");
-        listCabecera.add("F. Publicación");
-        listCabecera.add("F. Registro");
+        if (titulo.contains("stock")) {
+            listCabecera.add("Local");
+        } else {
+            listCabecera.add("F. Publicación");
+            listCabecera.add("F. Registro");
+        }
         listCabecera.add("Stock");
         listCabecera.add("Estado");
         for (String cabeceraItem : listCabecera) {
@@ -208,14 +217,21 @@ public class GenerarReportePDF {
             cell.setBorderWidth(0);
             cell.setPadding(10f);
             tabla.addCell(cell);
-            cell = new PdfPCell(new Phrase(libroItem.getFechaPublicacion().toString(), fontCuerpoTabla));
-            cell.setBorderWidth(0);
-            cell.setPadding(10f);
-            tabla.addCell(cell);
-            cell = new PdfPCell(new Phrase(libroItem.getFechaRegistro().toString(), fontCuerpoTabla));
-            cell.setBorderWidth(0);
-            cell.setPadding(10f);
-            tabla.addCell(cell);
+            if (titulo.contains("stock")) {
+                cell = new PdfPCell(new Phrase(libroItem.getLocal().getDireccion().toString(), fontCuerpoTabla));
+                cell.setBorderWidth(0);
+                cell.setPadding(10f);
+                tabla.addCell(cell);
+            } else {
+                cell = new PdfPCell(new Phrase(libroItem.getFechaPublicacion().toString(), fontCuerpoTabla));
+                cell.setBorderWidth(0);
+                cell.setPadding(10f);
+                tabla.addCell(cell);
+                cell = new PdfPCell(new Phrase(libroItem.getFechaRegistro().toString(), fontCuerpoTabla));
+                cell.setBorderWidth(0);
+                cell.setPadding(10f);
+                tabla.addCell(cell);
+            }
             cell = new PdfPCell(new Phrase(libroItem.getStock().toString(), fontCuerpoTabla));
             cell.setBorderWidth(0);
             cell.setPadding(10f);
