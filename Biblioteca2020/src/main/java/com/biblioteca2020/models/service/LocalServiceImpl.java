@@ -88,4 +88,11 @@ public class LocalServiceImpl implements ILocalService {
 		return localDao.findFirstByEmpresa(empresa);
 	}
 
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public Local fetchByIdWithEmpresa(Long id) {
+		return localDao.fetchByIdWithEmpresa(id);
+	}
+
 }

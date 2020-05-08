@@ -20,6 +20,9 @@ public interface ILibroService {
 	public List<Libro> findByEstado(boolean estado);
 
 	// USADO
+	public List<Libro> findByLocal(Long idLocal);
+
+	// USADO
 	public List<Libro> findByLocalAndEstado(Long idLocal, boolean estado);
 
 	// USADO

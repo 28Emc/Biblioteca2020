@@ -36,8 +36,8 @@ public class Local implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@JsonIgnore
-	@ManyToOne(fetch = FetchType.LAZY)
+	//@JsonIgnore
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "empresa_id", nullable = false)
 	private Empresa empresa;
 	

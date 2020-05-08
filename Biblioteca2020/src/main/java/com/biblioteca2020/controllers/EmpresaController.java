@@ -24,65 +24,40 @@ import com.biblioteca2020.models.service.IEmpresaService;
 @RequestMapping("/empresas")
 @SessionAttributes("empresa")
 public class EmpresaController {
+
 	@Autowired
 	private IEmpresaService empresaService;
 
 	@Autowired
 	private IEmpleadoService empleadoService;
 
-	// ################################ ROLE ADMIN
-	// AQUI BUSCO EL ID DEL EMPLEADO PARA FILTRAR LA TABLA SEGUN SU LOCAL Y EMPRESA
-	// DONDE PERTENECE
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping(value = "/listar")
-	public String listarEmpresaPorEmpleado(Model model, Principal principal) {
+	public String listarEmpresas(Model model, Principal principal) {
 		Empleado empleado = empleadoService.findByUsername(principal.getName());
 		Empresa empresa = empleado.getLocal().getEmpresa();
-		model.addAttribute("titulo", "Datos de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
+		model.addAttribute("titulo", "Datos de " + empleado.getLocal().getEmpresa().getRazonSocial());
 		model.addAttribute("empresas", empresa);
 		return "/empresas/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping("/cancelar")
 	public String cancelar() {
 		return "redirect:/empresas/listar";
 	}
 
-	// MÉTODO PARA REALIZAR LA BUSQUEDA DE EMPRESAS MEDIANTE AUTOCOMPLETADO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@RequestMapping(value = "/cargar-empresas/{term}", produces = { "application/json" })
-	public @ResponseBody Empresa cargarEmpresas(@PathVariable String term) {
+	public @ResponseBody Empresa cargarInputEmpresas(@PathVariable String term) {
 		return empresaService.findByRucAndEstado(term, true);
 	}
 
-	// ESTE MÉTODO SE SUPONE QUE RECOGE EL RUC DE MANERA "EXTERNA", AL TOMAR UN
-	// VALOR CORRECTO,
-	// ME DEVUELVE LOS DEMÁS CAMPOS, COMO LA DIRECCIÓN Y LA RAZÓN SOCIAL.
-	// POR AHORA SOLO GUARDO INSERTANDO LOS DATOS MANUALMENTE.
-	/*
-	 * @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	 * 
-	 * @PostMapping(value = "/crear") public String crearEmpresa(@Valid Empresa
-	 * empresa, BindingResult result, Model model, SessionStatus status,
-	 * RedirectAttributes flash) { if (result.hasErrors()) {
-	 * model.addAttribute("empresa", empresa); model.addAttribute("titulo",
-	 * "Registro de Empresa"); return "/empresas/crear"; } try {
-	 * empresa.setEstado(true); empresaService.save(empresa);
-	 * flash.addFlashAttribute("success",
-	 * "La empresa ha sido registrada en la base de datos (Código " +
-	 * empresa.getId() + ")"); status.setComplete(); return
-	 * "redirect:/empresas/listar"; } catch (Exception e) {
-	 * model.addAttribute("error", e.getMessage()); model.addAttribute("empresa",
-	 * empresa); model.addAttribute("titulo", "Registro de Empresa"); return
-	 * "/empresas/crear"; } }
-	 */
-
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@GetMapping(value = "/editar/{id}")
-	public String editarFormEmpresa(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash) {
+	public String editarEmpresa(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash) {
 		model.addAttribute("editable", true);
-		model.addAttribute("titulo", "Modificar Empresa");
+		model.addAttribute("titulo", "Modificar datos de la empresa");
 		try {
 			Empresa empresa = empresaService.findOne(id);
 			model.addAttribute("empresa", empresa);
@@ -93,26 +68,26 @@ public class EmpresaController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarEmpresa(@Valid Empresa empresa, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash) {
 		if (result.hasErrors()) {
 			model.addAttribute("empresa", empresa);
 			model.addAttribute("editable", true);
-			model.addAttribute("titulo", "Modificar Empresa");
+			model.addAttribute("titulo", "Modificar datos de la empresa");
 			return "/empresas/crear";
 		}
 		try {
 			empresaService.update(empresa);
-			flash.addFlashAttribute("warning", "La empresa '" + empresa.getRazonSocial() + "'(código " + empresa.getId()
-					+ ") ha sido actualizada en la base de datos.");
+			flash.addFlashAttribute("warning", "Los datos de la empresa " + empresa.getRazonSocial() + " (código "
+					+ empresa.getId() + ") han sido actualizados en la base de datos");
 			status.setComplete();
 			return "redirect:/empresas/listar";
 		} catch (Exception e) {
 			model.addAttribute("empresa", empresa);
 			model.addAttribute("editable", true);
-			model.addAttribute("titulo", "Modificar Empresa");
+			model.addAttribute("titulo", "Modificar datos de la empresa");
 			model.addAttribute("error", e.getMessage());
 			return "/empresas/crear";
 		}

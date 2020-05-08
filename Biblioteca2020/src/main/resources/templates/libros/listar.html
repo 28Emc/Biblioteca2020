@@ -13,11 +13,11 @@
 
       <h1 hidden th:text="${idLocal}"></h1>
 
-      <div class="row pt-5 pb-4" sec:authorize="hasRole('ROLE_SYSADMIN')">
+      <div class="row pt-3 pb-2" sec:authorize="hasRole('ROLE_SYSADMIN')">
         <div class="col-sm-3 col-md-2 col-xl-1">
           <a
             class="btn btn-primary btn-block rounded-0 border-0 py-2"
-            th:href="@{/libros/crear}"
+            th:href="@{/locales/libros/crear/}+${idLocal}"
             data-toggle="tooltip"
             data-placement="top"
             th:title="'Nuevo'"
@@ -26,11 +26,11 @@
         </div>
       </div>
 
-      <div class="row pt-5 pb-4" sec:authorize="hasRole('ROLE_ADMIN')">
+      <div class="row pt-3 pb-2" sec:authorize="hasRole('ROLE_ADMIN')">
         <div class="col-sm-3 col-md-2 col-xl-1">
           <a
             class="btn btn-primary btn-block rounded-0 border-0 py-2"
-            th:href="@{/locales/libros/crear}"
+            th:href="@{/locales/libros/crear/}+${idLocal}"
             data-toggle="tooltip"
             data-placement="top"
             th:title="'Nuevo'"
@@ -38,6 +38,7 @@
           ></a>
         </div>
       </div>
+
       <div
         class="row py-3 float-md-right float-xs-none"
         th:if="${not #lists.isEmpty(libros)}"
@@ -53,6 +54,7 @@
           ></a>
         </div>
       </div>
+
       <h2 th:if="${#lists.isEmpty(libros)}">No hay libros en este local</h2>
 
       <table
@@ -74,8 +76,7 @@
             <th>Stock</th>
             <th>Estado</th>
             <th
-              colspan="2"
-              sec:authorize="hasRole('ROLE_ADMIN')"
+              colspan="3"
               class="text-center"
             >
               Opciones
@@ -108,7 +109,7 @@
                 >
                   <a
                     class="btn btn-transparent btn-block rounded-0 shadow-none"
-                    th:href="@{'/libros/editar/'}+${libro.id}"
+                    th:href="@{'/locales/libros/editar/'}+${idLocal}+'/'+${libro.id}"
                     data-toggle="tooltip"
                     data-placement="bottom"
                     th:title="'Editar'"
@@ -118,7 +119,7 @@
                 <td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')">
                   <a
                     class="btn btn-transparent btn-block rounded-0 shadow-none"
-                    th:href="@{'/locales/libros/editar/'}+${libro.id}"
+                    th:href="@{'/locales/libros/editar/'}+${idLocal}+'/'+${libro.id}"
                     data-toggle="tooltip"
                     data-placement="bottom"
                     th:title="'Editar'"
@@ -132,7 +133,7 @@
                 >
                   <a
                     class="btn btn-transparent btn-block rounded-0 shadow-none"
-                    th:href="@{'/libros/deshabilitar/'}+${libro.id}"
+                    th:href="@{'/locales/libros/deshabilitar/'}+${idLocal}+'/'+${libro.id}"
                     onclick="return confirm('Seguro de querer deshabilitar el libro?');"
                     data-toggle="tooltip"
                     data-placement="bottom"
@@ -143,7 +144,7 @@
                 <td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')">
                   <a
                     class="btn btn-transparent btn-block rounded-0 shadow-none"
-                    th:href="@{'/locales/libros/deshabilitar/'}+${libro.id}"
+                    th:href="@{'/locales/libros/deshabilitar/'}+${idLocal}+'/'+${libro.id}"
                     onclick="return confirm('Seguro de querer deshabilitar el libro?');"
                     data-toggle="tooltip"
                     data-placement="bottom"

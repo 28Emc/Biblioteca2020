@@ -1,6 +1,5 @@
 package com.biblioteca2020.controllers;
 
-import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -8,7 +7,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +19,7 @@ import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Empresa;
 import com.biblioteca2020.models.entity.Local;
 import com.biblioteca2020.models.service.IEmpleadoService;
+import com.biblioteca2020.models.service.IEmpresaService;
 import com.biblioteca2020.models.service.ILocalService;
 
 @Controller
@@ -34,164 +33,204 @@ public class LocalController {
 	@Autowired
 	private IEmpleadoService empleadoService;
 
-	/*
-	 * @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	 * 
-	 * @GetMapping(value = "/listar") public String listarLocales(Model model) {
-	 * model.addAttribute("titulo", "Listado de Locales");
-	 * model.addAttribute("locales", localService.findAll()); return
-	 * "/locales/listar"; }
-	 */
+	@Autowired
+	private IEmpresaService empresaService;
 
-	// LOS SUPERVISORES PUEDEN VER EL LOCAL ANEXO A SU
-	// EMPRESA, EN CASO CONTRARIO NO TENGO ACCESO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
+	@GetMapping(value = "/listar")
+	public String listarLocales(Model model, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		model.addAttribute("titulo", "Listado de locales de " + empleado.getLocal().getEmpresa().getRazonSocial());
+		model.addAttribute("locales", localService.findAll());
+		return "/locales/listar";
+	}
+
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/listar/{id}")
-	public String listarLocalesPorEmpresa(@PathVariable(value = "id") Long id, Model model, Authentication authentication) {
+	public String listarLocalesPorEmpresa(@PathVariable(value = "id") Long id, Model model,
+			Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		Local local;
-		// VALIDO QUE EL LOCAL EXISTE
+		String ruta = "";
+		// VALIDO QUE EL LOCAL EXISTE Y QUE PUEDA ACCEDER A ÉL
 		try {
 			localService.findById(id);
-		} catch (Exception e1) {
-			model.addAttribute("error", e1.getMessage());
-			return "/home";
-		}
-		// VALIDO QUE TENGA ACCESO AL LOCAL
-		try {
 			local = localService.fetchByIdWithEmpresaWithEmpleado(id, empleado.getId());
-			model.addAttribute("titulo",
-					"Listado de Locales de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
+			model.addAttribute("titulo", "Listado de locales de " + empleado.getLocal().getEmpresa().getRazonSocial());
 			model.addAttribute("locales", local);
-			return "/locales/listar";
+			ruta = "/locales/listar";
 		} catch (Exception e) {
 			model.addAttribute("error", e.getMessage());
-			return "/home";
+			ruta = "/home";
 		}
+		return ruta;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@GetMapping("/cancelar")
-	public String cancelar(ModelMap modelMap, Authentication authentication) {
+	public String cancelar(Model model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		Empresa empresaLocales = empleado.getLocal().getEmpresa();
-		modelMap.put("empresaLocales", empresaLocales);
-		return "redirect:/locales/listar/" + empresaLocales.getId();
+		Empresa empresaLocales = empresaService.fetchByIdWithLocal(empleado.getLocal().getEmpresa().getId());
+		String ruta = "";
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_SYSADMIN]":
+				ruta = "redirect:/locales/listar";
+				break;
+			case "[ROLE_ADMIN]":
+				model.addAttribute("empresaLocales", empresaLocales);
+				ruta = "redirect:/locales/listar/" + empresaLocales.getId();
+				break;
+		}
+		return ruta;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping(value = "/crear")
-	public String crearLocal(Map<String, Object> model, Authentication authentication) {
-		model.put("titulo", "Registro de Local");
-		model.put("local", new Local());
-		// AQUÍ TENGO QUE LLAMAR A LOS DATOS DE LA EMPRESA DE ESE LOCAL
+	public String crearLocal(Model model, Authentication authentication) {
+		model.addAttribute("titulo", "Registro de local nuevo");
+		model.addAttribute("local", new Local());
+		// AQUÍ TENGO QUE LLAMAR A LOS DATOS DE LA EMPRESA PARA EL NUEVO LOCAL
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		Empresa empresaLocales = empleado.getLocal().getEmpresa();
-		model.put("empresaLocales", empresaLocales);
-		return "/locales/crear";
+		Empresa empresaLocales = empresaService.fetchByIdWithLocal(empleado.getLocal().getEmpresa().getId());
+		String ruta = "";
+		try {
+			model.addAttribute("empresaLocales", empresaLocales);
+			ruta = "/locales/crear";
+		} catch (Exception e) {
+			model.addAttribute("error", e.getMessage());
+			ruta = "/locales/listar";
+		}
+		return ruta;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
-	public String crearLocal(@Valid Local local, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, Authentication authentication) {
+	public String guardarLocal(@Valid Local local, BindingResult result, Model model, SessionStatus status,
+			RedirectAttributes flash, Authentication authentication) throws Exception {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		Empresa empresaLocales = empleado.getLocal().getEmpresa();
+		Empresa empresaLocales = empresaService.fetchByIdWithLocal(empleado.getLocal().getEmpresa().getId());
 		model.addAttribute("empresaLocales", empresaLocales);
+		String ruta = "";
 		if (result.hasErrors()) {
-			model.addAttribute("titulo", "Formulario de Local");
+			model.addAttribute("titulo", "Registro de local nuevo");
 			model.addAttribute("local", local);
 			model.addAttribute("empresaLocales", empresaLocales);
+			model.addAttribute("error", "El campo dirección es obligatorio");
 			return "/locales/crear";
 		}
 		try {
 			localService.save(local);
 			flash.addFlashAttribute("success",
-					"El local ha sido registrado en la base datos (Código " + local.getId() + ").");
+					"El local ha sido registrado en la base datos (código " + local.getId() + ")");
 			status.setComplete();
-			return "redirect:/locales/listar/" + empresaLocales.getId();
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					ruta = "redirect:/locales/listar";
+					break;
+				case "[ROLE_ADMIN]":
+					ruta = "redirect:/locales/listar/" + empresaLocales.getId();
+					break;
+			}
 		} catch (Exception e) {
-			model.addAttribute("titulo", "Formulario de Local");
+			model.addAttribute("titulo", "Registro de local nuevo");
 			model.addAttribute("local", local);
 			model.addAttribute("error", e.getMessage());
 			model.addAttribute("empresaLocales", empresaLocales);
-			return "/locales/crear";
+			ruta = "/locales/crear";
 		}
+		return ruta;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping(value = "/editar/{id}")
-	public String editarLocal(@PathVariable(value = "id") Long id, Map<String, Object> modelMap,
-			RedirectAttributes flash, Authentication authentication) {
+	public String editarLocal(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash,
+			Authentication authentication) {
 		Local local = null;
-		modelMap.put("editable", true);
-		modelMap.put("titulo", "Modificar Local");
+		model.addAttribute("editable", true);
+		model.addAttribute("titulo", "Modificar datos del local");
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		Empresa empresaLocales = empleado.getLocal().getEmpresa();
-		modelMap.put("empresaLocales", empresaLocales);
+		Empresa empresaLocales = empresaService.fetchByIdWithLocal(empleado.getLocal().getEmpresa().getId());
+		model.addAttribute("empresaLocales", empresaLocales);
+		String ruta = "";
 		try {
 			local = localService.findById(id);
-			modelMap.put("local", local);
-			return "/locales/crear";
+			model.addAttribute("local", local);
+			ruta = "/locales/crear";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
-			return "redirect:/locales/listar/" + empresaLocales.getId();
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					ruta = "redirect:/locales/listar";
+					break;
+				case "[ROLE_ADMIN]":
+					ruta = "redirect:/locales/listar/" + empresaLocales.getId();
+					break;
+			}
 		}
+		return ruta;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	// HAY UN BUG CON LA ANOTACIÓN @VALID EN ESTE CONTROLADOR SOLAMENTE
-	public String guardarLocal(/*@Valid*/ Local local, BindingResult result, Model model, SessionStatus status,
+	public String actualizarLocal(Local local, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Authentication authentication) {
-		
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		Empresa empresaLocales = empleado.getLocal().getEmpresa();
+		Empresa empresaLocales = empresaService.fetchByIdWithLocal(empleado.getLocal().getEmpresa().getId());
 		model.addAttribute("empresaLocales", empresaLocales);
+		String ruta = "";
 		if (result.hasErrors()) {
 			model.addAttribute("local", local);
 			model.addAttribute("editable", true);
-			model.addAttribute("titulo", "Modificar Local");
+			model.addAttribute("titulo", "Modificar datos del local");
 			return "/locales/crear";
 		}
 		try {
 			localService.update(local);
-			flash.addFlashAttribute("warning", "El local con dirección '" + local.getDireccion() + "'(código "
-					+ local.getId() + ") ha sido actualizado en la base de datos.");
+			flash.addFlashAttribute("warning", "Los datos del local con dirección " + local.getDireccion() + "(código "
+					+ local.getId() + ") han sido actualizados en la base de datos");
 			status.setComplete();
-			return "redirect:/locales/listar/" + empresaLocales.getId();
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					ruta = "redirect:/locales/listar";
+					break;
+				case "[ROLE_ADMIN]":
+					ruta = "redirect:/locales/listar/" + empresaLocales.getId();
+					break;
+			}
 		} catch (Exception e) {
 			model.addAttribute("local", local);
 			model.addAttribute("editable", true);
-			model.addAttribute("titulo", "Modificar Local");
+			model.addAttribute("titulo", "Modificar datos del local");
 			model.addAttribute("error", e.getMessage());
-			return "/locales/crear";
+			ruta = "/locales/crear";
 		}
+		return ruta;
 	}
 
-	/*@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@GetMapping(value = "/deshabilitar/{id}")
-	public String deshabilitarLocal(@PathVariable(value = "id") Long id, RedirectAttributes flash,
-			Principal principal) {
+	public String deshabilitarLocal(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		Local local = null;
-		Empleado empleado = empleadoService.findByUsername(principal.getName());
-		Empresa empresaLocales = empleado.getLocal().getEmpresa();
+		String ruta = "";
 		try {
 			local = localService.findById(id);
 			local.setEstado(false);
 			localService.update(local);
 			flash.addFlashAttribute("warning", "El local con dirección '" + local.getDireccion() + "'(código "
-					+ local.getId() + ") ha sido deshabilitado.");
-			return "redirect:/locales/listar/" + empresaLocales.getId();
+					+ local.getId() + ") ha sido deshabilitado");
+			ruta = "redirect:/locales/listar";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
-			return "redirect:/locales/listar/" + empresaLocales.getId();
+			ruta = "redirect:/locales/listar";
 		}
-	}*/
+		return ruta;
+	}
 }

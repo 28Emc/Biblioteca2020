@@ -52,4 +52,11 @@ public class EmpresaServiceImpl implements IEmpresaService {
 	public void update(Empresa empresa) throws Exception {
 		empresaDao.save(empresa);
 	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public Empresa fetchByIdWithLocal(Long id){
+		return empresaDao.fetchByIdWithLocal(id);
+	}
 }

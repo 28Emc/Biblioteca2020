@@ -11,5 +11,8 @@ public interface IEmpresaService {
 	public Empresa findOne(Long id) throws Exception;
 
 	// USADO
+	public Empresa fetchByIdWithLocal(Long id);
+
+	// USADO
 	public void update(Empresa empresa) throws Exception;
 }

@@ -1,93 +1,113 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="layout/layout :: head"></head>
 
-<head th:replace="layout/layout :: head"></head>
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
 
-<body class="bg-light">
+    <div class="container my-3 px-5">
+      <h1 class="py-4" th:text="${titulo}"></h1>
 
-	<header th:replace="layout/layout :: header"></header>
+      <form
+        th:action="@{/empresas/editar}"
+        th:object="${empresa}"
+        method="post"
+      >
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-12 col-lg-6">
+            <label class="col-form-label" for="buscar_empresa">Ruc</label>
+            <input
+              id="buscar_empresa"
+              name="buscar_empresa"
+              class="form-control rounded-0 shadow-none"
+              type="number"
+              th:field="*{ruc}"
+              th:errorclass="'form-control'"
+              placeholder="Escribir RUC"
+              autofocus
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('ruc')}"
+              th:errors="*{ruc}"
+            ></small>
+          </div>
+        </div>
 
-	<div class="container my-3 px-5">
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-12 col-lg-6">
+            <label class="col-form-label" for="razonSocial">Razón Social</label>
+            <input
+              id="razonSocial"
+              name="razonSocial"
+              class="form-control rounded-0 shadow-none"
+              type="text"
+              th:field="*{razonSocial}"
+              th:errorclass="'form-control'"
+              placeholder='Ejm. "Empresa Ejemplo S.A."'
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('razonSocial')}"
+              th:errors="*{razonSocial}"
+            ></small>
+          </div>
+          <div class="col-sm-12 col-md-12 col-lg-6">
+            <label class="col-form-label" for="direccion">Dirección</label>
+            <input
+              id="direccion"
+              name="direccion"
+              class="form-control rounded-0 shadow-none"
+              type="text"
+              th:field="*{direccion}"
+              th:errorclass="'form-control'"
+              placeholder='Ejm. "Av. Los Duraznos 32"'
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('direccion')}"
+              th:errors="*{direccion}"
+            ></small>
+          </div>
+        </div>
 
-		<h1 class="py-4" th:text="${titulo}"></h1>
+        <div class="form-group row py-3">
+          <!-- MOVIL -->
+          <div class="col-6 d-block d-sm-none">
+            <a
+              class="btn btn-transparent btn-block rounded-0 shadow-none"
+              th:href="@{'/empresas/cancelar'}"
+              ><i class="fas fa-times fa-2x"></i
+            ></a>
+          </div>
+          <div class="col-6 d-block d-sm-none">
+            <button
+              class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+              type="submit"
+            >
+              <i class="fas fa-check fa-2x"></i>
+            </button>
+          </div>
 
-		<form th:action="${editable} ?@{/empresas/editar} :@{/empresas/crear}"
-			th:object="${empresa}" method="post">
+          <!-- WEB -->
+          <div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+            <a
+              class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+              th:href="@{'/empresas/cancelar'}"
+              >CANCELAR</a
+            >
+          </div>
+          <div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+            <input
+              class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+              type="submit"
+              th:value="'GUARDAR CAMBIOS'"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
 
-			<div class="form-group row">
-				<div class="col-md-12">
-					<h4 th:if="${!editable}" class="text-muted">Para registrar una
-						empresa, necesita buscarla por su RUC.</h4>
-				</div>
-			</div>
-
-			<div class="form-group row">
-				<div class="col-sm-12 col-md-12 col-lg-6">
-					<label class="col-form-label" for="buscar_empresa">Ruc</label> <input
-						id="buscar_empresa" name="buscar_empresa"
-						class="form-control rounded-0 shadow-none" type="number"
-						th:field="*{ruc}" th:errorclass="'form-control'"
-						placeholder="Escribe tu RUC" autofocus /> <small
-						class="form-text text-danger" th:if="${#fields.hasErrors('ruc')}"
-						th:errors="*{ruc}"></small>
-				</div>
-			</div>
-
-			<div class="form-group row">
-				<div class="col-sm-12 col-md-12 col-lg-6">
-					<label class="col-form-label" for="razonSocial">Razón
-						Social</label> <input id="razonSocial" name="razonSocial"
-						class="form-control rounded-0 shadow-none" type="text"
-						th:field="*{razonSocial}" th:errorclass="'form-control'"
-						placeholder="Ejm. &quot;Empresa Ejemplo S.A.&quot;" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('razonSocial')}"
-						th:errors="*{razonSocial}"></small>
-				</div>
-				<div class="col-sm-12 col-md-12 col-lg-6">
-					<label class="col-form-label" for="direccion">Dirección</label> <input
-						id="direccion" name="direccion"
-						class="form-control rounded-0 shadow-none" type="text"
-						th:field="*{direccion}" th:errorclass="'form-control'"
-						placeholder="Ejm. &quot;Av. Los Duraznos 32&quot;" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></small>
-				</div>
-			</div>
-
-			<div class="form-group row py-3">
-				<!-- MOVIL -->
-				<div class="col-6 d-block d-sm-none">
-					<a class="btn btn-transparent btn-block rounded-0 shadow-none"
-						th:href="@{'/empresas/cancelar'}"><i
-						class="fas fa-times fa-2x"></i></a>
-				</div>
-				<div class="col-6 d-block d-sm-none">
-					<button
-						class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
-						type="submit">
-						<i class="fas fa-check fa-2x"></i>
-					</button>
-				</div>
-
-				<!-- WEB -->
-				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
-					<a
-						class="btn btn-transparent btn-block shadow-none font-weight-bolder"
-						th:href="@{'/empresas/cancelar'}">CANCELAR</a>
-				</div>
-				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
-					<input
-						class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
-						type="submit" th:value="${editable}?'GUARDAR CAMBIOS':'CREAR'" />
-				</div>
-			</div>
-
-		</form>
-	</div>
-
-	<footer th:replace="layout/layout :: footer"></footer>
-	<!-- AQUI VA AUTOCOMPLETE-EMPRESAS -->
-
-</body>
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
 </html>

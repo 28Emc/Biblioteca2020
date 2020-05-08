@@ -16,49 +16,24 @@
 					<div th:switch="${rol}">
 						<h1 th:case="'[ROLE_SYSADMIN]'">
 							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
-							<br /> <br /> Rol <span class="badge badge-danger"
+							<br /> <br /> Rol <span class="badge badge-dark"
 								th:text="'SYSADMIN'"></span>
 						</h1>
 						<h1 th:case="'[ROLE_ADMIN]'">
 							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
-							<br /> <br /> Rol <span class="badge badge-warning"
+							<br /> <br /> Rol <span class="badge badge-danger"
 								th:text="'ADMIN'"></span>
 						</h1>
 						<h1 th:case="'[ROLE_EMPLEADO]'">
 							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
 							<br /> <br /> Rol <span class="badge badge-success"
 								th:text="'EMPLEADO'"></span>
-						</h1>
-						<h1 th:case="'[ROLE_USER]'">
-							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
-							<br /> <br /> Rol <span class="badge badge-primary"
-								th:text="'USUARIO'"></span>
-						</h1>
-						<h1 th:case="*">
-							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
-							<br /> <br /> Rol <span class="badge badge-light"
-								th:text="'USUARIO INVITADO'"></span>
-						</h1>
+						</h1>						
 					</div>
 				</th:block>
 
 				<th:block th:if="${usuario}!=null">
-					<div th:switch="${rol}">
-						<h1 th:case="'[ROLE_SYSADMIN]'">
-							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-							<br> Rol <span class="badge badge-danger"
-								th:text="'ADMIN GLOBAL'"></span>
-						</h1>
-						<h1 th:case="'[ROLE_ADMIN]'">
-							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-							<br> <br> Rol <span class="badge badge-warning"
-								th:text="'ADMIN LOCAL'"></span>
-						</h1>
-						<h1 th:case="'[ROLE_EMPLEADO]'">
-							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-							<br> <br> Rol <span class="badge badge-success"
-								th:text="'EMPLEADO'"></span>
-						</h1>
+					<div th:switch="${rol}">						
 						<h1 th:case="'[ROLE_USER]'">
 							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
 							<br> <br> Rol <span class="badge badge-primary"

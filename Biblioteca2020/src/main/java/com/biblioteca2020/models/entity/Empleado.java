@@ -73,8 +73,8 @@ public class Empleado implements Serializable {
 	@Size(max = 200)
 	private String direccion;
 
-	@Column(length = 30, unique = true)
-	@Size(max = 30)
+	@Column(length = 50, unique = true)
+	@Size(max = 50)
 	@Email
 	@NotBlank
 	private String email;

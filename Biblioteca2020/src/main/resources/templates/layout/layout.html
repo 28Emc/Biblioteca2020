@@ -25,45 +25,34 @@
 			<div class="collapse navbar-collapse" id="navbarNav">
 				<ul class="navbar-nav ml-auto">
 					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN')"
+						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
 						th:href="@{/empresas/listar}">Empresa</a></li>
 					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN')"
+						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
 						th:href="@{/empleados/listar}">Empleados</a></li>
 					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN')"
+						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
 						th:href="@{/categorias/listar}">Categorias</a></li>
 					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN')"
+						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
 						th:href="@{/locales/libros/listar}">Libros</a></li>
 					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN')"
+						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
 						th:href="@{/usuarios/listar}">Usuarios</a></li>
 					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN')"
-						th:href="@{/prestamos/listar}">Préstamos</a></li>
-					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_EMPLEADO')"
-						th:href="@{/locales/libros/listar}">Libros</a></li>
-					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_EMPLEADO')"
-						th:href="@{/usuarios/listar}">Usuarios</a></li>
-					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_EMPLEADO')"
-						th:href="@{/prestamos/listar}">Préstamos</a></li>
+						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+						th:href="@{/prestamos/listar}">Préstamos</a></li>					
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_USER')"
 						th:href="@{/usuarios/biblioteca}"><i class="fas fa-book"></i>
-							Ver libros</a></li>
+							Catálogo de Libros</a></li>
 					<li class="nav-item"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_USER')"
 						th:href="@{/prestamos/historial-user}"><i
-							class="fas fa-clipboard-list"></i> Historial Préstamos</a></li>
+							class="fas fa-clipboard-list"></i> Historial</a></li>
 				</ul>
 
 				<ul class="navbar-nav">
-					<!-- <li sec:authorize="!isAuthenticated()" class="btn btn-transparent"><a
-						class="nav-link" th:href="@{/login}">Iniciar Sesión</a></li> -->
 					<li sec:authorize="isAuthenticated()" class="dropdown show"><a
 						class="btn dropdown-toggle text-light shadow-none" href="#"
 						role="button" id="dropdownMenuLink" data-toggle="dropdown"
@@ -72,11 +61,11 @@
 						<div class="dropdown-menu dropdown-menu-right bg-light"
 							aria-labelledby="dropdownMenuLink">
 							<a
-								sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
+								sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
 								class="dropdown-item bg-light"
 								th:href="@{/empleados/editar-perfil}"><i
 								class="fas fa-user-alt"></i> Mi Perfil</a> <a
-								sec:authorize="hasRole('ROLE_EMPLEADO') || hasRole('ROLE_ADMIN')"
+								sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
 								class="dropdown-item bg-light"
 								th:href="@{/empleados/cambio-password}"><i
 								class="fas fa-user-lock"></i> Cambiar Password</a> <a
@@ -114,7 +103,6 @@
 			class="alert alert-info alert-dismissible fade show rounded-0" role="alert"
 			th:if="${info!=null}" th:text="${info}"></div>
 
-
 	</header>
 
 	<footer th:fragment="footer" class="footer mt-auto py-3 text-center">
@@ -150,20 +138,7 @@
 				} else {
 					return false;
 				}
-			}
-			// COMPONENTE DE FECHA GENERICO PARA TODA LA APP
-			/*$('.datepicker').datepicker({
-				format : 'yyyy-mm-dd', // FORMATO DE FECHA
-				//startDate : '0d', // MUESTRA FECHA DESDE HOY
-				endDate: '+2m', // MUESTRA FECHA HASTA UN MAXIMO DE 3 MESES
-				autoclose: true, // OCULTAR AUTOMATICAMENTE COMPONENTE AL ESCOJER FECHA
-				todayHighlight: true, // ENFASIS EN EL DIA ACTUAL 
-				language: 'es', // LENGUAJE DEL COMPONENTE
-				templates: { // ELEMENTOS PERSONALIZADOS DEL COMPONENTE
-				    leftArrow: '<i class="fa fa-angle-left"></i>',
-				    rightArrow: '<i class="fa fa-angle-right"></i>'
-				}
-			});*/
+			}			
 			var datepicker = $.fn.datepicker.noConflict(); // return $.fn.datepicker to previously assigned value
 			$.fn.bootstrapDP = datepicker; // give $().bootstrapDP the bootstrap-datepicker functionality
 		</script>

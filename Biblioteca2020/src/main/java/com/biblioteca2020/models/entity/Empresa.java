@@ -26,7 +26,6 @@ public class Empresa implements Serializable {
 	private Long id;
 
 	// EMPRESA(1):LOCAL(*)
-	// @JsonIgnore
 	@OneToMany(mappedBy = "empresa", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Local> locales;
 
