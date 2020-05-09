@@ -34,7 +34,7 @@
 						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
 						th:href="@{/categorias/listar}">Categorias</a></li>
 					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
 						th:href="@{/locales/libros/listar}">Libros</a></li>
 					<li class="nav-item px-1"><a class="nav-link"
 						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"

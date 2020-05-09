@@ -30,12 +30,14 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.biblioteca2020.models.entity.Empleado;
 import com.biblioteca2020.models.entity.Libro;
+import com.biblioteca2020.models.entity.Local;
 import com.biblioteca2020.models.entity.Prestamo;
 import com.biblioteca2020.models.entity.PrestamoLog;
 import com.biblioteca2020.models.entity.Usuario;
 import com.biblioteca2020.models.service.EmailSenderService;
 import com.biblioteca2020.models.service.IEmpleadoService;
 import com.biblioteca2020.models.service.ILibroService;
+import com.biblioteca2020.models.service.ILocalService;
 import com.biblioteca2020.models.service.IPrestamoLogService;
 import com.biblioteca2020.models.service.IPrestamoService;
 import com.biblioteca2020.models.service.IUsuarioService;
@@ -57,6 +59,9 @@ public class PrestamoController {
 	private ILibroService libroService;
 
 	@Autowired
+	private ILocalService localService;
+
+	@Autowired
 	private IEmpleadoService empleadoService;
 
 	@Autowired
@@ -65,7 +70,8 @@ public class PrestamoController {
 	@Autowired
 	private EmailSenderService emailSenderService;
 
-	// ############################ ADMIN, EMPLEADO ############################
+	// ############################ SYSADMIN, ADMIN, EMPLEADO
+	// ############################
 	// LISTADO POR ROLES
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/listar")
@@ -73,6 +79,9 @@ public class PrestamoController {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_SYSADMIN]":
+				model.addAttribute("prestamos", prestamoService.fetchWithLibroWithUsuarioWithEmpleado());
+				break;
 			case "[ROLE_ADMIN]":
 				model.addAttribute("prestamos",
 						prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleado(empleado.getLocal().getId()));
@@ -82,7 +91,7 @@ public class PrestamoController {
 						prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerEmpleado(empleado.getId()));
 				break;
 		}
-		model.addAttribute("titulo", "Listado de Préstamos");
+		model.addAttribute("titulo", "Listado de préstamos");
 		model.addAttribute("confirma", true);
 		return "/prestamos/listar";
 	}
@@ -633,10 +642,108 @@ public class PrestamoController {
 	public String crearPrestamo(Model model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleadoPrestamo = empleadoService.findByUsernameAndEstado(userDetails.getUsername(), true);
-		model.addAttribute("titulo", "Creación de Préstamo");
+		model.addAttribute("titulo", "Creación de préstamo nuevo");
 		model.addAttribute("prestamo", new Prestamo());
 		model.addAttribute("empleado", empleadoPrestamo);
 		return "/prestamos/crear";
+	}
+
+	// CARGA DE FORMULARIO DE CREACIÓN DE PRÉSTAMOS PARA SYSADMIN
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
+	@GetMapping(value = "/crear-sysadmin-1")
+	public String crearPrestamoSysadmin1(Model model) {
+		List<Usuario> usuarios = usuarioService.findAll();
+		List<Local> locales = localService.fetchByIdWithEmpresa();
+		model.addAttribute("titulo", "Creación de préstamo nuevo");
+		model.addAttribute("usuarios", usuarios);
+		model.addAttribute("locales", locales);
+		return "/prestamos/crear-sysadmin-1";
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
+	@GetMapping(value = "/crear-sysadmin-2")
+	public String crearPrestamoSysadmin2(@RequestParam Long id_usuario, @RequestParam Long id_local, Model model) {
+		Usuario usuario;
+		Local local;
+		try {
+			usuario = usuarioService.findById(id_usuario);
+			local = localService.findById(id_local);
+			List<Empleado> empleados = empleadoService.findByLocal(local.getId());
+			for (int i = 0; i < empleados.size(); i++) {
+				empleados.removeIf(n -> n.getRoles().iterator().next().getAuthority().equals("ROLE_PRUEBA"));
+			}
+			List<Libro> libros = libroService.findByLocalAndEstado(local.getId(), true);
+			model.addAttribute("usuario", usuario);
+			model.addAttribute("local", local);
+			model.addAttribute("empleados", empleados);
+			model.addAttribute("libros", libros);
+		} catch (Exception e) {
+			model.addAttribute("error", e.getMessage());
+			return "/prestamos/crear-sysadmin-1";
+		}
+		model.addAttribute("titulo", "Creación de préstamo nuevo");
+		model.addAttribute("prestamo", new Prestamo());
+		return "/prestamos/crear-sysadmin-2";
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
+	@PostMapping(value = "/crear-sysadmin-final")
+	public String crearPrestamoSysadminFinal(@Valid Prestamo prestamo, BindingResult result, RedirectAttributes flash,
+			SessionStatus status, Model model, Authentication authentication) {
+		// EMPLEADO
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleadoPrestamo = empleadoService.findByUsernameAndEstado(userDetails.getUsername(), true);
+		prestamo.setEmpleado(empleadoPrestamo);
+		if (result.hasErrors()) {
+			model.addAttribute("titulo", "Creación de préstamo nuevo");
+			model.addAttribute("prestamo", prestamo);
+			return "/prestamos/crear";
+		}
+		// LIBRO
+		try {
+			Libro libroPrestamo = libroService.findOne(prestamo.getLibro().getId());
+			prestamo.setLibro(libroPrestamo);
+			// ACTUALIZACIÓN DE STOCK
+			if (libroPrestamo.getStock() <= 0) {
+				model.addAttribute("error", "Lo sentimos, no hay stock suficiente del libro seleccionado ("
+						+ libroPrestamo.getTitulo() + ")");
+				return "redirect:/prestamos/listar";
+			} else {
+				libroPrestamo.setStock(libroPrestamo.getStock() - 1);
+			}
+		} catch (Exception e) {
+			model.addAttribute("error", e.getMessage());
+		}
+		// USUARIO
+		try {
+			Usuario usuarioPrestamo = usuarioService.findById(prestamo.getUsuario().getId());
+			prestamo.setUsuario(usuarioPrestamo);
+		} catch (Exception e1) {
+			model.addAttribute("error", e1.getMessage());
+			return "/prestamos/crear";
+		}
+		// FECHA DESPACHO
+		Date fechaDespacho = new Date();
+		prestamo.setFecha_despacho(fechaDespacho);
+		// OBSERVACIONES
+		prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo()
+				+ " ha sido programado para su devolución el día " + prestamo.getFecha_devolucion()
+				+ ", por el empleado: " + empleadoPrestamo.getNombres().concat(", " + empleadoPrestamo.getApellidos())
+				+ " (código empleado " + empleadoPrestamo.getId() + ") al usuario: "
+				+ prestamo.getUsuario().getNombres() + " (código usuario " + prestamo.getUsuario().getId() + ")");
+		// DEVOLUCION
+		prestamo.setDevolucion(false);
+		prestamoService.save(prestamo);
+		// JUSTO DESPUES DE REGISTRAR EL PRÉSTAMO, INSERTO EL REGISTRO EN MI TABLA LOG
+		prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamo.getEmpleado().getId(), null,
+				prestamo.getLibro().getId(), null, prestamo.getUsuario().getId(), null, "INSERT EMPLOYEE",
+				empleadoPrestamo.getUsername().concat(" (Cod. Empleado: " + empleadoPrestamo.getId() + ")"),
+				prestamo.getFecha_despacho(), null, prestamo.getFecha_devolucion(), null, prestamo.getDevolucion(),
+				null, prestamo.getObservaciones(), null, new Date(), null, null));
+		flash.addFlashAttribute("success", "Orden de prestamo creada correctamente.");
+		flash.addFlashAttribute("confirma", true);
+		status.setComplete();
+		return "redirect:/prestamos/listar";
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
@@ -648,7 +755,7 @@ public class PrestamoController {
 		Empleado empleadoPrestamo = empleadoService.findByUsernameAndEstado(userDetails.getUsername(), true);
 		prestamo.setEmpleado(empleadoPrestamo);
 		if (result.hasErrors()) {
-			model.addAttribute("titulo", "Creación de Préstamo");
+			model.addAttribute("titulo", "Creación de préstamo nuevo");
 			model.addAttribute("prestamo", prestamo);
 			return "/prestamos/crear";
 		}
@@ -700,7 +807,7 @@ public class PrestamoController {
 	}
 
 	// CONFIRMACIÓN DE ORDEN DE USUARIO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/confirmar-orden/{id}")
 	public String confirmarOrden(@PathVariable(value = "id") Long id, RedirectAttributes flash,
 			Authentication authentication, Model model) {
@@ -718,11 +825,23 @@ public class PrestamoController {
 						+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código empleado "
 						+ empleado.getId() + ")");
 				prestamoService.save(prestamo);
+				String tipoOp = "";
+				switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_SYSADMIN]":
+						tipoOp = "CONFIRMA ORDEN SYSADMIN";
+						break;
+					case "[ROLE_ADMIN]":
+						tipoOp = "CONFIRMA ORDEN ADMIN";
+						break;
+					default:
+						tipoOp = "CONFIRMA ORDEN EMPLOYEE";
+						break;
+				}
 				// JUSTO DESPUES DE CONFIRMAR LA ORDEN DE PRÉSTAMO, INSERTO EL REGISTRO EN MI
 				// TABLA LOG
 				prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamoOld.getEmpleado().getId(),
 						prestamo.getEmpleado().getId(), prestamoOld.getLibro().getId(), prestamo.getLibro().getId(),
-						prestamoOld.getUsuario().getId(), prestamo.getUsuario().getId(), "CONFIRMA ORDEN EMPLOYEE",
+						prestamoOld.getUsuario().getId(), prestamo.getUsuario().getId(), tipoOp,
 						prestamo.getEmpleado().getUsername()
 								.concat(" (Cod. Empleado: " + prestamo.getEmpleado().getId() + ")"),
 						prestamoOld.getFecha_despacho(), prestamo.getFecha_despacho(),
@@ -740,7 +859,7 @@ public class PrestamoController {
 	}
 
 	// CONFIRMACIÓN DE DEVOLUCIÒN DE LIBRO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/devolver-libro/{id}")
 	public String devolverLibro(@PathVariable(value = "id") Long id, RedirectAttributes flash,
 			Authentication authentication, Model model) {
@@ -771,11 +890,23 @@ public class PrestamoController {
 					+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código empleado "
 					+ empleado.getId() + ")");
 			prestamoService.save(prestamo);
+			String tipoOp = "";
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					tipoOp = "DEVOLVER LIBRO SYSADMIN";
+					break;
+				case "[ROLE_ADMIN]":
+					tipoOp = "DEVOLVER LIBRO ADMIN";
+					break;
+				default:
+					tipoOp = "DEVOLVER LIBRO EMPLOYEE";
+					break;
+			}
 			// JUSTO DESPUES DE DEVOLVER EL LIBRO, INSERTO EL REGISTRO EN MI
 			// TABLA LOG
 			prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamoOld.getEmpleado().getId(),
 					prestamo.getEmpleado().getId(), prestamoOld.getLibro().getId(), prestamo.getLibro().getId(),
-					prestamoOld.getUsuario().getId(), prestamo.getUsuario().getId(), "DEVOLVER LIBRO EMPLOYEE",
+					prestamoOld.getUsuario().getId(), prestamo.getUsuario().getId(), tipoOp,
 					prestamo.getEmpleado().getUsername()
 							.concat(" (Cod. Empleado: " + prestamo.getEmpleado().getId() + ")"),
 					prestamoOld.getFecha_despacho(), prestamo.getFecha_despacho(), prestamoOld.getFecha_devolucion(),
@@ -788,7 +919,7 @@ public class PrestamoController {
 	}
 
 	// ANULACIÒN DE PRÉSTAMO, AUN PRESENTE EN LA BD
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/anular-prestamo/{id}")
 	public String anularPrestamo(@PathVariable(value = "id") Long id, RedirectAttributes flash,
 			Authentication authentication, Model model) {
@@ -840,11 +971,23 @@ public class PrestamoController {
 				emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", prestamo.getUsuario().getEmail(),
 						"Préstamo Anulado | Biblioteca2020", message);
 				prestamoService.save(prestamo);
+				String tipoOp = "";
+				switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_SYSADMIN]":
+						tipoOp = "ANULAR PRESTAMO SYSADMIN";
+						break;
+					case "[ROLE_ADMIN]":
+						tipoOp = "ANULAR PRESTAMO ADMIN";
+						break;
+					default:
+						tipoOp = "ANULAR PRESTAMO EMPLOYEE";
+						break;
+				}
 				// JUSTO DESPUES DE DEVOLVER EL LIBRO, INSERTO EL REGISTRO EN MI
 				// TABLA LOG
 				prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamoOld.getEmpleado().getId(),
 						prestamo.getEmpleado().getId(), prestamoOld.getLibro().getId(), prestamo.getLibro().getId(),
-						prestamoOld.getUsuario().getId(), prestamo.getUsuario().getId(), "ANULAR PRESTAMO EMPLOYEE",
+						prestamoOld.getUsuario().getId(), prestamo.getUsuario().getId(), tipoOp,
 						prestamo.getEmpleado().getUsername()
 								.concat(" (Cod. Empleado: " + prestamo.getEmpleado().getId() + ")"),
 						prestamoOld.getFecha_despacho(), prestamo.getFecha_despacho(),

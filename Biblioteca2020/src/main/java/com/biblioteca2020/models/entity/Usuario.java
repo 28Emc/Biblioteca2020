@@ -105,7 +105,7 @@ public class Usuario implements Serializable {
 	@PrePersist
 	public void prePersist() {
 		fecha_registro = new Date();
-		estado = false;
+		//estado = false;
 	}
 
 	private static final long serialVersionUID = 1L;

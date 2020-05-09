@@ -10,21 +10,28 @@ import com.biblioteca2020.models.entity.Local;
 
 public interface ILocalDao extends CrudRepository<Local, Long> {
 	// USADO
-	public Local findFirstByEmpresa(Empresa empresa);
+	public List<Local> findFirstByEmpresa(Empresa empresa);
 
 	public List<Local> findByEstado(Boolean estado);
 
 	public List<Local> findByDireccionLikeIgnoreCase(String term);
-	
+
 	public Local findByDireccion(String direccion);
-	
+
 	public Optional<Local> findById(Long id);
+
 	// USADO
-	//ESTA QUERY MUESTRA EL LOCAL ANEXOS A LA EMPRESA Y AL EMPLEADO QUE ESTÁ LOGUEADO
+	// ESTA QUERY MUESTRA EL LOCAL ANEXOS A LA EMPRESA Y AL EMPLEADO QUE ESTÁ
+	// LOGUEADO
 	@Query("select l from Local l join fetch l.empleados e join fetch l.empresa em where em.id=?1 and e.id=?2")
 	public Local fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado);
 
+	// USADO
 	@Query("select l from Local l join fetch l.empresa em where l.id=?1")
 	public Local fetchByIdWithEmpresa(Long id);
+
+	// USADO
+	@Query("select l from Local l join fetch l.empresa em")
+	public List<Local> fetchByIdWithEmpresa();
 
 }

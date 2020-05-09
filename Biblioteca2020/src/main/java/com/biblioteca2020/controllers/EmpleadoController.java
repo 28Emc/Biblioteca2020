@@ -65,8 +65,8 @@ public class EmpleadoController {
 
 	private static final List<String> formatosFoto = Arrays.asList("image/png", "image/jpeg", "image/jpg");
 
-	// ############################## ROLE EMPLEADO, ROLE ADMIN
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
+	// ##############################   SYSADMIN, ADMIN, EMPLEADO 
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/editar-perfil")
 	public String editarPerfil(Model model, RedirectAttributes flash, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -89,7 +89,7 @@ public class EmpleadoController {
 		return "/empleados/perfil";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@PostMapping(value = "/editar-perfil")
 	public String guardarPerfil(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Map<String, Object> modelMap, @RequestParam("foto_emp") MultipartFile foto,
@@ -199,13 +199,13 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/cancelar-perfil")
 	public String cancelarPerfil() {
 		return "redirect:/home";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/cambio-password")
 	public String cambioPasswordEmpleado(Model model, Authentication authentication) {
 		CambiarPassword cambiarPassword = new CambiarPassword();
@@ -217,7 +217,7 @@ public class EmpleadoController {
 		return "/empleados/cambio-password";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@PostMapping("/cambio-password")
 	public String cambioPasswordEmpleado(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
 			RedirectAttributes flash, Authentication authentication) {
@@ -261,7 +261,7 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_EMPLEADO', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/deshabilitar-perfil")
 	public String deshabilitarPerfil(RedirectAttributes flash, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -305,13 +305,18 @@ public class EmpleadoController {
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		switch (userDetails.getAuthorities().toString()) {
 			case "[ROLE_SYSADMIN]":
-				model.addAttribute("empleados", empleadoService.findAll());
+				List<Empleado> empleados = empleadoService.findAll();
+				for (int i = 0; i < empleados.size(); i++) {
+					empleados.removeIf(n -> n.getRoles().iterator().next().getAuthority().equals("ROLE_PRUEBA"));
+				}
+				model.addAttribute("titulo", "Listado de empleados");
+				model.addAttribute("empleados", empleados);
 				break;
 			case "[ROLE_ADMIN]":
 				model.addAttribute("empleados",
 						empleadoService.fetchByIdWithLocalWithEmpresa(empleado.getLocal().getId()));
 				model.addAttribute("titulo",
-						"Listado de Empleados de '" + empleado.getLocal().getEmpresa().getRazonSocial() + "'");
+						"Listado de empleados de " + empleado.getLocal().getEmpresa().getRazonSocial());
 				break;
 		}
 		model.addAttribute("empleado", new Empleado());
@@ -604,18 +609,27 @@ public class EmpleadoController {
 		return "redirect:/empleados/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping("/crear")
 	public String crearFormEmpleado(Model model, Authentication authentication, RedirectAttributes flash) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Local> localesList = null;
 		try {
-			model.addAttribute("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					localesList = localService.findAll();
+					break;
+				default:
+					localesList = localService.findFirstByEmpresa(empleado.getLocal().getEmpresa());
+					break;
+			}
+			model.addAttribute("localesList", localesList);
 			Empleado emp = new Empleado();
 			emp.setFoto_empleado("no-image.jpg");
 			model.addAttribute("empleado", emp);
 			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-			model.addAttribute("titulo", "Registro de Empleado");
+			model.addAttribute("titulo", "Registro de empleado nuevo");
 			return "empleados/crear";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
@@ -623,35 +637,28 @@ public class EmpleadoController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
 	public String crearEmpleado(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, @RequestParam("foto_emp") MultipartFile foto, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleadoLog = empleadoService.findByUsername(userDetails.getUsername());
+		List<Local> localesList = null;
 		if (result.hasErrors()) {
-			model.addAttribute("empleado", empleado);
-			try {
-				model.addAttribute("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
-			} catch (Exception e) {
-				flash.addFlashAttribute("error", e.getMessage());
-				return "/empleados/crear";
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					localesList = localService.findAll();
+					break;
+				default:
+					localesList = localService.findFirstByEmpresa(empleadoLog.getLocal().getEmpresa());
+					break;
 			}
+			model.addAttribute("empleado", empleado);
+			model.addAttribute("localesList", localesList);
 			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-			model.addAttribute("titulo", "Registro de Empleado");
+			model.addAttribute("titulo", "Registro de empleado nuevo");
 			return "/empleados/crear";
 		}
-
-		if (!foto.isEmpty()) {
-			String rootPath = "C://Temp//uploads";
-			try {
-				byte[] bytes = foto.getBytes();
-				Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-				Files.write(rutaCompleta, bytes);
-				empleado.setFoto_empleado(foto.getOriginalFilename());
-			} catch (IOException e) {
-				model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
-			}
-		}
-
 		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
 			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
@@ -664,39 +671,41 @@ public class EmpleadoController {
 					empleado.setFoto_empleado(foto.getOriginalFilename());
 				} catch (IOException e) {
 					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
-					model.addAttribute("empleado", empleado);
-					try {
-						model.addAttribute("localesList",
-								localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
-					} catch (Exception e1) {
-						flash.addFlashAttribute("error", e1.getMessage());
-						return "/empleados/crear";
+					switch (userDetails.getAuthorities().toString()) {
+						case "[ROLE_SYSADMIN]":
+							localesList = localService.findAll();
+							break;
+						default:
+							localesList = localService.findFirstByEmpresa(empleadoLog.getLocal().getEmpresa());
+							break;
 					}
+					model.addAttribute("empleado", empleado);
+					model.addAttribute("localesList", localesList);
 					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-					model.addAttribute("titulo", "Registro de Empleado");
+					model.addAttribute("titulo", "Registro de empleado nuevo");
 					return "/empleados/crear";
 				}
 			} else {
 				model.addAttribute("error", "El formato de la foto es incorrecto");
-				model.addAttribute("empleado", empleado);
-				try {
-					model.addAttribute("localesList",
-							localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
-				} catch (Exception e2) {
-					flash.addFlashAttribute("error", e2.getMessage());
-					return "/empleados/crear";
+				switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_SYSADMIN]":
+						localesList = localService.findAll();
+						break;
+					default:
+						localesList = localService.findFirstByEmpresa(empleadoLog.getLocal().getEmpresa());
+						break;
 				}
+				model.addAttribute("empleado", empleado);
+				model.addAttribute("localesList", localesList);
 				model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-				model.addAttribute("titulo", "Registro de Empleado");
+				model.addAttribute("titulo", "Registro de empleado nuevo");
 				return "/empleados/crear";
 			}
 		} else {
 			empleado.setFoto_empleado("no-image.jpg");
 		}
-
 		try {
 			empleadoService.save(empleado);
-
 			// AL CREAR UN EMPLEADO, INSERTO MI REGISTRO EN EL LOG DE EMPLEADOS
 			Long idRole = empleado.getRoles().iterator().next().getId();
 			empleadoLogService.save(new EmpleadoLog(idRole, empleado.getNombres(), null, empleado.getApellidos(), null,
@@ -704,84 +713,94 @@ public class EmpleadoController {
 					empleado.getCelular(), null, empleado.getFecha_registro(), null, empleado.getUsername(), null,
 					empleado.getPassword(), null, empleado.getEstado(), null, empleado.getFoto_empleado(), null,
 					"INSERT BY ADMIN", new Date(), null, null));
-
 			flash.addFlashAttribute("success",
 					"El empleado ha sido registrado en la base de datos (Código " + empleado.getId() + ")");
 			status.setComplete();
 			return "redirect:/empleados/listar";
 		} catch (Exception e) {
-			try {
-				model.addAttribute("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
-			} catch (Exception e2) {
-				flash.addFlashAttribute("error", e2.getMessage());
-				return "/empleados/crear";
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					localesList = localService.findAll();
+					break;
+				default:
+					localesList = localService.findFirstByEmpresa(empleadoLog.getLocal().getEmpresa());
+					break;
 			}
 			model.addAttribute("empleado", empleado);
+			model.addAttribute("localesList", localesList);
 			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-			model.addAttribute("titulo", "Registro de Empleado");
+			model.addAttribute("titulo", "Registro de empleado nuevo");
 			model.addAttribute("error", e.getMessage());
 			return "/empleados/crear";
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping("/editar/{id}")
 	public String editarFormEmpleado(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash,
 			Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		// AQUI VALIDO SI EL USUARIO LOGUEADO ES ADMIN Y PUEDE EDITAR SU MISMO REGISTRO
-		try {
-			Empleado empleadoAdmin = empleadoService.findById(id);
-			if (empleadoAdmin.getRoles().toString().contains("ROLE_ADMIN") == true
-					&& empleado.getRoles().toString().contains("ROLE_ADMIN") == false) {
-				flash.addFlashAttribute("error", "No tienes permiso para acceder a este recurso.");
-				return "redirect:/empleados/listar";
-			}
-		} catch (Exception e1) {
-			flash.addFlashAttribute("error", e1.getMessage());
-			return "redirect:/empleados/listar";
-		}
-		// FIN VALIDACION ADMIN
-		try {
-			model.addAttribute("localesList", localService.findFirstByEmpresa(empleado.getLocal().getEmpresa()));
-		} catch (Exception e) {
-			flash.addFlashAttribute("error", e.getMessage());
-			return "/empleados/crear";
-		}
-		model.addAttribute("editable", true);
-		model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-		model.addAttribute("titulo", "Modificar Empleado");
+		List<Local> localesList = null;
+		String ruta = "";
 		try {
 			Empleado empleadoEditable = empleadoService.findById(id);
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					localesList = localService.findAll();
+					// MUESTRO EL ROLE_SYSADMIN AL SYSADMIN LOGUEADO SOLAMENTE
+					if (empleadoEditable.getRoles().iterator().next().getAuthority().equals("ROLE_SYSADMIN")) {
+						model.addAttribute("roles", roleService.findForSysadmin());
+					} else {
+						model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					}
+					break;
+				case "[ROLE_ADMIN]":
+					localesList = localService.findFirstByEmpresa(empleado.getLocal().getEmpresa());
+					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					break;
+			}
+			model.addAttribute("localesList", localesList);
+			model.addAttribute("editable", true);
 			model.addAttribute("empleado", empleadoEditable);
-			return "/empleados/crear";
+			model.addAttribute("titulo", "Modificar datos del empleado");
+			ruta = "/empleados/crear";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
-			return "redirect:/empleados/listar";
+			ruta = "redirect:/empleados/listar";
 		}
+		return ruta;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String guardarEmpleado(@Valid Empleado empleado, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash, Authentication authentication, @RequestParam("foto_emp") MultipartFile foto) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleadoLogueado = empleadoService.findByUsername(userDetails.getUsername());
-		Empleado empleadoOld = empleadoLogueado;
+		Empleado empleadoLog = empleadoLogueado;
+		List<Local> localesList = null;
 		if (result.hasErrors()) {
-			try {
-				model.addAttribute("localesList",
-						localService.findFirstByEmpresa(empleadoLogueado.getLocal().getEmpresa()));
-			} catch (Exception e) {
-				flash.addFlashAttribute("error", e.getMessage());
-				return "/empleados/crear";
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					localesList = localService.findAll();
+					// MUESTRO EL ROLE_SYSADMIN AL SYSADMIN LOGUEADO SOLAMENTE
+					if (empleadoLogueado.getRoles().iterator().next().getAuthority().equals("ROLE_SYSADMIN")) {
+						model.addAttribute("roles", roleService.findForSysadmin());
+					} else {
+						model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					}
+					break;
+				case "[ROLE_ADMIN]":
+					localesList = localService.findFirstByEmpresa(empleado.getLocal().getEmpresa());
+					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					break;
 			}
-			model.addAttribute("empleado", empleado);
+			model.addAttribute("localesList", localesList);
 			model.addAttribute("editable", true);
-			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-			model.addAttribute("titulo", "Modificar Empleado");
-			return "/empleados/editar";
+			model.addAttribute("empleado", empleado);
+			model.addAttribute("titulo", "Modificar datos del empleado");
+			return "/empleados/crear";
 		}
 
 		// PREGUNTO SI EL PARAMETRO ES NULO
@@ -795,92 +814,122 @@ public class EmpleadoController {
 					Files.write(rutaCompleta, bytes);
 					empleado.setFoto_empleado(foto.getOriginalFilename());
 				} catch (IOException e) {
-					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
-					try {
-						model.addAttribute("localesList",
-								localService.findFirstByEmpresa(empleadoLogueado.getLocal().getEmpresa()));
-					} catch (Exception e2) {
-						flash.addFlashAttribute("error", e2.getMessage());
-						return "/empleados/crear";
+					switch (userDetails.getAuthorities().toString()) {
+						case "[ROLE_SYSADMIN]":
+							localesList = localService.findAll();
+							// MUESTRO EL ROLE_SYSADMIN AL SYSADMIN LOGUEADO SOLAMENTE
+							if (empleadoLogueado.getRoles().iterator().next().getAuthority().equals("ROLE_SYSADMIN")) {
+								model.addAttribute("roles", roleService.findForSysadmin());
+							} else {
+								model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+							}
+							break;
+						case "[ROLE_ADMIN]":
+							localesList = localService.findFirstByEmpresa(empleado.getLocal().getEmpresa());
+							model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+							break;
 					}
-					model.addAttribute("empleado", empleado);
+					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+					model.addAttribute("localesList", localesList);
 					model.addAttribute("editable", true);
-					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-					model.addAttribute("titulo", "Modificar Empleado");
-					return "/empleados/editar";
-				}
-			} else {
-				model.addAttribute("error", "El formato de la foto es incorrecto");
-				try {
-					model.addAttribute("localesList",
-							localService.findFirstByEmpresa(empleadoLogueado.getLocal().getEmpresa()));
-				} catch (Exception e3) {
-					flash.addFlashAttribute("error", e3.getMessage());
+					model.addAttribute("empleado", empleado);
+					model.addAttribute("titulo", "Modificar datos del empleado");
 					return "/empleados/crear";
 				}
-				model.addAttribute("empleado", empleado);
+			} else {
+				switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_SYSADMIN]":
+						localesList = localService.findAll();
+						// MUESTRO EL ROLE_SYSADMIN AL SYSADMIN LOGUEADO SOLAMENTE
+						if (empleadoLogueado.getRoles().iterator().next().getAuthority().equals("ROLE_SYSADMIN")) {
+							model.addAttribute("roles", roleService.findForSysadmin());
+						} else {
+							model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+						}
+						break;
+					case "[ROLE_ADMIN]":
+						localesList = localService.findFirstByEmpresa(empleado.getLocal().getEmpresa());
+						model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+						break;
+				}
+				model.addAttribute("error", "El formato de la foto es incorrecto");
+				model.addAttribute("localesList", localesList);
 				model.addAttribute("editable", true);
-				model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-				model.addAttribute("titulo", "Modificar Empleado");
-				return "/empleados/editar";
+				model.addAttribute("empleado", empleado);
+				model.addAttribute("titulo", "Modificar datos del empleado");
+				return "/empleados/crear";
 			}
 		}
-
 		try {
 			empleadoService.update(empleado);
-
 			// AL ACTUALIZAR UN EMPLEADO, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
 			Long idRole = empleado.getRoles().iterator().next().getId();
-			empleadoLogService.save(new EmpleadoLog(idRole, empleadoOld.getNombres(), empleado.getNombres(),
-					empleadoOld.getApellidos(), empleado.getApellidos(), empleadoOld.getNroDocumento(),
-					empleado.getNroDocumento(), empleadoOld.getDireccion(), empleado.getDireccion(),
-					empleadoOld.getEmail(), empleado.getEmail(), empleadoOld.getCelular(), empleado.getCelular(),
-					empleadoOld.getFecha_registro(), empleado.getFecha_registro(), empleadoOld.getUsername(),
-					empleado.getUsername(), empleadoOld.getPassword(), empleado.getPassword(), empleadoOld.getEstado(),
-					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(),
+			empleadoLogService.save(new EmpleadoLog(idRole, empleadoLog.getNombres(), empleado.getNombres(),
+					empleadoLog.getApellidos(), empleado.getApellidos(), empleadoLog.getNroDocumento(),
+					empleado.getNroDocumento(), empleadoLog.getDireccion(), empleado.getDireccion(),
+					empleadoLog.getEmail(), empleado.getEmail(), empleadoLog.getCelular(), empleado.getCelular(),
+					empleadoLog.getFecha_registro(), empleado.getFecha_registro(), empleadoLog.getUsername(),
+					empleado.getUsername(), empleadoLog.getPassword(), empleado.getPassword(), empleadoLog.getEstado(),
+					empleado.getEstado(), empleadoLog.getFoto_empleado(), empleado.getFoto_empleado(),
 					"UPDATE BY ADMIN", null, new Date(), null));
-
 			flash.addFlashAttribute("warning",
 					"El empleado con código " + empleado.getId() + " ha sido actualizado en la base de datos.");
 			status.setComplete();
 			return "redirect:/empleados/listar";
 		} catch (Exception e) {
-			try {
-				model.addAttribute("localesList",
-						localService.findFirstByEmpresa(empleadoLogueado.getLocal().getEmpresa()));
-			} catch (Exception e2) {
-				flash.addFlashAttribute("error", e2.getMessage());
-				return "/empleados/crear";
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					localesList = localService.findAll();
+					// MUESTRO EL ROLE_SYSADMIN AL SYSADMIN LOGUEADO SOLAMENTE
+					if (empleadoLogueado.getRoles().iterator().next().getAuthority().equals("ROLE_SYSADMIN")) {
+						model.addAttribute("roles", roleService.findForSysadmin());
+					} else {
+						model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					}
+					break;
+				case "[ROLE_ADMIN]":
+					localesList = localService.findFirstByEmpresa(empleado.getLocal().getEmpresa());
+					model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
+					break;
 			}
-			model.addAttribute("empleado", empleado);
+			model.addAttribute("localesList", localesList);
 			model.addAttribute("editable", true);
-			model.addAttribute("roles", roleService.findForEmpleadosAndAdmin());
-			model.addAttribute("titulo", "Modificar Empleado");
+			model.addAttribute("empleado", empleado);
+			model.addAttribute("titulo", "Modificar datos del empleado");
 			model.addAttribute("error", e.getMessage());
 			return "/empleados/crear";
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping(value = "/deshabilitar/{id}")
-	public String deshabilitarEmpleado(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
+	public String deshabilitarEmpleado(@PathVariable(value = "id") Long id, RedirectAttributes flash,
+			Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		String tipoOp = "";
 		try {
 			Empleado empleado = empleadoService.findById(id);
 			Empleado empleadoOld = empleado;
 			empleado.setEstado(false);
 			empleadoService.update(empleado);
-
-			// AL DESHABILITAR UN EMPLEADO, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
 			Long idRole = empleado.getRoles().iterator().next().getId();
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					tipoOp = "LOCK ACCOUNT BY SYSADMIN";
+					break;
+				case "[ROLE_ADMIN]":
+					tipoOp = "LOCK ACCOUNT BY ADMIN";
+					break;
+			}
+			// AL DESHABILITAR UN EMPLEADO, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
 			empleadoLogService.save(new EmpleadoLog(idRole, empleadoOld.getNombres(), empleado.getNombres(),
 					empleadoOld.getApellidos(), empleado.getApellidos(), empleadoOld.getNroDocumento(),
 					empleado.getNroDocumento(), empleadoOld.getDireccion(), empleado.getDireccion(),
 					empleadoOld.getEmail(), empleado.getEmail(), empleadoOld.getCelular(), empleado.getCelular(),
 					empleadoOld.getFecha_registro(), empleado.getFecha_registro(), empleadoOld.getUsername(),
 					empleado.getUsername(), empleadoOld.getPassword(), empleado.getPassword(), empleadoOld.getEstado(),
-					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(),
-					"LOCK ACCOUNT BY ADMIN", null, new Date(), null));
-
+					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(), tipoOp, null,
+					new Date(), null));
 			flash.addFlashAttribute("info", "El empleado con código " + empleado.getId() + " ha sido deshabilitado.");
 			return "redirect:/empleados/listar";
 		} catch (Exception e) {

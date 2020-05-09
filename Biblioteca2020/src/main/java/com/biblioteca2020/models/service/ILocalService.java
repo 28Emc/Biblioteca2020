@@ -25,12 +25,15 @@ public interface ILocalService {
 	public Local findByDireccion(String direccion);
 
 	// USADO
-	public Local findFirstByEmpresa(Empresa empresa);
+	public List<Local> findFirstByEmpresa(Empresa empresa);
 
 	// USADO
 	public Local fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado) throws Exception;
 
 	// USADO
 	public Local fetchByIdWithEmpresa(Long id);
+
+	// USADO
+	public List<Local> fetchByIdWithEmpresa();
 
 }

@@ -16,7 +16,8 @@
                 response(
                   $.map(data, function (item) {
                     return {
-                      value: item.direccion,
+                      label: item.direccion,
+                      value: item.id,
                     };
                   })
                 );
@@ -27,7 +28,9 @@
             event.preventDefault();
           },
           select: function (event, ui) {
-            $("#buscar_local").val(ui.item.value);
+            $("#buscar_local").val(ui.item.label);
+            $("#id_local").val(ui.item.value);
+            $("#direccion_local").val(ui.item.label);
             return false;
           },
         });

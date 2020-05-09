@@ -369,8 +369,8 @@ public class UsuarioController {
 		} else {
 			usuario.setFoto_usuario("no-image.jpg");
 			try {
+				usuario.setEstado(false);
 				usuarioService.save(usuario);
-
 				// AL CREAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
 				Long idRole = usuario.getRoles().iterator().next().getId();
 				usuarioLogService.save(new UsuarioLog(idRole, usuario.getNombres(), null, usuario.getApellidos(), null,
@@ -378,7 +378,6 @@ public class UsuarioController {
 						usuario.getCelular(), null, usuario.getFecha_registro(), null, usuario.getUsername(), null,
 						usuario.getPassword(), null, usuario.getEstado(), null, usuario.getFoto_usuario(), null,
 						"INSERT USER", new Date(), null, null));
-
 			} catch (Exception e) {
 				model.addAttribute("usuario", usuario);
 				model.addAttribute("roles", roleService.findOnlyUsers());
@@ -432,7 +431,6 @@ public class UsuarioController {
 				Usuario usuarioOld = usuario;
 				usuario.setEstado(true);
 				usuarioService.update(usuario);
-
 				// AL ACTUALIZAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
 				Long idRole = usuario.getRoles().iterator().next().getId();
 				usuarioLogService.save(new UsuarioLog(idRole, usuarioOld.getNombres(), usuario.getNombres(),
@@ -443,7 +441,6 @@ public class UsuarioController {
 						usuario.getUsername(), usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(),
 						usuario.getEstado(), usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(),
 						"VALIDATE ACCOUNT USER", null, new Date(), null));
-
 				model.addAttribute("titulo", "Cuenta Verificada");
 				return "/usuarios/cuenta-verificada";
 			} catch (Exception e) {
@@ -755,7 +752,7 @@ public class UsuarioController {
 	// ############################ ROLE ADMIN, EMPLEADO
 	// ############################
 	// LISTADO DE USUARIOS
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/listar")
 	public String listarUsuarios(Model model) {
 		model.addAttribute("usuario", new Usuario());
@@ -930,28 +927,28 @@ public class UsuarioController {
 		return "redirect:/usuarios/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping("/crear")
 	public String crearFormUsuario(Model model) {
 		Usuario usuario = new Usuario();
 		usuario.setFoto_usuario("no-image.jpg");
 		model.addAttribute("usuario", usuario);
 		model.addAttribute("roles", roleService.findOnlyUsers());
-		model.addAttribute("titulo", "Registro de Usuario");
+		model.addAttribute("titulo", "Registro de usuario nuevo");
 		return "usuarios/crear";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
 	public String crearUsuario(@Valid Usuario usuario, BindingResult result, Model model, SessionStatus status,
-			RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto) {
+			RedirectAttributes flash, @RequestParam("foto_usu") MultipartFile foto, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		if (result.hasErrors()) {
 			model.addAttribute("usuario", usuario);
 			model.addAttribute("roles", roleService.findOnlyUsers());
-			model.addAttribute("titulo", "Registro de Usuario");
+			model.addAttribute("titulo", "Registro de usuario nuevo");
 			return "/usuarios/crear";
 		}
-
 		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
 			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
@@ -979,18 +976,25 @@ public class UsuarioController {
 		} else {
 			usuario.setFoto_usuario("no-image.jpg");
 		}
-
 		try {
+			usuario.setEstado(true);
 			usuarioService.save(usuario);
-
 			// AL CREAR EL USUARIO, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
 			Long idRole = usuario.getRoles().iterator().next().getId();
+			String tipoOp = "";
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					tipoOp = "INSERT BY SYSADMIN";
+					break;
+				case "[ROLE_ADMIN]":
+					tipoOp = "INSERT BY ADMIN";
+					break;
+			}
 			usuarioLogService.save(new UsuarioLog(idRole, usuario.getNombres(), null, usuario.getApellidos(), null,
 					usuario.getNroDocumento(), null, usuario.getDireccion(), null, usuario.getEmail(), null,
 					usuario.getCelular(), null, usuario.getFecha_registro(), null, usuario.getUsername(), null,
-					usuario.getPassword(), null, usuario.getEstado(), null, usuario.getFoto_usuario(), null,
-					"INSERT ADMIN", new Date(), null, null));
-
+					usuario.getPassword(), null, usuario.getEstado(), null, usuario.getFoto_usuario(), null, tipoOp,
+					new Date(), null, null));
 			flash.addFlashAttribute("success",
 					"El usuario ha sido registrado en la base de datos (Código " + usuario.getId() + ")");
 			status.setComplete();
@@ -1004,9 +1008,11 @@ public class UsuarioController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping(value = "/deshabilitar/{id}")
-	public String deshabilitarUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
+	public String deshabilitarUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash,
+			Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		try {
 			Usuario usuario = usuarioService.findById(id);
 			Usuario usuarioOld = usuario;
@@ -1015,15 +1021,22 @@ public class UsuarioController {
 
 			// AL ACTUALIZAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
 			Long idRole = usuario.getRoles().iterator().next().getId();
+			String tipoOp = "";
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					tipoOp = "LOCK ACCOUNT BY SYSADMIN";
+					break;
+				case "[ROLE_ADMIN]":
+					tipoOp = "LOCK ACCOUNT BY ADMIN";
+					break;
+			}
 			usuarioLogService.save(new UsuarioLog(idRole, usuarioOld.getNombres(), usuario.getNombres(),
 					usuarioOld.getApellidos(), usuario.getApellidos(), usuarioOld.getNroDocumento(),
 					usuario.getNroDocumento(), usuarioOld.getDireccion(), usuario.getDireccion(), usuarioOld.getEmail(),
 					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
 					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
 					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
-					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "LOCK ACCOUNT BY ADMIN", null, new Date(),
-					null));
-
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), tipoOp, null, new Date(), null));
 			flash.addFlashAttribute("info", "El usuario con código " + usuario.getId() + " ha sido deshabilitado.");
 			return "redirect:/usuarios/listar";
 		} catch (Exception e) {

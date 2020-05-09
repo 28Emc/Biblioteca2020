@@ -1,183 +1,308 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="layout/layout :: head"></head>
 
-<head th:replace="layout/layout :: head"></head>
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
 
-<body class="bg-light">
+    <div class="container my-3 px-5">
+      <h1 class="py-4" th:text="${titulo}"></h1>
 
-	<header th:replace="layout/layout :: header"></header>
+      <form
+        enctype="multipart/form-data"
+        th:action="${editable} ?@{/empleados/editar} :@{/empleados/crear}"
+        th:object="${empleado}"
+        method="post"
+      >
+        <h4 class="my-4" th:text="'Datos personales'"></h4>
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-12 col-lg-6">
+            <label class="col-form-label" for="nombres">Nombre(s)</label>
+            <input
+              class="form-control rounded-0 shadow-none"
+              type="text"
+              th:field="*{nombres}"
+              th:errorclass="'form-control'"
+              placeholder="Nombre Completo"
+              autofocus
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('nombres')}"
+              th:errors="*{nombres}"
+            ></small>
+          </div>
+          <div class="col-sm-12 col-md-12 col-lg-6">
+            <label class="col-form-label" for="apellidos">Apellidos</label>
+            <input
+              class="form-control rounded-0 shadow-none"
+              type="text"
+              th:field="*{apellidos}"
+              th:errorclass="'form-control'"
+              placeholder="Apellido Paterno y Materno"
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('apellidos')}"
+              th:errors="*{apellidos}"
+            ></small>
+          </div>
+          <div class="col-sm-12 col-md-12 col-lg-6">
+            <label class="col-form-label" for="nroDocumento">DNI</label
+            ><input
+              class="form-control rounded-0 shadow-none"
+              type="number"
+              th:field="*{nroDocumento}"
+              th:errorclass="'form-control'"
+              placeholder='Ejm. "00000000"'
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('nroDocumento')}"
+              th:errors="*{nroDocumento}"
+            ></small>
+          </div>
+          <div class="col-sm-12 col-md-12 col-lg-6">
+            <label class="col-form-label" for="celular">Celular</label>
+            <input
+              class="form-control rounded-0 shadow-none"
+              type="number"
+              th:field="*{celular}"
+              th:errorclass="'form-control'"
+              placeholder='Ejm. "99999999"'
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('celular')}"
+              th:errors="*{celular}"
+            ></small>
+          </div>
+          <div class="col-sm-12 col-md-12">
+            <label class="col-form-label" for="direccion">Dirección</label>
+            <input
+              class="form-control rounded-0 shadow-none"
+              type="text"
+              th:field="*{direccion}"
+              th:errorclass="'form-control'"
+              placeholder="Av / Jr / Calle"
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('direccion')}"
+              th:errors="*{direccion}"
+            ></small>
+          </div>
+        </div>
 
-	<div class="container my-3 px-5">
+        <h4 th:text="'Datos de usuario'"></h4>
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-12 col-lg-6">
+            <label class="col-form-label" for="username">Usuario</label>
+            <input
+              class="form-control rounded-0 shadow-none"
+              type="text"
+              th:field="*{username}"
+              th:errorclass="'form-control'"
+              placeholder="Usuario"
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('username')}"
+              th:errors="*{username}"
+            ></small>
+          </div>
+          <div class="col-sm-12 col-md-12 col-lg-6">
+            <label class="col-form-label" for="email">Email</label>
+            <input
+              class="form-control rounded-0 shadow-none"
+              type="email"
+              th:field="*{email}"
+              th:errorclass="'form-control'"
+              placeholder='Ejm. "test@email.com"'
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('email')}"
+              th:errors="*{email}"
+            ></small>
+          </div>
+        </div>
 
-		<h1 class="py-4" th:text="${titulo}"></h1>
+        <div
+          class="form-group row"
+          th:if="${editable==null or editable==false}"
+        >
+          <div class="col-sm-12 col-md-12">
+            <label class="col-form-label" for="password">Contraseña</label>
+            <input
+              class="form-control rounded-0 shadow-none"
+              type="password"
+              th:field="*{password}"
+              th:errorclass="'form-control'"
+              placeholder="Mín. 8 caracteres, 1 dígito, 1 letra mayúscula, 1 letra minúscula, sin espacios"
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('password')}"
+              th:errors="*{password}"
+            ></small>
+          </div>
+          <div class="col-sm-12 col-md-12">
+            <label class="col-form-label" for="passwordConfirmacion"
+              >Confirmar Contraseña</label
+            >
+            <input
+              class="form-control rounded-0 shadow-none"
+              type="password"
+              th:field="*{passwordConfirmacion}"
+              th:errorclass="'form-control'"
+              placeholder="Escribir nuevamente la contraseña"
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('passwordConfirmacion')}"
+              th:errors="*{passwordConfirmacion}"
+            ></small>
+          </div>
+        </div>
 
-		<form enctype="multipart/form-data"
-			th:action="${editable} ?@{/empleados/editar} :@{/empleados/crear}"
-			th:object="${empleado}" method="post">
+        <div class="form-group row">
+          <div
+            class="col-sm-12 col-md-12 col-lg-6"
+            sec:authorize="hasRole('ROLE_SYSADMIN')"
+          >
+            <label class="col-form-label" for="local">Local</label>
+            <select
+              class="form-control custom-select rounded-0 shadow-none"
+              th:field="${empleado.local}"
+              th:errorclass="'form-control'"
+            >
+              <option
+                th:each="local :${localesList}"
+                th:value="${local.id}"
+                th:text="${local.direccion}"
+              ></option>
+            </select>
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('local')}"
+              th:errors="${local.id}"
+            ></small>
+          </div>
+          <div
+            class="col-sm-12 col-md-12 col-lg-6"
+            sec:authorize="hasRole('ROLE_ADMIN')"
+            hidden
+          >
+            <label class="col-form-label" for="local">Local</label>
+            <select
+              class="form-control custom-select rounded-0 shadow-none"
+              th:field="${empleado.local}"
+              th:errorclass="'form-control'"
+            >
+              <option
+                th:each="local :${localesList}"
+                th:value="${local.id}"
+                th:text="${local.direccion}"
+              ></option>
+            </select>
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('local')}"
+              th:errors="${local.id}"
+            ></small>
+          </div>
+          <div class="col-sm-12 col-md-12 col-lg-6">
+            <label class="col-form-label" for="rol">Rol</label>
+            <select
+              class="form-control custom-select rounded-0 shadow-none"
+              th:field="${empleado.roles}"
+              th:errorclass="'form-control'"
+            >
+              <option
+                th:each="rol :${roles}"
+                th:value="${rol.id}"
+                th:text="${rol.authority}"
+              ></option>
+            </select>
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('roles')}"
+              th:errors="${empleado.roles}"
+            ></small>
+          </div>
+        </div>
 
-			<h4 class="my-4" th:text="'Datos personales'"></h4>
-			<div class="form-group row">
-				<div class="col-sm-12 col-md-12 col-lg-6">
-					<label class="col-form-label" for="nombres">Nombre(s)</label> <input
-						class="form-control rounded-0 shadow-none" type="text"
-						th:field="*{nombres}" th:errorclass="'form-control'"
-						placeholder="Nombre Completo" autofocus /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('nombres')}" th:errors="*{nombres}"></small>
-				</div>
-				<div class="col-sm-12 col-md-12 col-lg-6">
-					<label class="col-form-label" for="apellidos">Apellidos</label> <input
-						class="form-control rounded-0 shadow-none" type="text"
-						th:field="*{apellidos}" th:errorclass="'form-control'"
-						placeholder="Apellido Paterno y Materno" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('apellidos')}" th:errors="*{apellidos}"></small>
-				</div>
-				<div class="col-sm-12 col-md-12 col-lg-6">
-					<label class="col-form-label" for="nroDocumento">DNI</label><input
-						class="form-control rounded-0 shadow-none" type="number"
-						th:field="*{nroDocumento}" th:errorclass="'form-control'"
-						placeholder="Ejm. &quot;00000000&quot;" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('nroDocumento')}"
-						th:errors="*{nroDocumento}"></small>
-				</div>
-				<div class="col-sm-12 col-md-12 col-lg-6">
-					<label class="col-form-label" for="celular">Celular</label> <input
-						class="form-control rounded-0 shadow-none" type="number"
-						th:field="*{celular}" th:errorclass="'form-control'"
-						placeholder="Ejm. &quot;99999999&quot;" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('celular')}" th:errors="*{celular}"></small>
-				</div>
-				<div class="col-sm-12 col-md-12">
-					<label class="col-form-label" for="direccion">Dirección</label> <input
-						class="form-control rounded-0 shadow-none" type="text"
-						th:field="*{direccion}" th:errorclass="'form-control'"
-						placeholder="Av / Jr / Calle" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></small>
-				</div>
-			</div>
+        <h3 class="mb-4">Foto</h3>
+        <div class="form-group row">
+          <div
+            class="col-sm-12 col-md-12 col-lg-6 p-3"
+            style="text-align: center;"
+          >
+            <img
+              th:if="${empleado.foto_empleado!=null && #strings.length(empleado.foto_empleado) > 0}"
+              class="img-thumbnail rounded-0 shadow-none"
+              style="max-width: 70%;"
+              th:alt="${empleado.foto_empleado}"
+              th:src="@{'/uploads/'+${empleado.foto_empleado}}"
+            />
+          </div>
+          <div
+            class="col-sm-12 col-md-12 col-lg-6 p-3"
+            style="position: relative;"
+          >
+            <input
+              style="position: absolute; bottom: 0;"
+              class="form-control-file rounded-0 shadow-none"
+              type="file"
+              name="foto_emp"
+              accept=".png, .jpeg, .jpg"
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('foto_empleado')}"
+              th:errors="*{foto_empleado}"
+            ></small>
+          </div>
+        </div>
 
-			<h4 th:text="'Datos de usuario'"></h4>
-			<div class="form-group row">
-				<div class="col-sm-12 col-md-12 col-lg-6">
-					<label class="col-form-label" for="username">Usuario</label> <input
-						class="form-control rounded-0 shadow-none" type="text"
-						th:field="*{username}" th:errorclass="'form-control'"
-						placeholder="Usuario" /> <small class="form-text text-danger"
-						th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></small>
-				</div>
-				<div class="col-sm-12 col-md-12 col-lg-6">
-					<label class="col-form-label" for="email">Email</label> <input
-						class="form-control rounded-0 shadow-none" type="email"
-						th:field="*{email}" th:errorclass="'form-control'"
-						placeholder="Ejm. &quot;test@email.com&quot;" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
-				</div>
-			</div>
+        <div class="form-group row py-3">
+          <!-- MOVIL -->
+          <div class="col-6 d-block d-sm-none">
+            <a
+              class="btn btn-transparent btn-block rounded-0 shadow-none"
+              th:href="@{'/empleados/cancelar'}"
+              ><i class="fas fa-times fa-2x"></i
+            ></a>
+          </div>
+          <div class="col-6 d-block d-sm-none">
+            <button
+              class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+              type="submit"
+            >
+              <i class="fas fa-check fa-2x"></i>
+            </button>
+          </div>
 
-			<div class="form-group row"
-				th:if="${editable==null or editable==false}">
-				<div class="col-sm-12 col-md-12">
-					<label class="col-form-label" for="password">Contraseña</label> <input
-						class="form-control rounded-0 shadow-none" type="password"
-						th:field="*{password}" th:errorclass="'form-control'"
-						placeholder="Mín. 8 caracteres, 1 dígito, 1 letra mayúscula, 1 letra minúscula, sin espacios" />
-					<small class="form-text text-danger"
-						th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small>
-				</div>
-				<div class="col-sm-12 col-md-12">
-					<label class="col-form-label" for="passwordConfirmacion">Confirmar
-						Contraseña</label> <input class="form-control rounded-0 shadow-none"
-						type="password" th:field="*{passwordConfirmacion}"
-						th:errorclass="'form-control'"
-						placeholder="Escribir nuevamente la contraseña" /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('passwordConfirmacion')}"
-						th:errors="*{passwordConfirmacion}"></small>
-				</div>
-			</div>
+          <!-- WEB -->
+          <div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+            <a
+              class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+              th:href="@{'/empleados/cancelar'}"
+              >CANCELAR</a
+            >
+          </div>
+          <div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+            <input
+              class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+              type="submit"
+              th:value="${editable}?'GUARDAR CAMBIOS':'CREAR'"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
 
-			<div class="form-group row">
-				<div class="col-sm-12 col-md-12 col-lg-6" hidden>
-					<label class="col-form-label" for="local">Local</label> <select
-						class="form-control custom-select rounded-0 shadow-none"
-						th:size="${#lists.size(localesList)}" th:field="${empleado.local}"
-						th:errorclass="'form-control'">
-						<option th:each="local :${localesList}" th:value="${local.id}"
-							th:text="${local.direccion}"></option>
-					</select> <small class="form-text text-danger"
-						th:if="${#fields.hasErrors('local')}" th:errors="${local.id}"></small>
-				</div>
-				<div class="col-sm-12 col-md-12 col-lg-6">
-					<label class="col-form-label" for="rol">Rol</label> <select
-						multiple="multiple" th:size="${#lists.size(roles)}"
-						class="form-control custom-select rounded-0 shadow-none"
-						th:field="${empleado.roles}" th:errorclass="'form-control'">
-						<option th:each="rol :${roles}" th:value="${rol.id}"
-							th:text="${rol.authority}"></option>
-					</select> <small class="form-text text-danger"
-						th:if="${#fields.hasErrors('roles')}"
-						th:errors="${empleado.roles}"></small>
-				</div>
-			</div>
-
-			<h3 class="mb-4">Foto</h3>
-			<div class="form-group row">
-				<div class="col-sm-12 col-md-12 col-lg-6 p-3"
-					style="text-align: center;">
-					<img
-						th:if="${empleado.foto_empleado!=null && #strings.length(empleado.foto_empleado) > 0}"
-						class="img-thumbnail rounded-0 shadow-none"
-						style="max-width: 70%;" th:alt="${empleado.foto_empleado}"
-						th:src="@{'/uploads/'+${empleado.foto_empleado}}">
-				</div>
-				<div class="col-sm-12 col-md-12 col-lg-6 p-3"
-					style="position: relative;">
-					<input style="position: absolute; bottom: 0;"
-						class="form-control-file rounded-0 shadow-none" type="file"
-						name="foto_emp" accept=".png, .jpeg, .jpg" /> <small class="form-text text-danger"
-						th:if="${#fields.hasErrors('foto_empleado')}"
-						th:errors="*{foto_empleado}"></small>
-				</div>
-			</div>
-
-			<div class="form-group row py-3">
-				<!-- MOVIL -->
-				<div class="col-6 d-block d-sm-none">
-					<a class="btn btn-transparent btn-block rounded-0 shadow-none"
-						th:href="@{'/empleados/cancelar'}"><i
-						class="fas fa-times fa-2x"></i></a>
-				</div>
-				<div class="col-6 d-block d-sm-none">
-					<button
-						class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
-						type="submit">
-						<i class="fas fa-check fa-2x"></i>
-					</button>
-				</div>
-
-				<!-- WEB -->
-				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
-					<a
-						class="btn btn-transparent btn-block shadow-none font-weight-bolder"
-						th:href="@{'/empleados/cancelar'}">CANCELAR</a>
-				</div>
-				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
-					<input
-						class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
-						type="submit" th:value="${editable}?'GUARDAR CAMBIOS':'CREAR'" />
-				</div>
-			</div>
-
-		</form>
-
-	</div>
-
-	<footer th:replace="layout/layout :: footer"></footer>
-
-</body>
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
 </html>

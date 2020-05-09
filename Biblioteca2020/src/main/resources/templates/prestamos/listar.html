@@ -11,6 +11,19 @@
     <div class="container-fluid my-3 px-5">
       <h1 class="py-2" th:text="${titulo}"></h1>
 
+      <div class="row pt-5 pb-1" sec:authorize="hasRole('ROLE_SYSADMIN')">
+        <div class="col-sm-3 col-md-2 col-xl-1">
+          <a
+            class="btn btn-info btn-block rounded-0 border-0 py-2"
+            th:href="@{/prestamos/crear-sysadmin-1}"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Generar Préstamo'"
+            ><i class="fas fa-plus fa-lg"></i
+          ></a>
+        </div>
+      </div>
+
       <div
         class="row pt-5 pb-1"
         sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
@@ -29,7 +42,7 @@
       <div
         class="row py-3 float-md-right float-xs-none"
         th:if="${not #lists.isEmpty(prestamos)}"
-        sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+        sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
       >
         <div class="col">
           <a
@@ -84,7 +97,7 @@
             <th
               class="text-center"
               colspan="3"
-              sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+              sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
             >
               Opciones
             </th>
@@ -132,7 +145,7 @@
 
               <th:block
                 th:if="${prestamo.devolucion}"
-                sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+                sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
               >
                 <td class="align-middle pl-2">
                   <h5>
@@ -171,7 +184,7 @@
 
               <th:block
                 th:unless="${prestamo.devolucion}"
-                sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+                sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
               >
                 <td class="align-middle pl-2">
                   <h5>
@@ -254,7 +267,7 @@
 
               <th:block
                 th:if="${prestamo.devolucion}"
-                sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+                sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
               >
                 <td class="align-middle pl-2">
                   <h5>
@@ -294,7 +307,7 @@
 
               <th:block
                 th:unless="${prestamo.devolucion}"
-                sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+                sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
               >
                 <td class="align-middle pl-2">
                   <h5>

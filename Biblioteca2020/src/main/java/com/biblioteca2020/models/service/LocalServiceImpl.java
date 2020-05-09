@@ -84,7 +84,7 @@ public class LocalServiceImpl implements ILocalService {
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
-	public Local findFirstByEmpresa(Empresa empresa) {
+	public List<Local> findFirstByEmpresa(Empresa empresa) {
 		return localDao.findFirstByEmpresa(empresa);
 	}
 
@@ -93,6 +93,13 @@ public class LocalServiceImpl implements ILocalService {
 	@Transactional(readOnly = true)
 	public Local fetchByIdWithEmpresa(Long id) {
 		return localDao.fetchByIdWithEmpresa(id);
+	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Local> fetchByIdWithEmpresa() {
+		return localDao.fetchByIdWithEmpresa();
 	}
 
 }
