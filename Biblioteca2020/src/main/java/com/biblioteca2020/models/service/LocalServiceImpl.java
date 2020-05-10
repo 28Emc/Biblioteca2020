@@ -59,7 +59,7 @@ public class LocalServiceImpl implements ILocalService {
 	public boolean verificarDireccion(Local local) throws ConstraintViolationException {
 		Local localEncontrado = findByDireccion(local.getDireccion());
 		if (localEncontrado != null) {
-			throw new ConstraintViolationException("La dirección ya está en uso.", null);
+			throw new ConstraintViolationException("La dirección ya está en uso", null);
 		}
 		return true;
 	}
@@ -69,7 +69,7 @@ public class LocalServiceImpl implements ILocalService {
 	@Transactional(readOnly = true)
 	public Local fetchByIdWithEmpresaWithEmpleado(Long idEmpresa, Long idEmpleado) throws Exception {
 		if (localDao.fetchByIdWithEmpresaWithEmpleado(idEmpresa, idEmpleado) == null) {
-			throw new Exception("No tienes acceso a otros locales.");
+			throw new Exception("No tienes acceso a otros locales");
 		}
 		return localDao.fetchByIdWithEmpresaWithEmpleado(idEmpresa, idEmpleado);
 	}
@@ -78,7 +78,7 @@ public class LocalServiceImpl implements ILocalService {
 	@Override
 	@Transactional(readOnly = true)
 	public Local findById(Long id) throws Exception {
-		return localDao.findById(id).orElseThrow(() -> new Exception("El local no existe."));
+		return localDao.findById(id).orElseThrow(() -> new Exception("El local no existe"));
 	}
 
 	// USADO
@@ -91,8 +91,8 @@ public class LocalServiceImpl implements ILocalService {
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
-	public Local fetchByIdWithEmpresa(Long id) {
-		return localDao.fetchByIdWithEmpresa(id);
+	public Local fetchByIdWithEmpresa(Long id) throws Exception {
+		return localDao.fetchByIdWithEmpresa(id).orElseThrow(() -> new Exception("El local no existe"));
 	}
 
 	// USADO

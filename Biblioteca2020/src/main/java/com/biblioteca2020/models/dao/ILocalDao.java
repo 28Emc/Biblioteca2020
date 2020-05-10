@@ -28,7 +28,7 @@ public interface ILocalDao extends CrudRepository<Local, Long> {
 
 	// USADO
 	@Query("select l from Local l join fetch l.empresa em where l.id=?1")
-	public Local fetchByIdWithEmpresa(Long id);
+	public Optional<Local> fetchByIdWithEmpresa(Long id);
 
 	// USADO
 	@Query("select l from Local l join fetch l.empresa em")

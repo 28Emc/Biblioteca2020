@@ -1,148 +1,213 @@
 <!DOCTYPE html>
-<html class="h-100" xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:fragment="head">
-<meta charset="UTF-8" />
-<meta name="viewport"
-	content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title th:text="'Biblioteca | ' + ${titulo}"></title>
-<link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
-<link rel="stylesheet" th:href="@{/css/jquery-ui.min.css}" />
-<link rel="stylesheet"
-	th:href="@{/date-picker/css/bootstrap-datepicker.standalone.css}" />
-</head>
-<body class="d-flex flex-column h-100">
+<html
+  class="h-100"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:fragment="head">
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title th:text="'Biblioteca | ' + ${titulo}"></title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/jquery-ui.min.css}" />
+    <link
+      rel="stylesheet"
+      th:href="@{/date-picker/css/bootstrap-datepicker.standalone.css}"
+    />
+  </head>
+  <body class="d-flex flex-column h-100">
+    <header th:fragment="header">
+      <nav class="navbar navbar-expand-lg navbar-dark sticky-top bg-dark p-3">
+        <a class="navbar-brand" th:href="@{/home}">Biblioteca2020</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li
+              class="nav-item px-1"
+              sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+            >
+              <a class="nav-link" th:href="@{/empresas/listar}">Empresa</a>
+            </li>
+            <li
+              class="nav-item px-1"
+              sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+            >
+              <a class="nav-link" th:href="@{/empleados/listar}">Empleados</a>
+            </li>
+            <li
+              class="nav-item px-1"
+              sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+            >
+              <a class="nav-link" th:href="@{/categorias/listar}">Categorias</a>
+            </li>
+            <li
+              class="nav-item px-1"
+              sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+            >
+              <a class="nav-link" th:href="@{/locales/libros/listar}">Libros</a>
+            </li>
+            <li
+              class="nav-item px-1"
+              sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+            >
+              <a class="nav-link" th:href="@{/usuarios/listar}">Usuarios</a>
+            </li>
+            <li
+              class="nav-item px-1"
+              sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+            >
+              <a class="nav-link" th:href="@{/prestamos/listar}">Préstamos</a>
+            </li>
+            <li class="nav-item" sec:authorize="hasRole('ROLE_USER')">
+              <a class="nav-link" th:href="@{/usuarios/biblioteca}"
+                ><i class="fas fa-book"></i> Catálogo de Libros</a
+              >
+            </li>
+            <li class="nav-item" sec:authorize="hasRole('ROLE_USER')">
+              <a class="nav-link" th:href="@{/prestamos/historial-user}"
+                ><i class="fas fa-clipboard-list"></i> Historial</a
+              >
+            </li>
+          </ul>
 
-	<header th:fragment="header">
-		<nav
-			class="navbar navbar-expand-lg navbar-dark sticky-top bg-dark p-3">
-			<a class="navbar-brand" th:href="@{/home}">Biblioteca2020</a>
-			<button class="navbar-toggler" type="button" data-toggle="collapse"
-				data-target="#navbarNav" aria-controls="navbarNav"
-				aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarNav">
-				<ul class="navbar-nav ml-auto">
-					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
-						th:href="@{/empresas/listar}">Empresa</a></li>
-					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
-						th:href="@{/empleados/listar}">Empleados</a></li>
-					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
-						th:href="@{/categorias/listar}">Categorias</a></li>
-					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
-						th:href="@{/locales/libros/listar}">Libros</a></li>
-					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
-						th:href="@{/usuarios/listar}">Usuarios</a></li>
-					<li class="nav-item px-1"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
-						th:href="@{/prestamos/listar}">Préstamos</a></li>					
-					<li class="nav-item"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_USER')"
-						th:href="@{/usuarios/biblioteca}"><i class="fas fa-book"></i>
-							Catálogo de Libros</a></li>
-					<li class="nav-item"><a class="nav-link"
-						sec:authorize="hasRole('ROLE_USER')"
-						th:href="@{/prestamos/historial-user}"><i
-							class="fas fa-clipboard-list"></i> Historial</a></li>
-				</ul>
+          <ul class="navbar-nav">
+            <li sec:authorize="isAuthenticated()" class="dropdown show">
+              <a
+                class="btn dropdown-toggle text-light shadow-none"
+                href="#"
+                role="button"
+                id="dropdownMenuLink"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                ><span sec:authentication="name"></span>
+              </a>
+              <div
+                class="dropdown-menu dropdown-menu-right bg-light"
+                aria-labelledby="dropdownMenuLink"
+              >
+                <a
+                  sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+                  class="dropdown-item bg-light"
+                  th:href="@{/empleados/editar-perfil}"
+                  ><i class="fas fa-user-alt"></i> Mi Perfil</a
+                >
+                <a
+                  sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+                  class="dropdown-item bg-light"
+                  th:href="@{/empleados/cambio-password}"
+                  ><i class="fas fa-user-lock"></i> Cambiar Password</a
+                >
+                <a
+                  sec:authorize="hasRole('ROLE_USER')"
+                  class="dropdown-item bg-light"
+                  th:href="@{/usuarios/editar-perfil}"
+                  ><i class="fas fa-user-alt"></i> Mi Perfil</a
+                >
+                <a
+                  sec:authorize="hasRole('ROLE_USER')"
+                  class="dropdown-item bg-light"
+                  th:href="@{/usuarios/cambio-password}"
+                  ><i class="fas fa-user-lock"></i> Cambiar Password</a
+                >
+                <div class="dropdown-divider"></div>
+                <form id="logoutForm" th:action="@{/logout}" method="post">
+                  <button
+                    class="dropdown-item bg-light"
+                    onclick="javascript: terminarSesion();"
+                    type="button"
+                  >
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                  </button>
+                </form>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </nav>
 
-				<ul class="navbar-nav">
-					<li sec:authorize="isAuthenticated()" class="dropdown show"><a
-						class="btn dropdown-toggle text-light shadow-none" href="#"
-						role="button" id="dropdownMenuLink" data-toggle="dropdown"
-						aria-haspopup="true" aria-expanded="false"><span
-							sec:authentication="name"></span> </a>
-						<div class="dropdown-menu dropdown-menu-right bg-light"
-							aria-labelledby="dropdownMenuLink">
-							<a
-								sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
-								class="dropdown-item bg-light"
-								th:href="@{/empleados/editar-perfil}"><i
-								class="fas fa-user-alt"></i> Mi Perfil</a> <a
-								sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
-								class="dropdown-item bg-light"
-								th:href="@{/empleados/cambio-password}"><i
-								class="fas fa-user-lock"></i> Cambiar Password</a> <a
-								sec:authorize="hasRole('ROLE_USER')"
-								class="dropdown-item bg-light"
-								th:href="@{/usuarios/editar-perfil}"><i
-								class="fas fa-user-alt"></i> Mi Perfil</a> <a
-								sec:authorize="hasRole('ROLE_USER')"
-								class="dropdown-item bg-light"
-								th:href="@{/usuarios/cambio-password}"><i
-								class="fas fa-user-lock"></i> Cambiar Password</a>
-							<div class="dropdown-divider"></div>
-							<form id="logoutForm" th:action="@{/logout}" method="post">
-								<button class="dropdown-item bg-light"
-									onclick="javascript: terminarSesion();" type="button">
-									<i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-								</button>
-							</form>
-						</div></li>
-				</ul>
-			</div>
-		</nav>
+      <!-- Mensajes flash para indicar el estado de las peticiones -->
+      <div
+        id="alertPers"
+        class="alert alert-success alert-dismissible fade show rounded-0"
+        role="alert"
+        th:if="${success!=null}"
+        th:text="${success}"
+      ></div>
+      <div
+        id="alertPers"
+        class="alert alert-danger alert-dismissible fade show rounded-0"
+        role="alert"
+        th:if="${error!=null}"
+        th:text="${error}"
+      ></div>
+      <div
+        id="alertPers"
+        class="alert alert-warning alert-dismissible fade show rounded-0"
+        role="alert"
+        th:if="${warning!=null}"
+        th:text="${warning}"
+      ></div>
+      <div
+        id="alertPers"
+        class="alert alert-info alert-dismissible fade show rounded-0"
+        role="alert"
+        th:if="${info!=null}"
+        th:text="${info}"
+      ></div>
+    </header>
 
-		<!-- Mensajes flash para indicar el estado de las peticiones -->
-		<div id="alertPers"
-			class="alert alert-success alert-dismissible fade show rounded-0" role="alert"
-			th:if="${success!=null}" th:text="${success}"></div>
-		<div id="alertPers"
-			class="alert alert-danger alert-dismissible fade show rounded-0" role="alert"
-			th:if="${error!=null}" th:text="${error}"></div>
-		<div id="alertPers"
-			class="alert alert-warning alert-dismissible fade show rounded-0" role="alert"
-			th:if="${warning!=null}" th:text="${warning}"></div>
-		<div id="alertPers"
-			class="alert alert-info alert-dismissible fade show rounded-0" role="alert"
-			th:if="${info!=null}" th:text="${info}"></div>
+    <footer th:fragment="footer" class="footer mt-auto py-3 text-center">
+      <p class="text-muted">Biblioteca ©2020</p>
+      <script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+      <script th:src="@{/js/jquery-ui.min.js}"></script>
+      <script th:src="@{/js/snbutton.js}"></script>
+      <script th:src="@{/js/popper.min.js}"></script>
+      <script th:src="@{/js/bootstrap.min.js}"></script>
+      <script th:src="@{/js/all.min.js}"></script>
+      <script th:src="@{/date-picker/js/bootstrap-datepicker.js}"></script>
+      <script th:src="@{/date-picker/js/bootstrap-datepicker.min.js}"></script>
+      <script
+        th:src="@{/date-picker/locales/bootstrap-datepicker.es.min.js}"
+        charset="UTF-8"
+      ></script>
+      <script type="text/javascript">
+        setTimeout(function () {
+          $("#alertPers").alert("close");
+        }, 3000);
 
-	</header>
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+        });
 
-	<footer th:fragment="footer" class="footer mt-auto py-3 text-center">
-		<p class="text-muted">Biblioteca ©2020</p>
-		<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
-		<script th:src="@{/js/jquery-ui.min.js}"></script>
-		<script th:src="@{/js/snbutton.js}"></script>
-		<script th:src="@{/js/popper.min.js}"></script>
-		<script th:src="@{/js/bootstrap.min.js}"></script>
-		<script th:src="@{/js/all.min.js}"></script>
-		<script th:src="@{/date-picker/js/bootstrap-datepicker.js}"></script>
-		<script th:src="@{/date-picker/js/bootstrap-datepicker.min.js}"></script>
-		<script
-			th:src="@{/date-picker/locales/bootstrap-datepicker.es.min.js}"
-			charset="UTF-8"></script>
-		<script type="text/javascript">
-			setTimeout(function() {
-				$("#alertPers").alert('close');
-			}, 3000);
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip();
+        });
 
-			$(function() {
-				$('[data-toggle="tooltip"]').tooltip()
-			});
-
-			$(function() {
-				$('[data-toggle="tooltip"]').tooltip();
-			})
-
-			function terminarSesion() {
-				var r = confirm('Desea terminar la sesión?');
-				if (r == true) {
-					document.forms["logoutForm"].submit();
-				} else {
-					return false;
-				}
-			}			
-			var datepicker = $.fn.datepicker.noConflict(); // return $.fn.datepicker to previously assigned value
-			$.fn.bootstrapDP = datepicker; // give $().bootstrapDP the bootstrap-datepicker functionality
-		</script>
-	</footer>
-
-</body>
+        function terminarSesion() {
+          var r = confirm("Desea terminar la sesión?");
+          if (r == true) {
+            document.forms["logoutForm"].submit();
+          } else {
+            return false;
+          }
+        }
+        var datepicker = $.fn.datepicker.noConflict(); // return $.fn.datepicker to previously assigned value
+        $.fn.bootstrapDP = datepicker; // give $().bootstrapDP the bootstrap-datepicker functionality
+      </script>
+    </footer>
+  </body>
 </html>

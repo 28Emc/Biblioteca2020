@@ -657,6 +657,8 @@ public class PrestamoController {
 		model.addAttribute("titulo", "Creación de préstamo nuevo");
 		model.addAttribute("usuarios", usuarios);
 		model.addAttribute("locales", locales);
+		model.addAttribute("empleado", new Empleado());
+		model.addAttribute("libro", new Libro());
 		return "/prestamos/crear-sysadmin-1";
 	}
 
@@ -688,22 +690,42 @@ public class PrestamoController {
 
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@PostMapping(value = "/crear-sysadmin-final")
-	public String crearPrestamoSysadminFinal(@Valid Prestamo prestamo, BindingResult result, RedirectAttributes flash,
-			SessionStatus status, Model model, Authentication authentication) {
-		// EMPLEADO
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleadoPrestamo = empleadoService.findByUsernameAndEstado(userDetails.getUsername(), true);
-		prestamo.setEmpleado(empleadoPrestamo);
-		if (result.hasErrors()) {
-			model.addAttribute("titulo", "Creación de préstamo nuevo");
-			model.addAttribute("prestamo", prestamo);
-			return "/prestamos/crear";
-		}
-		// LIBRO
+	public String crearPrestamoSysadminFinal(@RequestParam(name = "id_usuario", required = false) Long id_usuario,
+			@RequestParam(name = "id_local", required = false) Long id_local,
+			@RequestParam(name = "id_libro", required = false) Long id_libro,
+			@RequestParam(name = "id_empleado", required = false) Long id_empleado,
+			@RequestParam(name = "fecha_devolucion", required = false) String fecha_devolucion, Prestamo prestamo,
+			RedirectAttributes flash, SessionStatus status, Model model, Authentication authentication) {
 		try {
-			Libro libroPrestamo = libroService.findOne(prestamo.getLibro().getId());
+			if (id_usuario == null || id_libro == null || id_empleado == null || fecha_devolucion == null) {
+				Usuario usuario;
+				Local local;
+				try {
+					usuario = usuarioService.findById(id_usuario);
+					local = localService.findById(id_local);
+					List<Empleado> empleados = empleadoService.findByLocal(local.getId());
+					for (int i = 0; i < empleados.size(); i++) {
+						empleados.removeIf(n -> n.getRoles().iterator().next().getAuthority().equals("ROLE_PRUEBA"));
+					}
+					List<Libro> libros = libroService.findByLocalAndEstado(local.getId(), true);
+					model.addAttribute("usuario", usuario);
+					model.addAttribute("local", local);
+					model.addAttribute("empleados", empleados);
+					model.addAttribute("libros", libros);
+					model.addAttribute("titulo", "Creación de préstamo nuevo - error campos");
+					model.addAttribute("error", "Error, validar todos los campos");
+				} catch (Exception e) {
+					model.addAttribute("error", e.getMessage());
+				}
+				return "/prestamos/crear-sysadmin-2";
+			}
+			// EMPLEADO
+			Empleado empleadoPrestamo = empleadoService.findById(id_empleado);
+			prestamo.setEmpleado(empleadoPrestamo);
+			// LIBRO
+			Libro libroPrestamo = libroService.findOne(id_libro);
 			prestamo.setLibro(libroPrestamo);
-			// ACTUALIZACIÓN DE STOCK
+			// ACTUALIZACIÓN DE STOCK DE LIBRO
 			if (libroPrestamo.getStock() <= 0) {
 				model.addAttribute("error", "Lo sentimos, no hay stock suficiente del libro seleccionado ("
 						+ libroPrestamo.getTitulo() + ")");
@@ -711,42 +733,39 @@ public class PrestamoController {
 			} else {
 				libroPrestamo.setStock(libroPrestamo.getStock() - 1);
 			}
+			// USUARIO
+			Usuario usuarioPrestamo = usuarioService.findById(id_usuario);
+			prestamo.setUsuario(usuarioPrestamo);
+			// FECHA DESPACHO
+			Date fechaDespacho = new Date();
+			prestamo.setFecha_despacho(fechaDespacho);
+			// OBSERVACIONES
+			prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo()
+					+ " ha sido programado para su devolución el día " + prestamo.getFecha_devolucion()
+					+ ", por el empleado: "
+					+ empleadoPrestamo.getNombres().concat(", " + empleadoPrestamo.getApellidos())
+					+ " (código empleado " + empleadoPrestamo.getId() + ") al usuario: "
+					+ prestamo.getUsuario().getNombres() + " (código usuario " + prestamo.getUsuario().getId() + ")");
+			// DEVOLUCION
+			prestamo.setDevolucion(false);
+			prestamoService.save(prestamo);
+			// JUSTO DESPUES DE REGISTRAR EL PRÉSTAMO, INSERTO EL REGISTRO EN MI TABLA LOG
+			prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamo.getEmpleado().getId(), null,
+					prestamo.getLibro().getId(), null, prestamo.getUsuario().getId(), null, "INSERT EMPLOYEE",
+					empleadoPrestamo.getUsername().concat(" (Cod. Empleado: " + empleadoPrestamo.getId() + ")"),
+					prestamo.getFecha_despacho(), null, prestamo.getFecha_devolucion(), null, prestamo.getDevolucion(),
+					null, prestamo.getObservaciones(), null, new Date(), null, null));
+			flash.addFlashAttribute("success", "Orden de prestamo creada correctamente");
+			flash.addFlashAttribute("confirma", true);
+			status.setComplete();
+			return "redirect:/prestamos/listar";
 		} catch (Exception e) {
 			model.addAttribute("error", e.getMessage());
+			return "/prestamos/crear-sysadmin-2";
 		}
-		// USUARIO
-		try {
-			Usuario usuarioPrestamo = usuarioService.findById(prestamo.getUsuario().getId());
-			prestamo.setUsuario(usuarioPrestamo);
-		} catch (Exception e1) {
-			model.addAttribute("error", e1.getMessage());
-			return "/prestamos/crear";
-		}
-		// FECHA DESPACHO
-		Date fechaDespacho = new Date();
-		prestamo.setFecha_despacho(fechaDespacho);
-		// OBSERVACIONES
-		prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo()
-				+ " ha sido programado para su devolución el día " + prestamo.getFecha_devolucion()
-				+ ", por el empleado: " + empleadoPrestamo.getNombres().concat(", " + empleadoPrestamo.getApellidos())
-				+ " (código empleado " + empleadoPrestamo.getId() + ") al usuario: "
-				+ prestamo.getUsuario().getNombres() + " (código usuario " + prestamo.getUsuario().getId() + ")");
-		// DEVOLUCION
-		prestamo.setDevolucion(false);
-		prestamoService.save(prestamo);
-		// JUSTO DESPUES DE REGISTRAR EL PRÉSTAMO, INSERTO EL REGISTRO EN MI TABLA LOG
-		prestamoLogService.save(new PrestamoLog(prestamo.getId(), prestamo.getEmpleado().getId(), null,
-				prestamo.getLibro().getId(), null, prestamo.getUsuario().getId(), null, "INSERT EMPLOYEE",
-				empleadoPrestamo.getUsername().concat(" (Cod. Empleado: " + empleadoPrestamo.getId() + ")"),
-				prestamo.getFecha_despacho(), null, prestamo.getFecha_devolucion(), null, prestamo.getDevolucion(),
-				null, prestamo.getObservaciones(), null, new Date(), null, null));
-		flash.addFlashAttribute("success", "Orden de prestamo creada correctamente.");
-		flash.addFlashAttribute("confirma", true);
-		status.setComplete();
-		return "redirect:/prestamos/listar";
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@PostMapping(value = "/crear")
 	public String guardarPrestamo(@Valid Prestamo prestamo, BindingResult result, RedirectAttributes flash,
 			SessionStatus status, Model model, Authentication authentication) {

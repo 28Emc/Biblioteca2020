@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -59,14 +60,15 @@ public class LibroController {
 	@Autowired
 	private IEmpleadoService empleadoService;
 
+	// LISTADO DE FORMATOS DE FOTO PERMITIDOS
 	private static final List<String> formatosFoto = Arrays.asList("image/png", "image/jpeg", "image/jpg");
 
-	// ************************ ROLE ADMIN ************************
+	// ############################# CRUD #############################
 	// LISTADO DE LIBROS POR LOCAL Y USUARIO LOGUEADO (DESDE TABLA LOCAL)
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@GetMapping(value = "/locales/libros/listar/{id}")
-	public String listarLibrosPorLocalAdmin(@PathVariable(value = "id") Long idLocal, Model model,
-			Authentication authentication) {
+	@GetMapping(value = { "/locales/libros/listar/{id}", "/locales/libros/listar" })
+	public String listarLibrosPorLocal(@PathVariable(value = "id") Optional<Long> idLocal, Model model,
+			RedirectAttributes flash, Authentication authentication) {
 		// BUSCA EL EMPLEADO LOGUEADO
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
@@ -76,51 +78,361 @@ public class LibroController {
 		switch (userDetails.getAuthorities().toString()) {
 			case "[ROLE_SYSADMIN]":
 				try {
-					local = localService.fetchByIdWithEmpresa(idLocal);
-					libros = libroService.findByLocal(local.getId());
-					model.addAttribute("titulo", "Listado de libros de " + local.getDireccion());
-					model.addAttribute("libros", libros);
-					model.addAttribute("idLocal", idLocal);
-					ruta = "/libros/listar";
+					// VALIDO SI ID LOCAL ES DE ALGÚN LOCAL EXISTENTE ..
+					if (idLocal.isPresent()) {
+						local = localService.fetchByIdWithEmpresa(idLocal.get());
+						libros = libroService.findByLocal(local.getId());
+						model.addAttribute("titulo", "Listado de libros de " + local.getDireccion());
+						model.addAttribute("libros", libros);
+						model.addAttribute("idLocal", idLocal.get());
+						ruta = "/libros/listar";
+						// .. SI NO, REDIRECCIONO AL HOME
+					} else {
+						flash.addFlashAttribute("error", "El local es inválido");
+						ruta = "redirect:/home";
+					}
 				} catch (Exception e) {
-					model.addAttribute("error", e.getMessage());
-					ruta = "/home";
+					flash.addFlashAttribute("error", e.getMessage());
+					ruta = "redirect:/home";
 				}
 				break;
 			default:
 				model.addAttribute("titulo", "Listado de libros de " + empleado.getLocal().getDireccion());
-				// BUSCO LOS LIBROS POR SU LOCAL_ID Y POR EL ID_EMPLEADO
+				// OBTENER LIBROS POR ID_LOCAL Y ID_EMPLEADO
 				libros = libroService.fetchByIdWithLocalesWithEmpleado(empleado.getLocal().getId(), empleado.getId());
 				model.addAttribute("libros", libros);
-				model.addAttribute("idLocal", idLocal);
 				ruta = "/libros/listar";
 				break;
 		}
 		return ruta;
 	}
 
+	// MÉTODO PARA REALIZAR LA BUSQUEDA CATEGORIAS POR SU NOMBRE MEDIANTE
+	// AUTOCOMPLETADO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@RequestMapping(value = "/libros/cargar-categorias/{term}", produces = { "application/json" })
+	public @ResponseBody List<Categoria> cargarCategorias(@PathVariable String term) {
+		return categoriaService.findByNombreLikeIgnoreCase(term);
+	}
+
+	// REGRESAR A LISTADO DE LIBROS
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@GetMapping({ "/locales/libros/cancelar/{idLocal}", "/locales/libros/cancelar" })
+	public String cancelar(@PathVariable(value = "idLocal") Optional<Long> idLocal, Model model,
+			Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		String ruta = "";
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_SYSADMIN]":
+				model.addAttribute("idLocal", idLocal.get());
+				ruta = "redirect:/locales/libros/listar/" + idLocal.get();
+				break;
+			default:
+				ruta = "redirect:/locales/libros/listar";
+				break;
+		}
+		return ruta;
+	}
+
+	// FORMULARIO DE REGISTRO DE LIBRO NUEVO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@GetMapping({ "/locales/libros/crear/{idLocal}", "/locales/libros/crear" })
+	public String crearLibro(@PathVariable(value = "idLocal") Optional<Long> idLocal, Model model,
+			Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		Libro libro = new Libro();
+		List<Local> locales;
+		libro.setFoto_libro("no-book.jpg");
+		model.addAttribute("libro", libro);
+		model.addAttribute("titulo", "Registro de libro nuevo");
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_SYSADMIN]":
+				locales = localService.findAll();
+				model.addAttribute("locales", locales);
+				model.addAttribute("idLocal", idLocal.get());
+				break;
+			default:
+				model.addAttribute("local", empleado.getLocal());
+				break;
+		}
+		return "/libros/crear";
+	}
+
+	// REGISTRAR LIBRO NUEVO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@PostMapping({ "/locales/libros/crear/{idLocal}", "/locales/libros/crear" })
+	public String crearLibro(@PathVariable(value = "idLocal") Optional<Long> idLocal, @Valid Libro libro,
+			BindingResult result, Model model, SessionStatus status, RedirectAttributes flash,
+			@RequestParam("foto_li") MultipartFile foto, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Local> locales = null;
+		String ruta = "";
+		try {
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					locales = localService.findAll();
+					model.addAttribute("idLocal", idLocal.get());
+					ruta = "redirect:/locales/libros/listar/" + idLocal.get();
+					break;
+				default:
+					ruta = "redirect:/locales/libros/listar";
+					break;
+			}
+			// CAPTURAR ERRORES DE FORMULARIO
+			if (result.hasErrors()) {
+				switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_SYSADMIN]":
+						model.addAttribute("locales", locales);
+						model.addAttribute("idLocal", idLocal.get());
+						break;
+					default:
+						model.addAttribute("local", empleado.getLocal());
+						break;
+				}
+				model.addAttribute("titulo", "Registro de libro nuevo");
+				model.addAttribute("libro", libro);
+				return "/libros/crear";
+			}
+			// PREGUNTO SI EL PARAMETRO DE LA FOTO ES NULO ..
+			if (!foto.isEmpty()) {
+				// .. Y PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+				if (formatosFoto.contains(foto.getContentType())) {
+					String rootPath = "C://Temp//uploads";
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					libro.setFoto_libro(foto.getOriginalFilename());
+				} else {
+					switch (userDetails.getAuthorities().toString()) {
+						case "[ROLE_SYSADMIN]":
+							model.addAttribute("locales", locales);
+							model.addAttribute("idLocal", idLocal.get());
+							break;
+						default:
+							model.addAttribute("local", empleado.getLocal());
+							break;
+					}
+					model.addAttribute("titulo", "Registro de libro nuevo");
+					model.addAttribute("error", "El formato de la foto es incorrecto");
+					model.addAttribute("libro", libro);
+					return "/libros/crear";
+				}
+			} else {
+				libro.setFoto_libro("no-book.jpg");
+			}
+			// EXCEPCION DE FOTO
+		} catch (IOException ioe) {
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					model.addAttribute("locales", locales);
+					model.addAttribute("idLocal", idLocal.get());
+					break;
+				default:
+					model.addAttribute("local", empleado.getLocal());
+					break;
+			}
+			model.addAttribute("titulo", "Registro de libro nuevo");
+			model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+			model.addAttribute("libro", libro);
+			return "/libros/crear";
+		}
+		try {
+			// GUARDAR REGISTRO
+			libroService.save(libro);
+			flash.addFlashAttribute("success",
+					"El libro ha sido registrado en la base datos (Nombre " + libro.getTitulo() + ")");
+			status.setComplete();
+			// EXCEPCION GENERAL
+		} catch (Exception ex) {
+			flash.addFlashAttribute("error", ex.getMessage());
+		}
+		return ruta;
+	}
+
+	// FORMULARIO DE EDICION DE LIBRO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@GetMapping({ "/locales/libros/editar/{idLocal}/{id}", "/locales/libros/editar/{id}" })
+	public String editarLibro(@PathVariable(value = "idLocal") Optional<Long> idLocal,
+			@PathVariable(value = "id") Long idlibro, Model model, RedirectAttributes flash,
+			Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Local> locales = null;
+		String ruta = "";
+		try {
+			Libro libro = libroService.findOne(idlibro);
+			model.addAttribute("editable", true);
+			model.addAttribute("titulo", "Modificar datos de libro");
+			model.addAttribute("libro", libro);
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					locales = localService.findAll();
+					model.addAttribute("locales", locales);
+					model.addAttribute("idLocal", idLocal.get());
+					break;
+				default:
+					model.addAttribute("local", empleado.getLocal());
+					break;
+			}
+			ruta = "/libros/crear";
+		} catch (Exception e) {
+			flash.addFlashAttribute("error", e.getMessage());
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					ruta = "redirect:/locales/libros/listar/" + idLocal.get();
+					break;
+				default:
+					ruta = "redirect:/locales/libros/listar";
+					break;
+			}
+		}
+		return ruta;
+	}
+
+	// ACTUALIZAR LIBRO - BUG CON @VALID
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@PostMapping({ "/locales/libros/editar/{idLocal}", "/locales/libros/editar" })
+	public String guardarLibro(@PathVariable(value = "idLocal") Optional<Long> idLocal, Libro libro,
+			BindingResult result, Model model, SessionStatus status, RedirectAttributes flash,
+			@RequestParam("foto_li") MultipartFile foto, Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
+		List<Local> locales = null;
+		String ruta = "";
+		try {
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					locales = localService.findAll();
+					model.addAttribute("idLocal", idLocal.get());
+					ruta = "redirect:/locales/libros/listar/" + idLocal.get();
+					break;
+				default:
+					ruta = "redirect:/locales/libros/listar";
+					break;
+			}
+			// CAPTURAR ERRORES DE FORMULARIO
+			if (result.hasErrors()) {
+				switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_SYSADMIN]":
+						model.addAttribute("locales", locales);
+						model.addAttribute("idLocal", idLocal.get());
+						break;
+					default:
+						model.addAttribute("local", empleado.getLocal());
+						break;
+				}
+				model.addAttribute("titulo", "Modificar datos de libro");
+				model.addAttribute("libro", libro);
+				return "/libros/crear";
+			}
+			// PREGUNTO SI EL PARAMETRO DE LA FOTO ES NULO ..
+			if (!foto.isEmpty()) {
+				// .. Y PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+				if (formatosFoto.contains(foto.getContentType())) {
+					String rootPath = "C://Temp//uploads";
+					byte[] bytes = foto.getBytes();
+					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
+					Files.write(rutaCompleta, bytes);
+					libro.setFoto_libro(foto.getOriginalFilename());
+				} else {
+					switch (userDetails.getAuthorities().toString()) {
+						case "[ROLE_SYSADMIN]":
+							model.addAttribute("locales", locales);
+							model.addAttribute("idLocal", idLocal.get());
+							break;
+						default:
+							model.addAttribute("local", empleado.getLocal());
+							break;
+					}
+					model.addAttribute("titulo", "Modificar datos de libro");
+					model.addAttribute("error", "El formato de la foto es incorrecto");
+					model.addAttribute("libro", libro);
+					return "/libros/crear";
+				}
+			}
+			// EXCEPCION DE FOTO
+		} catch (IOException ioe) {
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					model.addAttribute("locales", locales);
+					model.addAttribute("idLocal", idLocal.get());
+					break;
+				default:
+					model.addAttribute("local", empleado.getLocal());
+					break;
+			}
+			model.addAttribute("titulo", "Modificar datos de libro");
+			model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
+			model.addAttribute("libro", libro);
+			return "/libros/crear";
+		}
+		try {
+			// ACTUALIZAR REGISTRO
+			libroService.update(libro);
+			flash.addFlashAttribute("warning",
+					"El libro " + libro.getTitulo() + " ha sido actualizado en la base de datos");
+			status.setComplete();
+		} catch (Exception ex) {
+			flash.addFlashAttribute("error", ex.getMessage());
+		}
+		return ruta;
+	}
+
+	// DESHABILITAR LIBRO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@GetMapping({ "/locales/libros/deshabilitar/{idLocal}/{id}", "/locales/libros/deshabilitar/{id}" })
+	public String deshabilitarLibro(@PathVariable(value = "idLocal") Optional<Long> idLocal,
+			@PathVariable(value = "id") Long id, Authentication authentication, RedirectAttributes flash) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		Libro libro;
+		String ruta = "";
+		try {
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					flash.addFlashAttribute("idLocal", idLocal.get());
+					ruta = "redirect:/locales/libros/listar/" + idLocal.get();
+					break;
+				default:
+					ruta = "redirect:/locales/libros/listar";
+					break;
+			}
+			libro = libroService.findOne(id);
+			libro.setEstado(false);
+			libroService.update(libro);
+			flash.addFlashAttribute("info", "El libro " + libro.getTitulo() + " ha sido deshabilitado");
+		} catch (Exception e) {
+			flash.addFlashAttribute("error", e.getMessage());
+		}
+		return ruta;
+	}
+
+	// ############################# REPORTES #############################
+	// FORMULARIO DE REPORTES LIBROS
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@GetMapping(value = "/locales/libros/reportes/{id}")
-	public String crearReporte(@PathVariable(value = "id") Long idLocal, Model model, Authentication authentication) {
+	@GetMapping(value = { "/locales/libros/reportes/{id}", "/locales/libros/reportes" })
+	public String crearReporte(@PathVariable(value = "id") Optional<Long> idLocal, Model model,
+			Authentication authentication) {
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		model.addAttribute("titulo", "Creación de Reportes");
 		model.addAttribute("libro", new Libro());
 		ArrayList<Boolean> estados = new ArrayList<Boolean>();
 		estados.add(true);
 		estados.add(false);
 		model.addAttribute("estados", estados);
-		model.addAttribute("idLocal", idLocal);
+		switch (userDetails.getAuthorities().toString()) {
+			case "[ROLE_SYSADMIN]":
+				model.addAttribute("idLocal", idLocal.get());
+				break;
+			default:
+				break;
+		}
 		return "/libros/crear_reporte";
 	}
 
-	// MÉTODO PARA REALIZAR LA BUSQUEDA CATEGORIAS POR SU NOMBRE MEDIANTE
-	// AUTOCOMPLETADO
-	@RequestMapping(value = "/libros/cargar-categorias/{term}", produces = { "application/json" })
-	public @ResponseBody List<Categoria> cargarCategorias(@PathVariable String term) {
-		return categoriaService.findByNombreLikeIgnoreCase(term);
-	}
-
-	// REPORTE PDF LIBROS UNICOS
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// GENERAR REPORTE PDF LIBROS UNICOS
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/locales/libros/reportes/pdf/libros-unicos", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfLibrosUnicos(Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -147,7 +459,8 @@ public class LibroController {
 		}
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// BUSCAR LIBROS POR CATEGORIA PARA GENERAR REPORTE
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/locales/libros/reportes/buscar-libros-por-categoria", method = RequestMethod.GET)
 	public String buscarCategoriaParaReporte(@RequestParam String categoria_libro, Model model,
 			Authentication authentication, RedirectAttributes flash) {
@@ -172,8 +485,8 @@ public class LibroController {
 		return "/libros/busqueda_libros_por_categoria";
 	}
 
-	// REPORTE PDF LIBROS POR CATEGORÍA
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// GENERAR REPORTE PDF LIBROS POR CATEGORÍA
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/locales/libros/reportes/pdf/libros-por-categoria/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfLibrosPorCategoria(@PathVariable("id") String id,
 			Authentication authentication, Model model) {
@@ -203,8 +516,8 @@ public class LibroController {
 		}
 	}
 
-	// REPORTE PDF LIBROS POR ESTADO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// GENERAR REPORTE PDF LIBROS POR ESTADO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/locales/libros/reportes/pdf/libros-por-estado/{estado}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfLibrosPorEstado(@PathVariable("estado") String estado,
 			Model model, Authentication authentication) {
@@ -253,8 +566,8 @@ public class LibroController {
 		}
 	}
 
-	// REPORTE EXCEL LIBROS UNICOS
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// GENERAR REPORTE EXCEL LIBROS UNICOS
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/locales/libros/reportes/xlsx/libros-unicos", method = RequestMethod.GET)
 	public ResponseEntity<InputStreamResource> generarExcelLibrosUnicos(Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -280,8 +593,8 @@ public class LibroController {
 		}
 	}
 
-	// REPORTE EXCEL LIBROS POR CATEGORÍA
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// GENERAR REPORTE EXCEL LIBROS POR CATEGORÍA
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/locales/libros/reportes/xlsx/libros-por-categoria/{id}", method = RequestMethod.GET)
 	public ResponseEntity<InputStreamResource> repLibrosPorCategoria(@PathVariable("id") String id,
 			Authentication authentication) {
@@ -309,8 +622,8 @@ public class LibroController {
 		}
 	}
 
-	// REPORTE EXCEL LIBROS POR ESTADO
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	// GENERAR REPORTE EXCEL LIBROS POR ESTADO
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/locales/libros/reportes/xlsx/libros-por-estado/{estado}", method = RequestMethod.GET)
 	public ResponseEntity<InputStreamResource> repLibrosPorEstado(@PathVariable("estado") String estado,
 			Authentication authentication) {
@@ -349,267 +662,6 @@ public class LibroController {
 			headers.clear();
 			headers.add("Location", "/error_reporte");
 			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
-		}
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
-	@GetMapping("/locales/libros/cancelar/{idLocal}")
-	public String cancelar(@PathVariable(value = "idLocal") Long idLocal, Model model) {
-		model.addAttribute("idLocal", idLocal);
-		return "redirect:/locales/libros/listar/" + idLocal;
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
-	@GetMapping("/locales/libros/crear/{idLocal}")
-	public String crearLibro(@PathVariable(value = "idLocal") Long idLocal, Model model,
-			Authentication authentication) {
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		Libro libro = new Libro();
-		libro.setFoto_libro("no-book.jpg");
-		model.addAttribute("libro", libro);
-		model.addAttribute("idLocal", idLocal);
-		model.addAttribute("titulo", "Registro de libro nuevo");
-		switch (userDetails.getAuthorities().toString()) {
-			case "[ROLE_SYSADMIN]":
-				List<Local> locales = localService.findAll();
-				model.addAttribute("locales", locales);
-				break;
-			default:
-				model.addAttribute("local", empleado.getLocal());
-				break;
-		}
-		return "/libros/crear";
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
-	@PostMapping("/locales/libros/crear/{idLocal}")
-	public String crearLibro(@PathVariable(value = "idLocal") Long idLocal, @Valid Libro libro, BindingResult result,
-			Model model, SessionStatus status, RedirectAttributes flash, @RequestParam("foto_li") MultipartFile foto,
-			Authentication authentication) {
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		if (result.hasErrors()) {
-			try {
-				Local local = localService.findById(empleado.getLocal().getId());
-				model.addAttribute("titulo", "Registro de Libro");
-				model.addAttribute("libro", libro);
-				model.addAttribute("local", local);
-				model.addAttribute("idLocal", idLocal);
-				switch (userDetails.getAuthorities().toString()) {
-					case "[ROLE_SYSADMIN]":
-						List<Local> locales = localService.findAll();
-						model.addAttribute("locales", locales);
-						break;
-					default:
-						model.addAttribute("local", empleado.getLocal());
-						break;
-				}
-				return "/libros/crear";
-			} catch (Exception e) {
-				model.addAttribute("error", e.getMessage());
-				return "redirect:/locales/libros/listar/" + idLocal;
-			}
-		}
-		// PREGUNTO SI EL PARAMETRO ES NULO
-		if (!foto.isEmpty()) {
-			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
-			if (formatosFoto.contains(foto.getContentType())) {
-				String rootPath = "C://Temp//uploads";
-				try {
-					byte[] bytes = foto.getBytes();
-					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-					Files.write(rutaCompleta, bytes);
-					libro.setFoto_libro(foto.getOriginalFilename());
-				} catch (IOException e) {
-					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
-					try {
-						Local local = localService.findById(empleado.getLocal().getId());
-						model.addAttribute("titulo", "Registro de Libro");
-						model.addAttribute("libro", libro);
-						model.addAttribute("local", local);
-						model.addAttribute("idLocal", idLocal);
-						return "/libros/crear";
-					} catch (Exception e2) {
-						model.addAttribute("error", e2.getMessage());
-						return "redirect:/locales/libros/listar/" + idLocal;
-					}
-				}
-			} else {
-				model.addAttribute("error", "El formato de la foto es incorrecto");
-				try {
-					Local local = localService.findById(empleado.getLocal().getId());
-					model.addAttribute("titulo", "Registro de Libro");
-					model.addAttribute("libro", libro);
-					model.addAttribute("local", local);
-					model.addAttribute("idLocal", idLocal);
-					return "/libros/crear";
-				} catch (Exception e3) {
-					model.addAttribute("error", e3.getMessage());
-					return "redirect:/locales/libros/listar/" + idLocal;
-				}
-			}
-		} else {
-			libro.setFoto_libro("no-book.jpg");
-		}
-		try {
-			libroService.save(libro);
-			flash.addFlashAttribute("success",
-					"El libro ha sido registrado en la base datos (Nombre '" + libro.getTitulo() + "').");
-			status.setComplete();
-			return "redirect:/locales/libros/listar/" + idLocal;
-		} catch (Exception e) {
-			Local local;
-			try {
-				local = localService.findById(empleado.getLocal().getId());
-				model.addAttribute("titulo", "Registro de Libro");
-				model.addAttribute("libro", libro);
-				model.addAttribute("local", local);
-				model.addAttribute("idLocal", idLocal);
-				switch (userDetails.getAuthorities().toString()) {
-					case "[ROLE_SYSADMIN]":
-						List<Local> locales = localService.findAll();
-						model.addAttribute("locales", locales);
-						break;
-					default:
-						model.addAttribute("local", empleado.getLocal());
-						break;
-				}
-				return "/libros/crear";
-			} catch (Exception e1) {
-				model.addAttribute("error", e1.getMessage());
-				return "redirect:/locales/libros/listar/" + idLocal;
-			}
-		}
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
-	@GetMapping("/locales/libros/editar/{idLocal}/{id}")
-	public String editarLibro(@PathVariable(value = "idLocal") Long idLocal, @PathVariable(value = "id") Long idlibro,
-			Model model, RedirectAttributes flash, Authentication authentication) {
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		try {
-			Local local = localService.findById(empleado.getLocal().getId());
-			model.addAttribute("editable", true);
-			model.addAttribute("titulo", "Modificar Libro");
-			model.addAttribute("local", local);
-			model.addAttribute("idLocal", idLocal);
-			switch (userDetails.getAuthorities().toString()) {
-				case "[ROLE_SYSADMIN]":
-					List<Local> locales = localService.findAll();
-					model.addAttribute("locales", locales);
-					break;
-				default:
-					model.addAttribute("local", empleado.getLocal());
-					break;
-			}
-			Libro libro = libroService.findOne(idlibro);
-			model.addAttribute("libro", libro);
-			return "/libros/crear";
-		} catch (Exception e) {
-			model.addAttribute("error", e.getMessage());
-			return "redirect:/locales/libros/listar/" + idLocal;
-		}
-	}
-
-	// BUG CON @VALID
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
-	@PostMapping("/locales/libros/editar/{idLocal}")
-	public String guardarLibro(@PathVariable(value = "idLocal") Long idLocal, Libro libro, BindingResult result,
-			Model model, SessionStatus status, RedirectAttributes flash, @RequestParam("foto_li") MultipartFile foto,
-			Authentication authentication) {
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		if (result.hasErrors()) {
-			try {
-				Local local = localService.findById(empleado.getLocal().getId());
-				model.addAttribute("titulo", "Registro de Libro");
-				model.addAttribute("libro", libro);
-				model.addAttribute("local", local);
-				model.addAttribute("idLocal", idLocal);
-				return "/libros/crear";
-			} catch (Exception e) {
-				flash.addFlashAttribute("error", e.getMessage());
-				return "redirect:/locales/libros/editar/" + idLocal;
-			}
-		}
-		// PREGUNTO SI EL PARAMETRO ES NULO
-		if (!foto.isEmpty()) {
-			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
-			if (formatosFoto.contains(foto.getContentType())) {
-				String rootPath = "C://Temp//uploads";
-				try {
-					byte[] bytes = foto.getBytes();
-					Path rutaCompleta = Paths.get(rootPath + "//" + foto.getOriginalFilename());
-					Files.write(rutaCompleta, bytes);
-					libro.setFoto_libro(foto.getOriginalFilename());
-				} catch (IOException e) {
-					model.addAttribute("error", "Lo sentimos, hubo un error a la hora de cargar tu foto");
-					try {
-						Local local = localService.findById(empleado.getLocal().getId());
-						model.addAttribute("titulo", "Registro de Libro");
-						model.addAttribute("libro", libro);
-						model.addAttribute("local", local);
-						model.addAttribute("idLocal", idLocal);
-						return "/libros/crear";
-					} catch (Exception e2) {
-						flash.addFlashAttribute("error", e2.getMessage());
-						return "redirect:/locales/libros/editar/" + idLocal;
-					}
-				}
-			} else {
-				model.addAttribute("error", "El formato de la foto es incorrecto");
-				try {
-					Local local = localService.findById(empleado.getLocal().getId());
-					model.addAttribute("titulo", "Registro de Libro");
-					model.addAttribute("libro", libro);
-					model.addAttribute("local", local);
-					model.addAttribute("idLocal", idLocal);
-					return "/libros/crear";
-				} catch (Exception e3) {
-					flash.addFlashAttribute("error", e3.getMessage());
-					return "redirect:/locales/libros/editar/" + idLocal;
-				}
-			}
-		}
-		try {
-			libroService.update(libro);
-			flash.addFlashAttribute("warning",
-					"El libro con código " + libro.getTitulo() + " ha sido actualizado en la base de datos.");
-			status.setComplete();
-			return "redirect:/locales/libros/listar/" + idLocal;
-		} catch (Exception e) {
-			Local local;
-			try {
-				local = localService.findById(empleado.getLocal().getId());
-				model.addAttribute("titulo", "Registro de Libro");
-				model.addAttribute("libro", libro);
-				model.addAttribute("local", local);
-				model.addAttribute("idLocal", idLocal);
-				return "/libros/crear";
-			} catch (Exception e1) {
-				flash.addFlashAttribute("error", e1.getMessage());
-				return "redirect:/locales/libros/listar/" + idLocal;
-			}
-		}
-	}
-
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
-	@RequestMapping("/locales/libros/deshabilitar/{idLocal}/{id}")
-	public String deshabilitarLibro(@PathVariable(value = "idLocal") Long idLocal, @PathVariable(value = "id") Long id,
-			RedirectAttributes flash) {
-		Libro libro = null;
-		try {
-			libro = libroService.findOne(id);
-			libro.setEstado(false);
-			libroService.update(libro);
-			flash.addFlashAttribute("idLocal", idLocal);
-			flash.addFlashAttribute("info", "El libro '" + libro.getTitulo() + "' ha sido deshabilitado.");
-			return "redirect:/locales/libros/listar/" + idLocal;
-		} catch (Exception e) {
-			flash.addFlashAttribute("error", e.getMessage());
-			return "redirect:/locales/libros/listar/" + idLocal;
 		}
 	}
 }

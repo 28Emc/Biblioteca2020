@@ -65,7 +65,7 @@ public class EmpleadoController {
 
 	private static final List<String> formatosFoto = Arrays.asList("image/png", "image/jpeg", "image/jpg");
 
-	// ##############################   SYSADMIN, ADMIN, EMPLEADO 
+	// ############################## SYSADMIN, ADMIN, EMPLEADO
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping("/editar-perfil")
 	public String editarPerfil(Model model, RedirectAttributes flash, Authentication authentication) {
@@ -112,7 +112,6 @@ public class EmpleadoController {
 			}
 			return "/empleados/perfil";
 		}
-
 		// PREGUNTO SI EL PARAMETRO ES NULO
 		if (!foto.isEmpty()) {
 			// PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
@@ -160,25 +159,35 @@ public class EmpleadoController {
 				return "/empleados/perfil";
 			}
 		}
-
 		try {
 			Empleado empleadoOld = empleado;
-			empleadoService.update(empleado);
-
-			// AL CAMBIAR PASSWORD, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
-			Long idRole = empleado.getRoles().iterator().next().getId();
-			empleadoLogService.save(new EmpleadoLog(idRole, empleadoOld.getNombres(), empleado.getNombres(),
-					empleadoOld.getApellidos(), empleado.getApellidos(), empleadoOld.getNroDocumento(),
-					empleado.getNroDocumento(), empleadoOld.getDireccion(), empleado.getDireccion(),
-					empleadoOld.getEmail(), empleado.getEmail(), empleadoOld.getCelular(), empleado.getCelular(),
-					empleadoOld.getFecha_registro(), empleado.getFecha_registro(), empleadoOld.getUsername(),
-					empleado.getUsername(), empleadoOld.getPassword(), empleado.getPassword(), empleadoOld.getEstado(),
-					empleado.getEstado(), empleadoOld.getFoto_empleado(), empleado.getFoto_empleado(),
-					"UPDATE PERFIL BY EMPLEADO", null, new Date(), null));
-
-			flash.addFlashAttribute("warning", "Perfil actualizado.");
-			status.setComplete();
-			return "redirect:/home";
+			//empleadoService.update(empleado);
+			// AQUI SOLICITO AL ADMIN QUE ENTRE NUEVAMENTE AL SISTEMA PARA ACTUALIZAR SUS
+			// CREDENCIALES
+			// EN CASO CONTRARIO OBTIENE UN ERROR AL MOMENTO DE ACCEDER A CUALQUIER OTRO
+			// RECURSO.
+			if (!userDetails.getUsername().equalsIgnoreCase(empleado.getUsername())) {
+				//authentication.setAuthenticated(false);
+				empleadoService.update(empleado);
+				authentication.setAuthenticated(false);
+				flash.addFlashAttribute("info", "Perfil actualizado! Iniciar sesión con sus nuevas credenciales!");
+				return "redirect:/login";
+			} else {
+				empleadoService.update(empleado);
+				// AL CAMBIAR PASSWORD, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+				Long idRole = empleado.getRoles().iterator().next().getId();
+				empleadoLogService.save(new EmpleadoLog(idRole, empleadoOld.getNombres(), empleado.getNombres(),
+						empleadoOld.getApellidos(), empleado.getApellidos(), empleadoOld.getNroDocumento(),
+						empleado.getNroDocumento(), empleadoOld.getDireccion(), empleado.getDireccion(),
+						empleadoOld.getEmail(), empleado.getEmail(), empleadoOld.getCelular(), empleado.getCelular(),
+						empleadoOld.getFecha_registro(), empleado.getFecha_registro(), empleadoOld.getUsername(),
+						empleado.getUsername(), empleadoOld.getPassword(), empleado.getPassword(),
+						empleadoOld.getEstado(), empleado.getEstado(), empleadoOld.getFoto_empleado(),
+						empleado.getFoto_empleado(), "UPDATE PERFIL BY EMPLEADO", null, new Date(), null));
+				flash.addFlashAttribute("warning", "Perfil actualizado");
+				status.setComplete();
+				return "redirect:/home";
+			}
 		} catch (Exception e) {
 			model.addAttribute("titulo", "Modificar Perfil");
 			model.addAttribute("editable", true);

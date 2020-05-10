@@ -12,9 +12,9 @@
       <h1 class="py-4" th:text="${titulo}"></h1>
 
       <form
+        autocomplete="off"
         th:action="@{/prestamos/crear-sysadmin-final}"
         method="post"
-        th:object="${prestamo}"
       >
         <h4 class="py-4">Usuario</h4>
         <div class="form-group row">
@@ -25,21 +25,23 @@
               name="id_usuario"
               id="id_usuario"
               class="form-control rounded-0 shadow-none"
-			  th:attr="value=${usuario.id}"
+              th:attr="value=${usuario.id}"
               placeholder="Id Usuario"
               readonly
             />
-		  </div>
-		  <div class="col-sm-12 col-md-3 col-lg-3" id="col_dni_usuario">
-            <label class="text-muted col-form-label" for="dni_usuario">DNI</label>
+          </div>
+          <div class="col-sm-12 col-md-3 col-lg-3" id="col_dni_usuario">
+            <label class="text-muted col-form-label" for="dni_usuario"
+              >DNI</label
+            >
             <input
               type="number"
               name="dni_usuario"
               id="dni_usuario"
               class="form-control rounded-0 shadow-none"
-			  th:attr="value=${usuario.nroDocumento}"
+              th:attr="value=${usuario.nroDocumento}"
               placeholder="DNI Usuario"
-              readonly
+              disabled
             />
           </div>
           <div class="col-sm-12 col-md-6 col-lg-6" id="col_nombre_usuario">
@@ -49,8 +51,8 @@
             <input
               type="text"
               name="nombre_usuario"
-			  id="nombre_usuario"
-			  th:attr="value=${usuario.nombres}+', '+${usuario.apellidos} "
+              id="nombre_usuario"
+              th:attr="value=${usuario.nombres}+', '+${usuario.apellidos} "
               class="form-control rounded-0 shadow-none"
               placeholder="Nombres del Usuario"
               disabled
@@ -65,11 +67,11 @@
             <input
               type="text"
               name="id_local"
-			  id="id_local"
-			  th:attr="value=${local.id}"
+              id="id_local"
+              th:attr="value=${local.id}"
               placeholder="Id Local"
               class="form-control rounded-0 shadow-none"
-              disabled
+              readonly
             />
           </div>
           <div class="col-sm-12 col-md-8 col-lg-8" id="col_direccion_local">
@@ -79,8 +81,8 @@
             <input
               type="text"
               name="direccion_local"
-			  id="direccion_local"
-			  th:attr="value=${local.direccion}"
+              id="direccion_local"
+              th:attr="value=${local.direccion}"
               class="form-control rounded-0 shadow-none"
               placeholder="Dirección"
               disabled
@@ -88,47 +90,56 @@
           </div>
         </div>
 
-		<h4 class="py-4">Libro</h4>
+        <h4 class="py-4">Libro</h4>
         <div class="form-group row">
           <div class="col-sm-12 col-md-12">
             <select
               class="form-control custom-select rounded-0 shadow-none"
-              th:field="${prestamo.libro}"
-              th:errorclass="'form-control'"
+              name="id_libro"
             >
               <option
                 th:each="libro :${libros}"
+                id="id_libro"
+                name="id_libro"
                 th:value="${libro.id}"
                 th:text="${libro.titulo}"
               ></option>
             </select>
-            <small
-              class="form-text text-danger"
-              th:if="${#fields.hasErrors('libro')}"
-              th:errors="${libro.id}"
-            ></small>
           </div>
-		</div>
-		
+        </div>
+
         <h4 class="py-4">Empleado</h4>
         <div class="form-group row">
           <div class="col-sm-12 col-md-12">
             <select
               class="form-control custom-select rounded-0 shadow-none"
-              th:field="${prestamo.empleado}"
-              th:errorclass="'form-control'"
+              name="id_empleado"
             >
               <option
                 th:each="empleado :${empleados}"
+                id="id_empleado"
+                name="id_empleado"
                 th:value="${empleado.id}"
                 th:text="${empleado.nombres}+', '+${empleado.apellidos}"
               ></option>
             </select>
-            <small
-              class="form-text text-danger"
-              th:if="${#fields.hasErrors('libro')}"
-              th:errors="${libro.id}"
-            ></small>
+          </div>
+        </div>
+
+        <h4 class="py-4">Fecha Devolución</h4>
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-6 col-lg-6">
+            <label class="col-form-label" for="fecha_devolucion"
+              >Fecha Devoluciòn</label
+            >
+            <input
+              class="form-control rounded-0 shadow-none datepicker"
+              type="text"
+              placeholder=" yyyy/mm/dd"
+              name="fecha_devolucion"
+              th:attr="value=${fecha_devolucion}"
+              required
+            />
           </div>
         </div>
 
@@ -172,5 +183,21 @@
     <footer th:replace="layout/layout :: footer"></footer>
     <script th:replace="layout/autocomplete-libros :: javascript"></script>
     <script th:replace="layout/autocomplete-empleados :: javascript"></script>
+    <script type="text/javascript">
+      // COMPONENTE DE FECHA ESPECIFICO PARA EL FORMULARIO
+      $(".datepicker").datepicker({
+        format: "yyyy-mm-dd", // FORMATO DE FECHA
+        startDate: "+2d", // MUESTRA FECHA DESDE MAÑANA
+        endDate: "+2m", // MUESTRA FECHA HASTA UN MAXIMO DE 3 MESES
+        autoclose: true, // OCULTAR AUTOMATICAMENTE COMPONENTE AL ESCOJER FECHA
+        todayHighlight: true, // ENFASIS EN EL DIA ACTUAL
+        language: "es", // LENGUAJE DEL COMPONENTE
+        templates: {
+          // ELEMENTOS PERSONALIZADOS DEL COMPONENTE
+          leftArrow: '<i class="fa fa-angle-left"></i>',
+          rightArrow: '<i class="fa fa-angle-right"></i>',
+        },
+      });
+    </script>
   </body>
 </html>

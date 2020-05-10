@@ -48,7 +48,7 @@ public class LocalController {
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 	@GetMapping(value = "/listar/{id}")
-	public String listarLocalesPorEmpresa(@PathVariable(value = "id") Long id, Model model,
+	public String listarLocalesPorEmpresa(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash,
 			Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
@@ -62,13 +62,13 @@ public class LocalController {
 			model.addAttribute("locales", local);
 			ruta = "/locales/listar";
 		} catch (Exception e) {
-			model.addAttribute("error", e.getMessage());
-			ruta = "/home";
+			flash.addFlashAttribute("error", e.getMessage());
+			ruta = "redirect:/home";
 		}
 		return ruta;
 	}
 
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping("/cancelar")
 	public String cancelar(Model model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
