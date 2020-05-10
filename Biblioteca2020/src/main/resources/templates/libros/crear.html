@@ -18,7 +18,7 @@
         enctype="multipart/form-data"
         th:object="${libro}"
         method="post"
-        th:action="${editable}? @{'/locales/libros/editar/'}+${idLocal} : @{'/locales/libros/crear/'}+${idLocal}"
+        th:action="${editable}? @{'/locales/'}+${idLocal}+'/libros/editar' : @{'/locales/'}+${idLocal}+'/libros/crear'"
       >
         <div class="form-group row">
           <div class="col-sm-12 col-md-12 col-lg-6">
@@ -241,7 +241,7 @@
             <a
               sec:authorize="hasRole('ROLE_SYSADMIN')"
               class="btn btn-transparent btn-block shadow-none font-weight-bolder"
-              th:href="@{'/locales/libros/cancelar/'}+${idLocal}"
+              th:href="@{'/locales/'}+${idLocal}+'/libros/cancelar'"
               >CANCELAR</a
             >
           </div>

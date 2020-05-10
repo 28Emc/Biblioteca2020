@@ -18,6 +18,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 
 @Service("emailSenderService")
 public class EmailSenderService {
@@ -108,7 +109,7 @@ public class EmailSenderService {
 
 	// USADO
 	@Async
-	public void sendMailLibrosWithCron(List<Libro> libros, String fecha, final String from, final String to,
+	public void sendMailLibrosWithCron(Model model, List<Libro> libros, String fecha, final String from, final String to,
 			final String subject, final String msg) {
 		try {
 			MimeMessage message = javaMailSender.createMimeMessage();
@@ -120,7 +121,7 @@ public class EmailSenderService {
 			helper.addInline("logo-biblioteca2020", new ClassPathResource("static/img/logo.jpg"));
 
 			ByteArrayInputStream bis = GenerarReportePDF
-					.generarPDFLibros("Reporte de libros - stock menor a 20 unidades", libros);
+					.generarPDFLibros(model, "Reporte de libros - stock menor a 20 unidades", libros);
 			DataSource dataSource = new ByteArrayDataSource(bis, "application/pdf");
 
 			helper.addAttachment("reporte-libros-" + fecha + ".pdf", dataSource);

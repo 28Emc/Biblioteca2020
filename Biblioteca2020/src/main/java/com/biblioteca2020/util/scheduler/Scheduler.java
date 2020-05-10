@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
 
 // CLASE QUE PERMITE PROGRAMAR EVENTOS REPETITIVOS
 @Component
@@ -267,7 +268,8 @@ public class Scheduler {
                         + "</html>";
                 String fecha = LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, esp) + "-"
                         + LocalDate.now().getYear();
-                emailSenderService.sendMailLibrosWithCron(libros, fecha, "Biblioteca2020 <edmech25@gmail.com>",
+                Model model = null;
+                emailSenderService.sendMailLibrosWithCron(model, libros, fecha, "Biblioteca2020 <edmech25@gmail.com>",
                         "edi@live.it", "Reporte de libros con bajo stock | Biblioteca2020", message);
                 System.out.println(
                         "EMAIL DE STOCK INFERIOR A 20 DE LIBROS ENVIADO!! EL DIA " + LocalDate.now().getDayOfMonth()

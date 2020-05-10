@@ -11,6 +11,8 @@
     <div class="container my-3 px-5">
       <h1 class="py-4" th:text="${titulo}"></h1>
 
+      <h1 hidden th:text="${idLocal}"></h1>
+
       <div class="form-group row">
         <div class="col-12">
           <h3>Datos de la Categoría</h3>
@@ -44,7 +46,7 @@
             <a
               role="button"
               th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
-              th:href="@{'/locales/libros/reportes/pdf/libros-por-categoria/'}+${categoria.id}"
+              th:href="@{'/locales/'}+${idLocal}+'/libros/reportes/pdf/libros-por-categoria/'+${categoria.id}"
               target="_blank"
               data-toggle="tooltip"
               data-placement="auto"
@@ -56,7 +58,7 @@
             <a
               role="button"
               th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
-              th:href="@{'/locales/libros/reportes/xlsx/libros-por-categoria/'}+${categoria.id}"
+              th:href="@{'/locales/}+${idLocal}+'/libros/reportes/xlsx/libros-por-categoria/'+${categoria.id}"
               data-toggle="tooltip"
               data-placement="auto"
               th:title="'Exportar XLSX'"
@@ -70,6 +72,13 @@
         <!-- WEB -->
         <div class="col-sm-12 col-md-12 py-2">
           <a
+            sec:authorize="hasRole('ROLE_SYSADMIN')"
+            class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+            th:href="@{'/locales/'}+${idLocal}+'/libros/reportes'"
+            >CANCELAR</a
+          >
+          <a
+            sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
             class="btn btn-transparent btn-block shadow-none font-weight-bolder"
             th:href="@{'/locales/libros/reportes'}"
             >CANCELAR</a

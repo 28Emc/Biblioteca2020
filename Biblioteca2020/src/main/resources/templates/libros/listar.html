@@ -18,7 +18,7 @@
           <a
             sec:authorize="hasRole('ROLE_SYSADMIN')"
             class="btn btn-primary btn-block rounded-0 border-0 py-2"
-            th:href="@{/locales/libros/crear/}+${idLocal}"
+            th:href="@{'/locales/'}+${idLocal}+'/libros/crear/'"
             data-toggle="tooltip"
             data-placement="top"
             th:title="'Nuevo'"
@@ -44,7 +44,7 @@
           <a
             sec:authorize="hasRole('ROLE_SYSADMIN')"
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/locales/libros/reportes/'}+${idLocal}"
+            th:href="@{'/locales/'}+${idLocal}+'/libros/reportes'"
             data-toggle="tooltip"
             data-placement="auto"
             th:title="'Generar reportes'"
@@ -113,7 +113,7 @@
                 >
                   <a
                     class="btn btn-transparent btn-block rounded-0 shadow-none"
-                    th:href="@{'/locales/libros/editar/'}+${idLocal}+'/'+${libro.id}"
+                    th:href="@{'/locales/'}+${idLocal}+'/libros/editar/'+${libro.id}"
                     data-toggle="tooltip"
                     data-placement="bottom"
                     th:title="'Editar'"
@@ -137,7 +137,7 @@
                 >
                   <a
                     class="btn btn-transparent btn-block rounded-0 shadow-none"
-                    th:href="@{'/locales/libros/deshabilitar/'}+${idLocal}+'/'+${libro.id}"
+                    th:href="@{'/locales/'}+${idLocal}+'/libros/deshabilitar/'+${libro.id}"
                     onclick="return confirm('Seguro de querer deshabilitar el libro?');"
                     data-toggle="tooltip"
                     data-placement="bottom"

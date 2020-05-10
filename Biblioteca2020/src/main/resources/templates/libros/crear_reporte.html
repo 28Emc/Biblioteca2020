@@ -11,6 +11,8 @@
     <div class="container my-3 px-5">
       <h1 class="py-4" th:text="${titulo}"></h1>
 
+      <h1 hidden th:text="${idLocal}"></h1>
+
       <div class="form-group row py-1">
         <div class="col-12">
           <h3>Reporte General</h3>
@@ -21,7 +23,7 @@
         <div class="col-6 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/locales/libros/reportes/pdf/libros-unicos'}"
+            th:href="@{'/locales/'}+${idLocal}+'/libros/reportes/pdf/libros-unicos'"
             target="_blank"
             data-toggle="tooltip"
             data-placement="auto"
@@ -32,7 +34,7 @@
         <div class="col-6 col-md-1 col-xl-1">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/locales/libros/reportes/xlsx/libros-unicos'}"
+            th:href="@{'/locales/'}+${idLocal}+'/libros/reportes/xlsx/libros-unicos'"
             data-toggle="tooltip"
             data-placement="auto"
             th:title="'Exportar XLSX'"
@@ -53,7 +55,7 @@
         <div class="col-6 col-sm-6 col-md-1 col-xl-1 text-center">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/locales/libros/reportes/pdf/libros-por-estado/'}+${estado}"
+            th:href="@{'/locales/'}+${idLocal}+'/libros/reportes/pdf/libros-por-estado/'+${estado}"
             target="_blank"
             data-toggle="tooltip"
             data-placement="auto"
@@ -64,7 +66,7 @@
         <div class="col-6 col-sm-6 col-md-1 col-xl-1 text-center">
           <a
             class="btn btn-transparent btn-block rounded-0 border-0 py-1"
-            th:href="@{'/locales/libros/reportes/xlsx/libros-por-estado/'}+${estado}"
+            th:href="@{'/locales/'}+${idLocal}+'/libros/reportes/xlsx/libros-por-estado/'+${estado}"
             data-toggle="tooltip"
             data-placement="auto"
             th:title="'Exportar XLSX'"
@@ -74,8 +76,8 @@
       </div>
 
       <form
-        th:action="@{/locales/libros/reportes/buscar-libros-por-categoria}"
-        sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+        th:action="@{'/locales/'}+${idLocal}+'/libros/reportes/buscar-libros-por-categoria'"
+        sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
         method="GET"
       >
         <div class="form-group row">
@@ -108,6 +110,13 @@
       <!-- WEB -->
       <div class="col-sm-12 col-md-12 py-2">
         <a
+          sec:authorize="hasRole('ROLE_SYSADMIN')"
+          class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+          th:href="@{'/locales/'}+${idLocal}+'/libros/cancelar'"
+          >CANCELAR</a
+        >
+        <a
+          sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
           class="btn btn-transparent btn-block shadow-none font-weight-bolder"
           th:href="@{'/locales/libros/cancelar'}"
           >CANCELAR</a

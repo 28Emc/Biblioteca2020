@@ -16,6 +16,9 @@ import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+
+import org.springframework.ui.Model;
+
 import com.lowagie.text.Font;
 
 // MÈTODO PARA GENERAR ARCHIVOS PDF CON DATA DINÁMICA
@@ -135,7 +138,7 @@ public class GenerarReportePDF {
     }
 
     // ################ LIBROS
-    public static ByteArrayInputStream generarPDFLibros(String titulo, List<Libro> libros) throws Exception {
+    public static ByteArrayInputStream generarPDFLibros(Model model, String titulo, List<Libro> libros) throws Exception {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -169,7 +172,8 @@ public class GenerarReportePDF {
         document.add(tablaCabecera);
 
         PdfPTable tabla = new PdfPTable(8);
-        if (titulo.contains("stock")) {
+        String role = (String) model.getAttribute("role");
+        if (titulo.contains("stock") || role.equals("[ROLE_SYSADMIN]")) {
             tabla = new PdfPTable(7);
             tabla.setWidths(new float[] { 1, 2.5f, 2.3f, 2.3f, 3f, 1.3f, 1.8f });
         } else {
@@ -184,7 +188,7 @@ public class GenerarReportePDF {
         listCabecera.add("Titulo");
         listCabecera.add("Autor");
         listCabecera.add("Categoría");
-        if (titulo.contains("stock")) {
+        if (titulo.contains("stock") || role.equals("[ROLE_SYSADMIN]")) {
             listCabecera.add("Local");
         } else {
             listCabecera.add("F. Publicación");
@@ -217,7 +221,7 @@ public class GenerarReportePDF {
             cell.setBorderWidth(0);
             cell.setPadding(10f);
             tabla.addCell(cell);
-            if (titulo.contains("stock")) {
+            if (titulo.contains("stock") || role.equals("[ROLE_SYSADMIN]")) {
                 cell = new PdfPCell(new Phrase(libroItem.getLocal().getDireccion().toString(), fontCuerpoTabla));
                 cell.setBorderWidth(0);
                 cell.setPadding(10f);

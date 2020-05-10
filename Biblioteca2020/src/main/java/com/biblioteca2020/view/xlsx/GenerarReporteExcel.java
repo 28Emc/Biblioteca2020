@@ -19,6 +19,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.ui.Model;
 
 // MÈTODO PARA GENERAR ARCHIVOS EXCEL CON DATA DINÁMICA
 public class GenerarReporteExcel {
@@ -226,7 +227,8 @@ public class GenerarReporteExcel {
     }
 
     // ################ LIBROS
-    public static ByteArrayInputStream generarExcelLibros(String titulo, List<Libro> libros) throws IOException {
+    public static ByteArrayInputStream generarExcelLibros(Model model, String titulo, List<Libro> libros)
+            throws IOException {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream();) {
             Sheet sheet = workbook.createSheet(titulo);
             int rowNum = 0;
@@ -242,13 +244,18 @@ public class GenerarReporteExcel {
             style.setFillForegroundColor(IndexedColors.ROYAL_BLUE.index);
             style.setAlignment(HorizontalAlignment.CENTER);
             style.setFont(font);
+            String role = (String) model.getAttribute("role");
             ArrayList<String> listCabecera = new ArrayList<>();
             listCabecera.add("Id");
             listCabecera.add("Titulo");
             listCabecera.add("Autor");
             listCabecera.add("Categoría");
-            listCabecera.add("Fecha Publicación");
-            listCabecera.add("Fecha Registro");
+            if (role.equals("[ROLE_SYSADMIN]")) {
+                listCabecera.add("Local");
+            } else {
+                listCabecera.add("Fecha Publicación");
+                listCabecera.add("Fecha Registro");
+            }
             listCabecera.add("Stock");
             listCabecera.add("Estado");
             Row cabecera = sheet.createRow(rowNum);
@@ -266,16 +273,25 @@ public class GenerarReporteExcel {
                 fila.createCell(1).setCellValue(libroItem.getTitulo());
                 fila.createCell(2).setCellValue(libroItem.getAutor());
                 fila.createCell(3).setCellValue(libroItem.getCategoria().getNombre());
-                fila.createCell(4).setCellValue(libroItem.getFechaPublicacion().toString());
-                fila.createCell(5).setCellValue(libroItem.getFechaRegistro().toString());
-                fila.createCell(6).setCellValue(libroItem.getStock());
-                if (libroItem.getEstado()) {
-                    fila.createCell(7).setCellValue("Activo");
+                if (role.equals("[ROLE_SYSADMIN]")) {
+                    fila.createCell(4).setCellValue(libroItem.getLocal().getDireccion());
+                    fila.createCell(5).setCellValue(libroItem.getStock());
+                    if (libroItem.getEstado()) {
+                        fila.createCell(6).setCellValue("Activo");
+                    } else {
+                        fila.createCell(6).setCellValue("Inactivo");
+                    }
                 } else {
-                    fila.createCell(7).setCellValue("Inactivo");
+                    fila.createCell(4).setCellValue(libroItem.getFechaPublicacion().toString());
+                    fila.createCell(5).setCellValue(libroItem.getFechaRegistro().toString());
+                    fila.createCell(6).setCellValue(libroItem.getStock());
+                    if (libroItem.getEstado()) {
+                        fila.createCell(7).setCellValue("Activo");
+                    } else {
+                        fila.createCell(7).setCellValue("Inactivo");
+                    }
                 }
             }
-
             for (int i = 0; i < listCabecera.size(); i++) {
                 sheet.autoSizeColumn(i);
             }
