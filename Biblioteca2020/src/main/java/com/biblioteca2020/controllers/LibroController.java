@@ -107,7 +107,7 @@ public class LibroController {
 		return ruta;
 	}
 
-	// MÉTODO PARA REALIZAR LA BUSQUEDA CATEGORIAS POR SU NOMBRE MEDIANTE
+	// MÉTODO PARA REALIZAR LA BUSQUEDA DE CATEGORIAS POR SU NOMBRE MEDIANTE
 	// AUTOCOMPLETADO
 	@RequestMapping(value = "/libros/cargar-categorias/{term}", produces = { "application/json" })
 	public @ResponseBody List<Categoria> cargarCategorias(@PathVariable String term) {
@@ -328,7 +328,7 @@ public class LibroController {
 			}
 			// PREGUNTO SI EL PARAMETRO DE LA FOTO ES NULO ..
 			if (!foto.isEmpty()) {
-				// .. Y PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN
+				// .. Y PREGUNTO SI MI FILE TIENE EL FORMATO DE IMAGEN CORRECTO
 				if (formatosFoto.contains(foto.getContentType())) {
 					String rootPath = "C://Temp//uploads";
 					byte[] bytes = foto.getBytes();
@@ -408,7 +408,7 @@ public class LibroController {
 	}
 
 	// ############################# REPORTES #############################
-	// FORMULARIO DE REPORTES LIBROS
+	// FORMULARIO DE REPORTES DE LIBROS
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = { "/locales/{id}/libros/reportes", "/locales/libros/reportes" })
 	public String crearReporte(@PathVariable(value = "id") Optional<Long> idLocal, Model model,
