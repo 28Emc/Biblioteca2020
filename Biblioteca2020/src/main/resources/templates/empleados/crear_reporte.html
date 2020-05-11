@@ -74,6 +74,7 @@
       </div>
 
       <form
+        sec:authorize="hasRole('ROLE_SYSADMIN')"
         th:action="@{/empleados/reportes/buscar-empleados-por-local}"
         method="GET"
       >

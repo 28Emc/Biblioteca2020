@@ -884,7 +884,7 @@ public class EmpleadoController {
 	}
 
 	// GENERAR PDF DE EMPLEADOS POR LOCAL
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@RequestMapping(value = "/reportes/pdf/empleados-por-local/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfEmpleadosPorLocal(@PathVariable("id") String id,
 			Authentication authentication) {
@@ -1023,7 +1023,7 @@ public class EmpleadoController {
 	}
 
 	// GENERAR REPORTE EXCEL DE EMPLEADOS POR LOCAL
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
 	@RequestMapping(value = "/reportes/xlsx/empleados-por-local/{id}", method = RequestMethod.GET)
 	public ResponseEntity<InputStreamResource> repEmpleadosPorLocal(@PathVariable("id") String id) {
 		List<Empleado> empleados = null;
