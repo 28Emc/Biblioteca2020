@@ -109,7 +109,6 @@ public class LibroController {
 
 	// MÉTODO PARA REALIZAR LA BUSQUEDA CATEGORIAS POR SU NOMBRE MEDIANTE
 	// AUTOCOMPLETADO
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@RequestMapping(value = "/libros/cargar-categorias/{term}", produces = { "application/json" })
 	public @ResponseBody List<Categoria> cargarCategorias(@PathVariable String term) {
 		return categoriaService.findByNombreLikeIgnoreCase(term);
@@ -433,7 +432,8 @@ public class LibroController {
 
 	// GENERAR REPORTE PDF LIBROS UNICOS
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/locales/{idLocal}/libros/reportes/pdf/libros-unicos", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	@RequestMapping(value = { "/locales/{idLocal}/libros/reportes/pdf/libros-unicos",
+			"/locales/libros/reportes/pdf/libros-unicos" }, method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfLibrosUnicos(
 			@PathVariable(value = "idLocal") Optional<Long> idLocal, Model model, Authentication authentication) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -445,13 +445,13 @@ public class LibroController {
 			switch (userDetails.getAuthorities().toString()) {
 				case "[ROLE_SYSADMIN]":
 					libros = libroService.fetchWithCategoriaWithLocal();
-					model.addAttribute("role", userDetails.getAuthorities().toString());
 					break;
 				default:
 					libros = libroService.fetchByIdWithLocalesWithEmpleado(empleado.getLocal().getId(),
 							empleado.getId());
 					break;
 			}
+			model.addAttribute("role", userDetails.getAuthorities().toString());
 			if (libros.size() != 0) {
 				bis = GenerarReportePDF.generarPDFLibros(model, "Reporte de Libros Únicos", libros);
 				headers.add("Content-Disposition", "inline; filename=listado-libros-unicos.pdf");
@@ -471,7 +471,8 @@ public class LibroController {
 
 	// BUSCAR LIBROS POR CATEGORIA PARA GENERAR REPORTE
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/locales/{idLocal}/libros/reportes/buscar-libros-por-categoria", method = RequestMethod.GET)
+	@RequestMapping(value = { "/locales/{idLocal}/libros/reportes/buscar-libros-por-categoria",
+			"/locales/libros/reportes/buscar-libros-por-categoria" }, method = RequestMethod.GET)
 	public String buscarCategoriaParaReporte(@PathVariable(value = "idLocal") Optional<Long> idLocal,
 			@RequestParam String categoria_libro, Model model, Authentication authentication,
 			RedirectAttributes flash) {
@@ -507,6 +508,9 @@ public class LibroController {
 				}
 			}
 			model.addAttribute("categoria", categoria);
+			if (idLocal.isPresent()) {
+				model.addAttribute("idLocal", idLocal.get());
+			}
 			ruta = "/libros/busqueda_libros_por_categoria";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", "Error, la categoría es incorrecta o no está disponible");
@@ -525,19 +529,28 @@ public class LibroController {
 
 	// GENERAR REPORTE PDF LIBROS POR CATEGORÍA
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/locales/{idLocal}/libros/reportes/pdf/libros-por-categoria/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	@RequestMapping(value = { "/locales/{idLocal}/libros/reportes/pdf/libros-por-categoria/{id_categoria}",
+			"/locales/libros/reportes/pdf/libros-por-categoria/{id_categoria}" }, method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfLibrosPorCategoria(
-			@PathVariable(value = "id") Optional<Long> idLocal, @PathVariable("idLocal") String id,
-			Authentication authentication, Model model) {
+			@PathVariable(value = "idLocal") Optional<Long> idLocal,
+			@PathVariable(name = "id_categoria", required = false) Long id, Authentication authentication,
+			Model model) {
 		ByteArrayInputStream bis;
 		var headers = new HttpHeaders();
+		List<Libro> libros = null;
 		try {
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 			Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-			Categoria categoria = categoriaService.findOne(Long.parseLong(id));
-			List<Libro> libros = null;
-
-			libros = libroService.findByCategoriaAndLocal(categoria.getNombre(), empleado.getLocal().getId());
+			Categoria categoria = categoriaService.findOne(id);
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					libros = libroService.findByCategoria(categoria.getNombre());
+					break;
+				default:
+					libros = libroService.findByCategoriaAndLocal(categoria.getNombre(), empleado.getLocal().getId());
+					break;
+			}
+			model.addAttribute("role", userDetails.getAuthorities().toString());
 			if (libros.size() != 0) {
 				bis = GenerarReportePDF.generarPDFLibros(model, "Reporte de Libros Por Categoría", libros);
 				headers.add("Content-Disposition", "inline; filename=listado-libros-por-categoria.pdf");
@@ -557,7 +570,8 @@ public class LibroController {
 
 	// GENERAR REPORTE PDF LIBROS POR ESTADO
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/locales/{idLocal}/libros/reportes/pdf/libros-por-estado/{estado}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	@RequestMapping(value = { "/locales/{idLocal}/libros/reportes/pdf/libros-por-estado/{estado}",
+			"/locales/libros/reportes/pdf/libros-por-estado/{estado}" }, method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
 	public ResponseEntity<InputStreamResource> generarPdfLibrosPorEstado(
 			@PathVariable(value = "idLocal") Optional<Long> idLocal, @PathVariable("estado") String estado, Model model,
 			Authentication authentication) {
@@ -571,11 +585,25 @@ public class LibroController {
 			String tituloPdf = "";
 			// USO UN STRING EN VEZ DE UN BOOLEAN PARA HACER SALTAR LA EXCEPCION
 			if (estado.equals("true")) {
-				libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), true);
+				switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_SYSADMIN]":
+						libros = libroService.findByEstado(true);
+						break;
+					default:
+						libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), true);
+						break;
+				}
 				titulo = "listado-libros-disponibles";
 				tituloPdf = "Reporte de Libros Disponibles";
 			} else if (estado.equals("false")) {
-				libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), false);
+				switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_SYSADMIN]":
+						libros = libroService.findByEstado(false);
+						break;
+					default:
+						libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), false);
+						break;
+				}
 				titulo = "listado-libros-no-disponibles";
 				tituloPdf = "Reporte de Libros No Disponibles";
 			} else if (!estado.equals("true") || estado.equals("false")) {
@@ -583,6 +611,7 @@ public class LibroController {
 				headers.add("Location", "/error_reporte");
 				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 			}
+			model.addAttribute("role", userDetails.getAuthorities().toString());
 			if (libros.size() != 0) {
 				bis = GenerarReportePDF.generarPDFLibros(model, tituloPdf, libros);
 				headers.add("Content-Disposition", "inline; filename=" + titulo + ".pdf");
@@ -608,7 +637,8 @@ public class LibroController {
 
 	// GENERAR REPORTE EXCEL LIBROS UNICOS
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/locales/{idLocal}/libros/reportes/xlsx/libros-unicos", method = RequestMethod.GET)
+	@RequestMapping(value = { "/locales/{idLocal}/libros/reportes/xlsx/libros-unicos",
+			"/locales/libros/reportes/xlsx/libros-unicos" }, method = RequestMethod.GET)
 	public ResponseEntity<InputStreamResource> generarExcelLibrosUnicos(
 			@PathVariable(value = "idLocal") Optional<Long> idLocal, Authentication authentication, Model model) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -627,6 +657,7 @@ public class LibroController {
 							empleado.getId());
 					break;
 			}
+			model.addAttribute("role", userDetails.getAuthorities().toString());
 			if (libros.size() != 0) {
 				bis = GenerarReporteExcel.generarExcelLibros(model, "Reporte de Libros Unicos", libros);
 				headers.add("Content-Disposition", "attachment; filename=listado-libros-unicos.xlsx");
@@ -645,8 +676,10 @@ public class LibroController {
 
 	// GENERAR REPORTE EXCEL LIBROS POR CATEGORÍA
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/locales/libros/reportes/xlsx/libros-por-categoria/{id}", method = RequestMethod.GET)
-	public ResponseEntity<InputStreamResource> repLibrosPorCategoria(@PathVariable("id") String id,
+	@RequestMapping(value = { "/locales/{idLocal}/libros/reportes/xlsx/libros-por-categoria/{id}",
+			"/locales/libros/reportes/xlsx/libros-por-categoria/{id}" }, method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> repLibrosPorCategoria(
+			@PathVariable(value = "idLocal") Optional<Long> idLocal, @PathVariable("id") String id,
 			Authentication authentication, Model model) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
@@ -655,7 +688,18 @@ public class LibroController {
 		var headers = new HttpHeaders();
 		try {
 			Categoria categoria = categoriaService.findOne(Long.parseLong(id));
-			libros = libroService.findByCategoriaAndLocal(categoria.getNombre(), empleado.getLocal().getId());
+			switch (userDetails.getAuthorities().toString()) {
+				case "[ROLE_SYSADMIN]":
+					libros = libroService.findByCategoria(categoria.getNombre());
+					break;
+				default:
+					libros = libroService.findByCategoriaAndLocal(categoria.getNombre(), empleado.getLocal().getId());
+					break;
+			}
+			if (idLocal.isPresent()) {
+				model.addAttribute("idLocal", idLocal.get());
+			}
+			model.addAttribute("role", userDetails.getAuthorities().toString());
 			if (libros.size() != 0) {
 				in = GenerarReporteExcel.generarExcelLibros(model, "Reporte de Libros Por Categoría", libros);
 				headers.add("Content-Disposition", "attachment; filename=listado-libros-por-categoria.xlsx");
@@ -674,8 +718,10 @@ public class LibroController {
 
 	// GENERAR REPORTE EXCEL LIBROS POR ESTADO
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/locales/libros/reportes/xlsx/libros-por-estado/{estado}", method = RequestMethod.GET)
-	public ResponseEntity<InputStreamResource> repLibrosPorEstado(@PathVariable("estado") String estado,
+	@RequestMapping(value = { "/locales/{idLocal}/libros/reportes/xlsx/libros-por-estado/{estado}",
+			"/locales/libros/reportes/xlsx/libros-por-estado/{estado}" }, method = RequestMethod.GET)
+	public ResponseEntity<InputStreamResource> repLibrosPorEstado(
+			@PathVariable(value = "idLocal") Optional<Long> idLocal, @PathVariable("estado") String estado,
 			Authentication authentication, Model model) {
 		List<Libro> libros = null;
 		ByteArrayInputStream in;
@@ -687,11 +733,25 @@ public class LibroController {
 			String tituloExcel = "";
 			// USO UN STRING EN VEZ DE UN BOOLEAN PARA HACER SALTAR LA EXCEPCION
 			if (estado.equals("true")) {
-				libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), true);
+				switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_SYSADMIN]":
+						libros = libroService.findByEstado(true);
+						break;
+					default:
+						libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), true);
+						break;
+				}
 				titulo = "listado-libros-disponibles";
 				tituloExcel = "Reporte de Libros Disponibles";
 			} else if (estado.equals("false")) {
-				libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), false);
+				switch (userDetails.getAuthorities().toString()) {
+					case "[ROLE_SYSADMIN]":
+						libros = libroService.findByEstado(false);
+						break;
+					default:
+						libros = libroService.findByLocalAndEstado(empleado.getLocal().getId(), false);
+						break;
+				}
 				titulo = "listado-libros-no-disponibles";
 				tituloExcel = "Reporte de Libros No Disponibles";
 			} else if (!estado.equals("true") || estado.equals("false")) {
@@ -699,6 +759,7 @@ public class LibroController {
 				headers.add("Location", "/error_reporte");
 				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
 			}
+			model.addAttribute("role", userDetails.getAuthorities().toString());
 			if (libros.size() != 0) {
 				in = GenerarReporteExcel.generarExcelLibros(model, tituloExcel, libros);
 				headers.add("Content-Disposition", "attachment; filename=" + titulo + ".xlsx");

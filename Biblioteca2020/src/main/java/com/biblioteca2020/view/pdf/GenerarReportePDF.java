@@ -138,7 +138,8 @@ public class GenerarReportePDF {
     }
 
     // ################ LIBROS
-    public static ByteArrayInputStream generarPDFLibros(Model model, String titulo, List<Libro> libros) throws Exception {
+    public static ByteArrayInputStream generarPDFLibros(Model model, String titulo, List<Libro> libros)
+            throws Exception {
         Document document = new Document();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -171,12 +172,13 @@ public class GenerarReportePDF {
         tablaCabecera.addCell(cellCabecera);
         document.add(tablaCabecera);
 
-        PdfPTable tabla = new PdfPTable(8);
+        PdfPTable tabla;
         String role = (String) model.getAttribute("role");
         if (titulo.contains("stock") || role.equals("[ROLE_SYSADMIN]")) {
             tabla = new PdfPTable(7);
             tabla.setWidths(new float[] { 1, 2.5f, 2.3f, 2.3f, 3f, 1.3f, 1.8f });
         } else {
+            tabla = new PdfPTable(8);
             tabla.setWidths(new float[] { 1, 2.5f, 2.3f, 2.3f, 2.5f, 2.3f, 1.3f, 1.8f });
         }
         tabla.setWidthPercentage(110);

@@ -46,4 +46,7 @@ public interface ILibroService {
 	// USADO
 	public void update(Libro libro);
 
+	// USADO
+	public List<Libro> findByCategoria(String categoria);
+
 }

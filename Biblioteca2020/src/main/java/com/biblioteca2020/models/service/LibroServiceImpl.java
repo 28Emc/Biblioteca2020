@@ -110,4 +110,11 @@ public class LibroServiceImpl implements ILibroService {
 	public List<Libro> findByLocal(Long idLocal) {
 		return libroDao.findByLocal(idLocal);
 	}
+
+	// USADO
+	@Override
+	@Transactional(readOnly = true)
+	public List<Libro> findByCategoria(String categoria) {
+		return libroDao.findByCategoria(categoria);
+	}
 }

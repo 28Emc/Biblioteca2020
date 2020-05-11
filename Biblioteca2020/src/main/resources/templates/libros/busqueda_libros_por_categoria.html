@@ -44,6 +44,7 @@
           </div>
           <div class="col-6 col-md-1 col-xl-1">
             <a
+              sec:authorize="hasRole('ROLE_SYSADMIN')"
               role="button"
               th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
               th:href="@{'/locales/'}+${idLocal}+'/libros/reportes/pdf/libros-por-categoria/'+${categoria.id}"
@@ -53,12 +54,34 @@
               th:title="'Exportar PDF'"
               ><i class="fas fa-file-pdf fa-2x text-danger"></i
             ></a>
+            <a
+              sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+              role="button"
+              th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
+              th:href="@{'/locales/libros/reportes/pdf/libros-por-categoria/'}+${categoria.id}"
+              target="_blank"
+              data-toggle="tooltip"
+              data-placement="auto"
+              th:title="'Exportar PDF'"
+              ><i class="fas fa-file-pdf fa-2x text-danger"></i
+            ></a>
           </div>
           <div class="col-6 col-md-1 col-xl-1">
             <a
+              sec:authorize="hasRole('ROLE_SYSADMIN')"
               role="button"
               th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
-              th:href="@{'/locales/}+${idLocal}+'/libros/reportes/xlsx/libros-por-categoria/'+${categoria.id}"
+              th:href="@{'/locales/'}+${idLocal}+'/libros/reportes/xlsx/libros-por-categoria/'+${categoria.id}"
+              data-toggle="tooltip"
+              data-placement="auto"
+              th:title="'Exportar XLSX'"
+              ><i class="fas fa-file-excel fa-2x text-success"></i
+            ></a>
+            <a
+              sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+              role="button"
+              th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
+              th:href="@{'/locales/libros/reportes/xlsx/libros-por-categoria/'}+${categoria.id}"
               data-toggle="tooltip"
               data-placement="auto"
               th:title="'Exportar XLSX'"
