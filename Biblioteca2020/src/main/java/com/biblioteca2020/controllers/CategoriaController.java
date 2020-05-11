@@ -1,7 +1,6 @@
 package com.biblioteca2020.controllers;
 
 import java.util.List;
-import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,64 +26,72 @@ public class CategoriaController {
 	@Autowired
 	private ICategoriaService categoriaService;
 
+	// ############################# CRUD #############################
+	// LISTADO DE CATEGORIAS
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@GetMapping(value = "/listar")
 	public String listarCategorias(Model model) {
 		model.addAttribute("categorias", categoriaService.findAll());
-		model.addAttribute("titulo", "Listado de Categorias");
+		model.addAttribute("titulo", "Listado de categorias");
 		return "categorias/listar";
 	}
 
+	// MÉTODO PARA REALIZAR LA BUSQUEDA DE CATEGORIAS POR SU NOMBRE MEDIANTE
+	// AUTOCOMPLETADO
 	@RequestMapping(value = "/cargar-categorias/{term}", produces = { "application/json" })
 	public @ResponseBody List<Categoria> cargarCategorias(@PathVariable String term) {
 		return categoriaService.findByNombreLikeIgnoreCase(term);
 	}
 
+	// REGRESAR A LISTADO DE CATEGORIAS
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping("/cancelar")
 	public String cancelar() {
 		return "redirect:/categorias/listar";
 	}
 
+	// FORMULARIO DE REGISTRO DE CATEGORIAS
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@RequestMapping(value = "/crear")
-	public String crearCategoria(Map<String, Object> modelMap) {
-		modelMap.put("titulo", "Registro de Categoría");
-		modelMap.put("categoria", new Categoria());
+	public String crearCategoria(Model model) {
+		model.addAttribute("titulo", "Registro de categoría nueva");
+		model.addAttribute("categoria", new Categoria());
 		return "categorias/crear";
 	}
 
+	// REGISTRAR CATEGORIA NUEVA
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@PostMapping(value = "/crear")
 	public String guardarCategoria(@Valid Categoria categoria, BindingResult result, Model model, SessionStatus status,
 			RedirectAttributes flash) {
+		String ruta = "";
 		if (result.hasErrors()) {
-			model.addAttribute("titulo", "Registro de Categoría");
+			model.addAttribute("titulo", "Registro de categoría nueva");
 			return "/categorias/crear";
 		}
-
 		try {
 			categoria.setEstado(true);
 			categoriaService.save(categoria);
-			// AQUI DEBO AGREGAR LA LÒGICA DE LOG
 			flash.addFlashAttribute("success",
-					"Nueva categoría '" + categoria.getNombre() + "' registrada (Id: " + categoria.getId() + ").");
+					"Nueva categoría '" + categoria.getNombre() + "' registrada (Id: " + categoria.getId() + ")");
 			status.setComplete();
-			return "redirect:/categorias/listar";
+			ruta = "redirect:/categorias/listar";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
-			flash.addFlashAttribute("titulo", "Registro de Categoría");
-			return "redirect:/categorias/crear";
+			flash.addFlashAttribute("titulo", "Registro de categoría nueva");
+			ruta = "redirect:/categorias/crear";
 		}
+		return ruta;
 	}
 
+	// FORMULARIO DE EDICIÓN DE CATEGORIA
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@GetMapping(value = "/crear/{id}")
 	public String editarCategorias(@PathVariable(value = "id") Long id, Model model, RedirectAttributes flash) {
 		try {
 			Categoria categoria = categoriaService.findOne(id);
 			model.addAttribute("editable", true);
-			model.addAttribute("titulo", "Modificar Categoría");
+			model.addAttribute("titulo", "Modificar datos de categoría");
 			model.addAttribute("categoria", categoria);
 			return "/categorias/crear";
 		} catch (Exception e) {
@@ -93,31 +100,34 @@ public class CategoriaController {
 		}
 	}
 
+	// ACTUALIZAR CATEGORIA
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@PostMapping(value = "/editar")
 	public String actualizarCategoria(@Valid Categoria categoria, BindingResult result, Model model,
 			SessionStatus status, RedirectAttributes flash) {
+		String ruta = "";
 		if (result.hasErrors()) {
 			model.addAttribute("editable", true);
-			model.addAttribute("titulo", "Modificar Categoría");
+			model.addAttribute("titulo", "Modificar datos de categoría");
 			return "/categorias/crear";
 		}
 		try {
 			categoriaService.save(categoria);
-			// AQUI DEBO AGREGAR LA LÒGICA DE LOG
 			flash.addFlashAttribute("warning",
-					"Categoría '" + categoria.getNombre() + "' (Id: " + categoria.getId() + ") actualizada.");
+					"Categoría '" + categoria.getNombre() + "' (Id: " + categoria.getId() + ") actualizada");
 			status.setComplete();
-			return "redirect:/categorias/listar";
+			ruta = "redirect:/categorias/listar";
 		} catch (Exception e) {
 			// SOSTITUYO EL MENSAJE DE ERROR GENÉRICO,
 			// YA QUE ES POSIBLE SOLO UN TIPO DE ERROR EN ESTE MÈTODO: EL DE VIOLACIÒN DE
 			// CONSTRAINT.
-			flash.addFlashAttribute("error", e.getMessage().replace(e.getMessage(), "La categoría ya existe."));
-			return "redirect:/categorias/listar";
+			flash.addFlashAttribute("error", e.getMessage().replace(e.getMessage(), "La categoría ya existe"));
+			ruta = "redirect:/categorias/listar";
 		}
+		return ruta;
 	}
 
+	// DESHABILITAR CATEGORIA
 	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN')")
 	@RequestMapping(value = "/deshabilitar/{id}")
 	public String deshabilitarCategoria(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
@@ -125,9 +135,8 @@ public class CategoriaController {
 			Categoria categoria = categoriaService.findOne(id);
 			categoria.setEstado(false);
 			categoriaService.save(categoria);
-			// AQUI DEBO AGREGAR LA LÒGICA DE LOG
 			flash.addFlashAttribute("info",
-					"Categoría '" + categoria.getNombre() + "' (Id: " + categoria.getId() + ") deshabilitada.");
+					"Categoría '" + categoria.getNombre() + "' (Id: " + categoria.getId() + ") deshabilitada");
 			return "redirect:/categorias/listar";
 		} catch (Exception e) {
 			flash.addFlashAttribute("error", e.getMessage());
