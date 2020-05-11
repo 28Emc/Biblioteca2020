@@ -26,6 +26,9 @@ public interface ILibroService {
 	public List<Libro> findByLocalAndEstado(Long idLocal, boolean estado);
 
 	// USADO
+	public List<Libro> findByTituloDistinct(String term);
+	
+	// USADO
 	public List<Libro> findByTituloGroup();
 
 	// USADO
@@ -33,6 +36,9 @@ public interface ILibroService {
 
 	// USADO
 	public List<Libro> findByTituloLikeIgnoreCaseAndLocalAndEstado(String term, Long id, Boolean estado);
+
+	// USADO
+	public Libro findByTituloAndLocal(String term, Long id);
 
 	// USADO
 	public Libro findByTituloAndLocalAndEstado(String term, Long id, Boolean estado);

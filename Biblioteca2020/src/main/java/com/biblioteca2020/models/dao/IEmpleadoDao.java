@@ -56,7 +56,7 @@ public interface IEmpleadoDao extends CrudRepository<Empleado, Long> {
 	public List<Empleado> fetchByIdWithRoles(String term);
 
 	// USADO
-	@Query("select e from Empleado e join fetch e.roles r where e.username NOT LIKE '%Prueba%' and e.nroDocumento like ?1")
+	@Query("select e from Empleado e join fetch e.roles r where r.authority not in ('ROLE_PRUEBA') and e.nroDocumento like ?1")
 	public List<Empleado> fetchByIdWithRolesSysAdmin(String term);
 
 	// USADO

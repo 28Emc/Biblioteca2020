@@ -26,6 +26,11 @@ public interface IPrestamoDao extends CrudRepository<Prestamo, Long> {
 	@Query("select p from Prestamo p join fetch p.usuario pe join fetch p.libro li join fetch p.empleado em where li.id like ?1")
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibro(Long idLibro);
 
+	// PRESTAMOS CON LIBROS, USUARIOS Y EMPLEADOS FILTRADOS POR ID_LIBRO
+	// USADO
+	@Query("select p from Prestamo p join fetch p.libro li where li.id like ?1")
+	public List<Prestamo> fetchWithLibroWithUsuarioWithEmpleado(Long idLibro);
+
 	// PRESTAMOS CON LIBROS, USUARIOS Y EMPLEADOS FILTRADOS POR ID_USUARIO
 	// (HISTORIAL)
 	// USADO

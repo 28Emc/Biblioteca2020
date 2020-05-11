@@ -13,6 +13,11 @@ public interface ILibroDao extends CrudRepository<Libro, Long> {
 	public List<Libro> findByTituloGroup();
 
 	// USADO
+	// MUESTRO SOLO LOS LIBROS NO REPETIDOS PARA LA BUSQUEDA EN EL REPORTE DE PRÉSTAMOS
+	@Query("select l from Libro l join fetch l.local ll where l.titulo like ?1")
+	public List<Libro> findByTituloDistinct(String term);
+
+	// USADO
 	@Query("select l from Libro l join fetch l.local ll where ll.id=?1")
 	public List<Libro> findByLocal(Long idLocal);
 
@@ -39,6 +44,10 @@ public interface ILibroDao extends CrudRepository<Libro, Long> {
 	// USADO
 	@Query("select l from Libro l join fetch l.local lo where l.titulo like ?1 and lo.id = ?2 and l.estado = ?3")
 	public List<Libro> findByTituloLikeIgnoreCaseAndLocalAndEstado(String term, Long id, Boolean estado);
+
+	// USADO
+	@Query("select l from Libro l join fetch l.local lo where l.titulo like ?1 and lo.id = ?2")
+	public Libro findByTituloAndLocal(String term, Long id);
 
 	// USADO
 	@Query("select l from Libro l join fetch l.local lo where l.titulo like ?1 and lo.id = ?2 and l.estado = ?3")
