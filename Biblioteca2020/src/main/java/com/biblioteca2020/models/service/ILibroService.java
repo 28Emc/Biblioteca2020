@@ -27,6 +27,9 @@ public interface ILibroService {
 
 	// USADO
 	public List<Libro> findByTituloDistinct(String term);
+
+	// USADO
+	//public Libro findByTitulo(String titulo);
 	
 	// USADO
 	public List<Libro> findByTituloGroup();

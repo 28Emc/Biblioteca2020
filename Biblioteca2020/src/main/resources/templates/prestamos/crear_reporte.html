@@ -166,8 +166,38 @@
       </form>
 
       <form
+        th:action="@{/prestamos/reportes/buscar-local}"
+        sec:authorize="hasRole('ROLE_SYSADMIN')"
+        method="GET"
+      >
+        <div class="form-group row">
+          <div class="col-12">
+            <h3>Filtrar Por Local de libro</h3>
+          </div>
+        </div>
+        <div class="form-group row pb-3">
+          <div class="col-sm-12 col-md-8 col-xl-8 py-2">
+            <input
+              type="text"
+              name="buscar_local"
+              id="buscar_local"
+              class="form-control rounded-0 shadow-none"
+              placeholder="Buscar local por su dirección"
+            />
+          </div>
+          <div class="col-sm-12 col-md-4 col-xl-4 py-2">
+            <input
+              type="submit"
+              th:value="'Verificar Disponibilidad'"
+              class="btn btn-info btn-block rounded-0 border-0"
+            />
+          </div>
+        </div>
+      </form>
+
+      <form
         th:action="@{/prestamos/reportes/buscar-libro}"
-        sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+        sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
         method="GET"
       >
         <div class="form-group row">
@@ -208,6 +238,7 @@
     </div>
 
     <footer th:replace="layout/layout :: footer"></footer>
+    <script th:replace="layout/autocomplete-locales :: javascript"></script>
     <script th:replace="layout/autocomplete-libros :: javascript"></script>
     <script
       th:replace="layout/autocomplete-empleados-reporte :: javascript"

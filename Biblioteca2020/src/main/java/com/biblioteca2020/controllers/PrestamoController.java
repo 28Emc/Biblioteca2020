@@ -690,6 +690,7 @@ public class PrestamoController {
 		model.addAttribute("enable", false);
 		model.addAttribute("empleado", new Empleado());
 		model.addAttribute("usuario", new Usuario());
+		model.addAttribute("local", new Local());
 		return "/prestamos/crear_reporte";
 	}
 
@@ -924,14 +925,77 @@ public class PrestamoController {
 		}
 	}
 
+	// BUSCAR PRÉSTAMOS POR LOCAL DE UN LIBRO ESPECÌFICO PARA GENERAR REPORTE CON
+	// SYSADMIN
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
+	@RequestMapping(value = "/reportes/buscar-local", method = RequestMethod.GET)
+	public String buscarLocalParaReporte(@RequestParam String buscar_local, Model model, RedirectAttributes flash) {
+		model.addAttribute("titulo", "Reporte por local y libro");
+		model.addAttribute("enable", true);
+		Local local = null;
+		try {
+			if (buscar_local.length() == 0 || buscar_local.length() > 100) {
+				flash.addFlashAttribute("error", "Error, la dirección del local es incorrecta");
+				return "redirect:/prestamos/reportes";
+			}
+			local = localService.findByDireccion(buscar_local);
+			if (local == null) {
+				flash.addFlashAttribute("error", "Error, el local no está disponible");
+				return "redirect:/prestamos/reportes";
+			}
+			model.addAttribute("local", local);
+		} catch (Exception e) {
+			flash.addFlashAttribute("error",
+					"Error, la dirección del local es incorrecta o el local no está disponible");
+			return "redirect:/prestamos/reportes";
+		}
+		return "/prestamos/busqueda_libro";
+	}
+
+	// GENERAR REPORTE PDF DE PRESTAMOS POR LIBRO SYSADMIN
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN')")
+	@RequestMapping(value = "/reportes/prestamos-por-libro/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE, params = "format=pdf")
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosPorLibroSysadmin(
+			@RequestParam(value = "buscar_libro", required = false) String buscar_libro,
+			@PathVariable(value = "id", required = false) String id, Authentication authentication,
+			RedirectAttributes flash) {
+		var headers = new HttpHeaders();
+		// BUSCAR LOS REPORTES POR EL ID LOCAL Y EL ID LIBRO
+		Libro libro = libroService.findByTituloAndLocal(buscar_libro, Long.parseLong(id));
+		if (buscar_libro.length() == 0 || buscar_libro.length() > 100) {
+			flash.addFlashAttribute("error", "Error, el titulo del libro es incorrecto");
+			headers.clear();
+			headers.add("Location", "/prestamos/reportes");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+		List<Prestamo> prestamos = prestamoService
+				.fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibroAndLocal(libro.getId(), Long.parseLong(id));
+		// GENERO EL REPORTE
+		ByteArrayInputStream bis;
+		try {
+			if (prestamos.size() != 0) {
+				bis = GenerarReportePDF.generarPDFPrestamos("Reporte de préstamos Por libro", prestamos);
+				headers.add("Content-Disposition", "inline; filename=prestamos-por-libro-reporte.pdf");
+				return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_PDF)
+						.body(new InputStreamResource(bis));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
 	// BUSCAR PRÉSTAMOS POR LIBRO PARA GENERAR REPORTE
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
 	@RequestMapping(value = "/reportes/buscar-libro", method = RequestMethod.GET)
 	public String buscarLibroParaReporte(@RequestParam String buscar_libro, Model model, Authentication authentication,
 			RedirectAttributes flash) {
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
-		model.addAttribute("titulo", "Reporte Por libro");
+		model.addAttribute("titulo", "Reporte por libro");
 		model.addAttribute("enable", true);
 		Libro libro = null;
 		try {
@@ -940,16 +1004,11 @@ public class PrestamoController {
 				return "redirect:/prestamos/reportes";
 			}
 			switch (userDetails.getAuthorities().toString()) {
-				case "[ROLE_SYSADMIN]":
-					libro = libroService.findByTituloLikeIgnoreCase(buscar_libro).get(0);
-					break;
 				case "[ROLE_ADMIN]":
-					libro = libroService.findByTituloLikeIgnoreCaseAndLocalAndEstado(buscar_libro,
-							empleado.getLocal().getId(), true).get(0);
+					libro = libroService.findByTituloAndLocal(buscar_libro, empleado.getLocal().getId());
 					break;
 				case "[ROLE_EMPLEADO]":
-					libro = libroService.findByTituloLikeIgnoreCaseAndLocalAndEstado(buscar_libro,
-							empleado.getLocal().getId(), true).get(0);
+					libro = libroService.findByTituloAndLocal(buscar_libro, empleado.getLocal().getId());
 					break;
 			}
 			if (libro == null) {
@@ -965,21 +1024,12 @@ public class PrestamoController {
 	}
 
 	// GENERAR REPORTE PDF DE PRESTAMOS POR LIBRO
-	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN', 'ROLE_ADMIN', 'ROLE_EMPLEADO')")
-	@RequestMapping(value = "/reportes/pdf/prestamos-por-libro/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
-	public ResponseEntity<InputStreamResource> generarPdfPrestamosPorLibro(@PathVariable("id") String id,
-			Authentication authentication) {
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-		List<Prestamo> prestamos = null;
-		// BUSCAR LOS REPORTES POR EL ID LIBRO
-		switch (userDetails.getAuthorities().toString()) {
-			case "[ROLE_SYSADMIN]":
-				prestamos = prestamoService.fetchWithLibroWithUsuarioWithEmpleado(Long.parseLong(id));
-				break;
-			default:
-				prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibro(Long.parseLong(id));
-				break;
-		}
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = { "/reportes/pdf/prestamos-por-libro/{id}",
+			"/reportes/pdf/prestamos-por-libro/{id}" }, method = RequestMethod.GET, produces = MediaType.APPLICATION_PDF_VALUE)
+	public ResponseEntity<InputStreamResource> generarPdfPrestamosPorLibro(
+			@PathVariable(value = "id", required = false) String id, Authentication authentication) {
+		List<Prestamo> prestamos = prestamoService.fetchWithLibroWithUsuarioWithEmpleado(Long.parseLong(id));
 		// GENERO EL REPORTE
 		ByteArrayInputStream bis;
 		var headers = new HttpHeaders();
@@ -1177,6 +1227,35 @@ public class PrestamoController {
 	public ResponseEntity<InputStreamResource> repPrestamosPorLibro(@PathVariable("id") String id) {
 		List<Prestamo> prestamos = null;
 		prestamos = prestamoService.fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibro(Long.parseLong(id));
+		ByteArrayInputStream in;
+		var headers = new HttpHeaders();
+		try {
+			if (prestamos.size() != 0) {
+				in = GenerarReporteExcel.generarExcelPrestamos("Reporte de préstamos por libro", prestamos);
+				headers.add("Content-Disposition", "attachment; filename=listado-prestamos-por-libro.xlsx");
+				return ResponseEntity.ok().headers(headers).body(new InputStreamResource(in));
+			} else {
+				headers.clear();
+				headers.add("Location", "/error_reporte");
+				return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+			}
+		} catch (IOException e) {
+			headers.clear();
+			headers.add("Location", "/error_reporte");
+			return new ResponseEntity<InputStreamResource>(null, headers, HttpStatus.FOUND);
+		}
+	}
+
+	// GENERAR REPORTE EXCEL PRESTAMOS POR LIBRO SYSADMIN
+	@PreAuthorize("hasAnyRole('ROLE_SYSADMIN','ROLE_ADMIN', 'ROLE_EMPLEADO')")
+	@RequestMapping(value = "/reportes/prestamos-por-libro/{id}", method = RequestMethod.GET, params = "format=xlsx")
+	public ResponseEntity<InputStreamResource> repPrestamosPorLibroSysadmin(
+			@RequestParam(value = "buscar_libro", required = false) String buscar_libro,
+			@PathVariable("id") String id) {
+		// BUSCAR LOS REPORTES POR EL ID LOCAL Y EL ID LIBRO
+		Libro libro = libroService.findByTituloAndLocal(buscar_libro, Long.parseLong(id));
+		List<Prestamo> prestamos = prestamoService
+				.fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibroAndLocal(libro.getId(), Long.parseLong(id));
 		ByteArrayInputStream in;
 		var headers = new HttpHeaders();
 		try {

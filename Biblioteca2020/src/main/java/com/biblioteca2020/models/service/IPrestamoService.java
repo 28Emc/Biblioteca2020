@@ -23,6 +23,9 @@ public interface IPrestamoService {
 	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibro(Long idLibro);
 
 	// USADO
+	public List<Prestamo> fetchByIdWithLibroWithUsuarioWithEmpleadoPerLibroAndLocal(Long idLibro, Long idLocal);
+
+	// USADO
 	public List<Prestamo> fetchWithLibroWithUsuarioWithEmpleado(Long idLibro);
 
 	// USADO
