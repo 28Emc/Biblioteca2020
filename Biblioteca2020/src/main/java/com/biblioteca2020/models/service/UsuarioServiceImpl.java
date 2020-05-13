@@ -170,7 +170,23 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
 		String passwordHash = passwordEncoder.encode(form.getNuevaPassword());
 		usuario.setPassword(passwordHash);
-		// ASEGURARME QUE TODOS LOS CAMPOS ESTEN CORRECTAMENTE SETEADOS (USUARIOS DE PRUEBA)
+		// ASEGURARME QUE TODOS LOS CAMPOS ESTEN CORRECTAMENTE SETEADOS (USUARIOS DE
+		// PRUEBA)
+		return usuarioDao.save(usuario);
+	}
+
+	// USADO
+	@Override
+	public Usuario recuperarPassword(CambiarPassword form) throws Exception {
+		Usuario usuario = findById(form.getId());
+		if (passwordEncoder.matches(form.getNuevaPassword(), usuario.getPassword())) {
+			throw new Exception("La nueva contraseña debe ser diferente a la actual");
+		}
+		if (!form.getNuevaPassword().equals(form.getConfirmarPassword())) {
+			throw new Exception("Las contraseñas no coinciden");
+		}
+		String passwordHash = passwordEncoder.encode(form.getNuevaPassword());
+		usuario.setPassword(passwordHash);
 		return usuarioDao.save(usuario);
 	}
 
@@ -184,7 +200,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 	// USADO
 	@Override
 	@Transactional(readOnly = true)
-	public Usuario findByNroDocumentoAndEmailAndEstado(String nroDocumento, String email, boolean estado){
-		return usuarioDao.findByNroDocumentoAndEmailAndEstado(nroDocumento, email, estado);
+	public Usuario findByNroDocumentoAndEmail(String nroDocumento, String email) {
+		return usuarioDao.findByNroDocumentoAndEmail(nroDocumento, email);
 	}
 }

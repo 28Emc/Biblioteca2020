@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:replace="layout/layout :: head"></head>
+
+  <body class="bg-light">
+    <div
+      id="alertPers"
+      class="alert alert-danger alert-dismissible fade show"
+      role="alert"
+      th:if="${error!=null}"
+      th:text="${error}"
+	></div>
+	<div
+      id="alertPers"
+      class="alert alert-info alert-dismissible fade show"
+      role="alert"
+      th:if="${info!=null}"
+      th:text="${info}"
+    ></div>
+
+    <div class="container my-4 py-5">
+      <h1 class="text-warning" th:text="${titulo}"></h1>
+
+      <form
+        th:action="@{/usuarios/recuperar-cuenta/habilitar-cuenta}"
+        th:object="${recuperarCuenta}"
+        method="post"
+      >
+        <h4 class="pt-5"
+          th:text="'Para habilitar nuevamente tu cuenta, necesitas escribir el correo con el cual registraste tu cuenta, y tu número de DNI'"
+        ></h4>
+        <div class="form-group row">
+          <div class="col-md-6">
+            <label class="col-form-label" for="nroDocumento">DNI</label>
+            <input
+              id="nroDocumento"
+              name="nroDocumento"
+              class="form-control"
+              type="number"
+              th:field="*{nroDocumento}"
+              placeholder="00000000"
+              autofocus
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('nroDocumento')}"
+              th:errors="*{nroDocumento}"
+            ></small>
+          </div>
+          <div class="col-md-6">
+            <label class="col-form-label" for="email">Email</label>
+            <input
+              id="email"
+              name="email"
+              class="form-control"
+              type="email"
+              th:field="*{email}"
+              placeholder="test@email.com"
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('email')}"
+              th:errors="*{email}"
+            ></small>
+          </div>
+        </div>
+
+        <div class="form-group row py-4">
+          <div class="col-md-6 py-2">
+            <a class="btn btn-light btn-block" th:href="@{'/usuarios/recuperar-cuenta'}"
+              >Cancelar</a
+            >
+          </div>
+          <div class="col-md-6 py-2">
+            <input
+              class="btn btn-dark btn-block"
+              type="submit"
+              th:value="'Enviar Solicitud'"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
+</html>

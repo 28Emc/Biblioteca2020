@@ -57,13 +57,12 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	// ANTERIORMENTE
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http
-				.csrf().disable()
-				.authorizeRequests()
+		http.csrf().disable().authorizeRequests()
 				// AQUI autorizo el acceso a estos recursos estaticos (EJM. IMAGENES, CSS, JS,
 				// ETC)
 				.antMatchers("/css/**", "/js/**", "/date-picker/**", "/img/**", "/**/crear-perfil", "/**/editar-perfil",
-						"/**/cuenta-verificada/**", "/**/recuperar-cuenta/")
+						"/**/cuenta-verificada/**", "/**/recuperar-cuenta/**", "/**/habilitar-cuenta/**",
+						"/**/**/recuperar-password/**")
 				.permitAll()
 				// AQUI yo gestiono mi LOGIN
 				.and().formLogin().successHandler(loginSuccessHandler)

@@ -13,7 +13,7 @@ public interface IUsuarioDao extends CrudRepository<Usuario, Long> {
 	public Usuario findByNroDocumento(String nroDocumento);
 
 	// USADO
-	public Usuario findByNroDocumentoAndEmailAndEstado(String nroDocumento, String email, boolean estado);
+	public Usuario findByNroDocumentoAndEmail(String nroDocumento, String email);
 
 	// USADO
 	@Query("select u from Usuario u where u.nroDocumento like ?1 and u.estado = ?2")

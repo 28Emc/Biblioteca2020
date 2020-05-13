@@ -36,6 +36,14 @@
 		<span class="text-justify" th:text="'Revisa tu correo para validar tu cuenta.'"></span>
 	</div>
 
+	<div class="container-fluid px-3 py-4" th:if="${titulo}=='Recuperar contraseña'">
+		<h1 class="text-info py-4 text-justify" th:text="${titulo}"></h1>
+		<span class="text-justify"
+			th:text="'Estimado usuario, un correo de verificaciòn ha sido enviado a ' + ${email} + '.'"></span>
+		<br /> 
+		<span class="text-justify" th:text="'Revisa tu correo para validar tu cuenta.'"></span>
+	</div>
+
 	<footer th:replace="layout/layout :: footer"></footer>
 
 </body>

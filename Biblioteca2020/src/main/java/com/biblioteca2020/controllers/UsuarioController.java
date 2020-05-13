@@ -556,7 +556,7 @@ public class UsuarioController {
 		return "/usuarios/cambio-password";
 	}
 
-	// ACTUALIZACIÓN DE CONTRASEÑA DEL EMPLEADO
+	// ACTUALIZACIÓN DE CONTRASEÑA DEL USUARIO
 	@PreAuthorize("hasAnyRole('ROLE_USER')")
 	@PostMapping("/cambio-password")
 	public String cambioPasswordUser(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
@@ -664,7 +664,7 @@ public class UsuarioController {
 					+ "</html>";
 			emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
 					"Cuenta Deshabilitada | Biblioteca2020", message);
-			flash.addFlashAttribute("info", "Su cuenta ha sido deshabilitada.");
+			flash.addFlashAttribute("info", "Su cuenta ha sido deshabilitada");
 			// CON ESTA PROPIEDAD ELIMINO LA SESIÓN DEL USUARIO LOGUEADO, PARA PODERLO
 			// REDIRECCIONAR AL LOGIN
 			authentication.setAuthenticated(false);
@@ -678,13 +678,20 @@ public class UsuarioController {
 		}
 	}
 
-	// RECUPERACIÓN DE CUENTA DE USUARIO
-	// SOLO REACTIVACIÓN (POR AHORA)
+	// FORMULARIO DE OPCIONES DE CUENTA DE USUARIO
 	@GetMapping(value = "/recuperar-cuenta")
-	public String habilitarPerfilForm(RedirectAttributes flash, Authentication authentication, Model model) {
-		model.addAttribute("titulo", "Recupera tu cuenta");
+	public String recuperarPerfilForm(RedirectAttributes flash, Authentication authentication, Model model) {
+		model.addAttribute("titulo", "Recuperar cuenta");
 		model.addAttribute("recuperarCuenta", new RecuperarCuenta());
 		return "/usuarios/recuperar-cuenta";
+	}
+
+	// FORMULARIO DE REACTIVACIÓN DE CUENTA DE USUARIO
+	@GetMapping(value = "/recuperar-cuenta/habilitar-cuenta")
+	public String habilitarPerfilForm(RedirectAttributes flash, Authentication authentication, Model model) {
+		model.addAttribute("titulo", "Solicitar reactivación de cuenta");
+		model.addAttribute("recuperarCuenta", new RecuperarCuenta());
+		return "/usuarios/habilitar-cuenta";
 	}
 
 	/*
@@ -695,7 +702,7 @@ public class UsuarioController {
 	 * EL ENLACE - ME REDIRECCIONA A LA PANTALLA DE CONFIRMACIÓN DEL ENLACE, QUE A
 	 * SU VEZ, ME DIRECCIONA AL LOGIN
 	 */
-	@PostMapping(value = "/recuperar-cuenta")
+	@PostMapping(value = "/recuperar-cuenta/habilitar-cuenta")
 	public String habilitarPerfil(@Valid RecuperarCuenta recuperarCuenta, BindingResult result,
 			@RequestParam(name = "nroDocumento", required = false) String nroDocumento,
 			@RequestParam(name = "email", required = false) String email, RedirectAttributes flash,
@@ -703,11 +710,20 @@ public class UsuarioController {
 		if (result.hasErrors()) {
 			model.addAttribute("titulo", "Recupera tu cuenta");
 			model.addAttribute("recuperarCuenta", recuperarCuenta);
-			return "/usuarios/recuperar-cuenta";
+			return "/usuarios/habilitar-cuenta";
 		}
 		try {
-			Usuario usuario = usuarioService.findByNroDocumentoAndEmailAndEstado(recuperarCuenta.getNroDocumento(),
-					recuperarCuenta.getEmail(), false);
+			Usuario usuario = usuarioService.findByNroDocumentoAndEmail(recuperarCuenta.getNroDocumento(),
+					recuperarCuenta.getEmail());
+			if (usuario == null) {
+				model.addAttribute("error", "Error, el DNI y/o correo ingresados son incorrectos!");
+				model.addAttribute("titulo", "Solicitar reactivación de cuenta");
+				return "/usuarios/habilitar-cuenta";
+			} else if (usuario.getEstado().equals(true)) {
+				model.addAttribute("info", "Esta cuenta ya està activada!");
+				model.addAttribute("titulo", "Solicitar reactivación de cuenta");
+				return "/usuarios/habilitar-cuenta";
+			}
 			// LÒGICA DE GENERACIÓN DE TOKEN DE CONFIRMACION CORREO
 			ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
 			confirmationTokenRepository.save(confirmationToken);
@@ -730,7 +746,7 @@ public class UsuarioController {
 					+ "<div class='footer' style='padding-top: 3rem;'>Biblioteca ©2020</div>" + "</html>";
 			emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
 					"Recuperar Cuenta | Biblioteca2020", message);
-			model.addAttribute("titulo", "Recupera tu Cuenta");
+			model.addAttribute("titulo", "Solicitar reactivación de cuenta");
 			model.addAttribute("email", usuario.getEmail());
 			return "/usuarios/registro-exitoso";
 		} catch (MailException ex) {
@@ -738,9 +754,180 @@ public class UsuarioController {
 			return "redirect:/login";
 		} catch (Exception e) {
 			model.addAttribute("error",
-					"Lo sentimos, el DNI y/o correo ingresados son incorrectos, o tu cuenta no necesita reactivarse.");
-			model.addAttribute("titulo", "Recupera tu cuenta");
-			return "/usuarios/recuperar-cuenta";
+					"Lo sentimos, su solicitud no puede ser enviada en estos momentos. Intèntelo mas tarde.");
+			model.addAttribute("titulo", "Solicitar reactivación de cuenta");
+			return "/usuarios/habilitar-cuenta";
+		}
+	}
+
+	// FORMULARIO DE RECUPERACIÓN DE CONTRASEÑA DE USUARIO
+	@GetMapping(value = "/recuperar-cuenta/recuperar-password")
+	public String recuperarPasswordForm(RedirectAttributes flash, Authentication authentication, Model model) {
+		model.addAttribute("titulo", "Recuperar contraseña");
+		model.addAttribute("recuperarCuenta", new RecuperarCuenta());
+		return "/usuarios/recuperar-password";
+	}
+
+	/*
+	 * LÒGICA DE RECUPERACIÓN DE CONTRASEÑA: - EN LOGIN, DOY CLICK EN
+	 * "RECUPERAR CUENTA" Y DESPUES EN "RECUPERACIÓN DE CUENTA VIA EMAIL" - EN EL
+	 * FORMULARIO ESCRIBO LA EMAIL DE REGISTRO DE LA CUENTA Y EL DNI PARA VALIDAR EL
+	 * USUARIO - SI VALIDA, MANDA UN CORREO DE SOLICITUD DE RECUPERACIÓN DE LA
+	 * CONTRASEÑA (PARECIDO A LA REACTIVACION DE LA CUENTA) - VEO EL CORREO Y DOY
+	 * CLIC EN EL ENLACE - ME REDIRECCIONA A LA PANTALLA DE CAMBIO DE CONTRASEÑA,
+	 * QUE A SU VEZ, ME DIRECCIONA AL LOGIN
+	 */
+	@PostMapping(value = "/recuperar-cuenta/recuperar-password")
+	public String cambioContraseña(@Valid RecuperarCuenta recuperarCuenta, BindingResult result,
+			@RequestParam(name = "nroDocumento", required = false) String nroDocumento,
+			@RequestParam(name = "email", required = false) String email, RedirectAttributes flash,
+			Authentication authentication, Model model) {
+		if (result.hasErrors()) {
+			model.addAttribute("titulo", "Recuperar contraseña");
+			model.addAttribute("recuperarCuenta", recuperarCuenta);
+			return "/usuarios/recuperar-password";
+		}
+		try {
+			Usuario usuario = usuarioService.findByNroDocumentoAndEmail(recuperarCuenta.getNroDocumento(),
+					recuperarCuenta.getEmail());
+			if (usuario == null) {
+				model.addAttribute("error", "Error, el DNI y/o correo ingresados son incorrectos!");
+				model.addAttribute("titulo", "Recuperar contraseña");
+				return "/usuarios/recuperar-password";
+			} else if (usuario.getEstado().equals(false)) {
+				model.addAttribute("error",
+						"Lo sentimos, su cuenta està deshabilitada. Ir a 'Reactivación de cuenta'.");
+				model.addAttribute("titulo", "Recuperar contraseña");
+				return "/usuarios/recuperar-password";
+			}
+			// LÒGICA DE GENERACIÓN DE TOKEN DE CONFIRMACION CORREO
+			ConfirmationToken confirmationToken = new ConfirmationToken(usuario);
+			confirmationTokenRepository.save(confirmationToken);
+			// OBTENER PATH DEL SERVIDOR EN LA PETICION ACTUAL, ES DECIR
+			// "http://localhost:8080"
+			String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+			// LÒGICA DE ENVIO CORREO, Y VALIDACIÓN CON MÈTODO EN COMÚN AL REGISTRO DE
+			// USUARIOS NUEVOS
+			String message = "<html><head>" + "<meta charset='UTF-8' />"
+					+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+					+ "<title>Recuperar contraseña | Biblioteca2020</title>" + "</head>" + "<body>"
+					+ "<div class='container' style='padding-top: 3rem;'>"
+					+ "<img style='padding-top: 3rem;' src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+					+ "<div class='container' style='padding-top: 3rem;'>"
+					+ "<p>Saludos, hemos recibido tu peticiòn de recuperar su contraseña.</p><br/>"
+					+ "<p style='padding-top: 1rem;'>Para poder cambiar su contraseña, entrar aquì: "
+					+ "<a class='text-info' href='" + baseUrl
+					+ "/usuarios/recuperar-cuenta/recuperar-password/confirmar?token="
+					+ confirmationToken.getConfirmationToken() + "'>" + baseUrl
+					+ "/usuarios/recuperar-cuenta/recuperar-password/confirmar?token="
+					+ confirmationToken.getConfirmationToken() + "</a>" + "</p>" + "</div>" + "</div>" + "</body>"
+					+ "<div class='footer' style='padding-top: 3rem;'>Biblioteca ©2020</div>" + "</html>";
+			emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
+					"Recuperar contraseña | Biblioteca2020", message);
+			model.addAttribute("titulo", "Recuperar contraseña");
+			model.addAttribute("email", usuario.getEmail());
+			return "/usuarios/registro-exitoso";
+		} catch (MailException ex) {
+			flash.addFlashAttribute("error", ex.getMessage());
+			return "redirect:/login";
+		} catch (Exception e) {
+			model.addAttribute("error",
+					"Lo sentimos, su solicitud no puede ser enviada en estos momentos. Intèntelo mas tarde.");
+			model.addAttribute("titulo", "Recuperar contraseña");
+			return "/usuarios/recuperar-password";
+		}
+	}
+
+	// FORMULARIO DE VALIDACIÓN DE EMAIL DE USUARIO PARA LA RECUPERACIÓN DE
+	// CONTRASEÑA
+	@RequestMapping(value = "/recuperar-cuenta/recuperar-password/confirmar", method = RequestMethod.GET)
+	public String verificarCuentaRecuperacionPassword(Model model, @RequestParam("token") String confirmationToken,
+			Authentication authentication) {
+		ConfirmationToken token = confirmationTokenRepository.findByConfirmationToken(confirmationToken);
+		if (token != null) {
+			try {
+				CambiarPassword cambiarPassword = new CambiarPassword();
+				Usuario usuario = usuarioService.findByUsername(token.getUsuario().getUsername());
+				cambiarPassword.setId(usuario.getId());
+				model.addAttribute("cambiarPassword", cambiarPassword);
+				model.addAttribute("titulo", "Cambio de contraseña");
+				return "/usuarios/actualizar-password";
+			} catch (Exception e) {
+				model.addAttribute("error", "Error: " + e.getMessage());
+				model.addAttribute("titulo", "Error");
+				return "/usuarios/error-registro";
+			}
+		} else {
+			model.addAttribute("error", "Lo sentimos, el enlace es invàlido o ya caducó!");
+			model.addAttribute("titulo", "Error");
+			return "/usuarios/error-registro";
+		}
+	}
+
+	// RECUPERACION DE CONTRASEÑA DEL USUARIO
+	@PostMapping("/recuperar-cuenta/recuperar-password/confirmar")
+	public String recuperarPasswordUser(@Valid CambiarPassword cambiarPassword, BindingResult resultForm, Model model,
+			RedirectAttributes flash, Authentication authentication) {
+		// SETEO ESTE CAMPO ASI, YA QUE NO LO NECESITO EN MI DTO
+		cambiarPassword.setPasswordActual("");
+		if (resultForm.hasErrors()) {
+			// CON ESTE BLOQUE SOBREESCRIBO EL ERROR GENÈRICO "NO PUEDE ESTAR VACÍO"
+			if (cambiarPassword.getNuevaPassword().equals("") || cambiarPassword.getConfirmarPassword().equals("")) {
+				model.addAttribute("cambiarPasswordError", "Todos los campos son obligatorios!");
+				model.addAttribute("titulo", "Cambio de contraseña");
+				return "/usuarios/actualizar-password";
+			}
+			/*String result = resultForm.getAllErrors().stream().map(x -> x.getDefaultMessage())
+					.collect(Collectors.joining(", "));
+			model.addAttribute("cambiarPasswordError", result);
+			model.addAttribute("titulo", "Cambio de contraseña");
+			return "/usuarios/actualizar-password";*/
+		}
+		try {
+			Usuario usuario = usuarioService.findById(cambiarPassword.getId());
+			Usuario usuarioOld = usuario;
+			usuarioService.recuperarPassword(cambiarPassword);
+			// AQUI, TENDRIA QUE BORRAR EL TOKEN O ANULARLO, PARA EVITAR REUTILIRAR EL MISMO
+			// TOKEN PARA REALIZAR LA MISMA OPERACION, POR ERROR
+			// AL ACTUALIZAR EL PERFIL, INSERTO MI REGISTRO EN EL LOG DE USUARIOS
+			Long idRole = usuario.getRoles().iterator().next().getId();
+			usuarioLogService.save(new UsuarioLog(idRole, usuarioOld.getNombres(), usuario.getNombres(),
+					usuarioOld.getApellidos(), usuario.getApellidos(), usuarioOld.getNroDocumento(),
+					usuario.getNroDocumento(), usuarioOld.getDireccion(), usuario.getDireccion(), usuarioOld.getEmail(),
+					usuario.getEmail(), usuarioOld.getCelular(), usuario.getCelular(), usuarioOld.getFecha_registro(),
+					usuario.getFecha_registro(), usuarioOld.getUsername(), usuario.getUsername(),
+					usuarioOld.getPassword(), usuario.getPassword(), usuarioOld.getEstado(), usuario.getEstado(),
+					usuarioOld.getFoto_usuario(), usuario.getFoto_usuario(), "RECOVERY PASSWORD BY USER", null,
+					new Date(), null));
+			// ENVIO DE MAIL DE CONFIRMACIÓN CON MIMEMESSAGE
+			String message = "<html><head>" + "<meta charset='UTF-8' />"
+					+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+					+ "<title>Cambio de Contraseña | Biblioteca2020</title>" + "</head>" + "<body>"
+					+ "<div class='container' style='padding-top: 1rem;'>"
+					+ "<img src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+					+ "<div class='container' style='padding-top: 5rem;'>" + "<p>Saludos " + usuario.getUsername()
+					+ ", recientemente ha actualizado su contraseña de usuario de Biblioteca2020.</p>"
+					+ "<p>Recuerde no divulgar sus datos a terceros.</p>"
+					+ "<p>Si usted no es el destinatario a quien se dirige el presente correo, "
+					+ "favor de contactar al remitente respondiendo al presente correo y eliminar el correo original "
+					+ "incluyendo sus archivos, así como cualquier copia del mismo.</p>" + "</div>" + "</div>"
+					+ "</body>"
+					+ "<div class='footer' style='padding-top: 5rem; padding-bottom:1rem;'>Biblioteca ©2020</div>"
+					+ "</html>";
+			emailSenderService.sendMail("Biblioteca2020 <edmech25@gmail.com>", usuario.getEmail(),
+					"Cambio de Contraseña | Biblioteca2020", message);
+			flash.addFlashAttribute("success", "Contraseña actualizada! Iniciar sesión con sus nuevas credenciales");
+			return "redirect:/login";
+		} catch (MailException ex) {
+			model.addAttribute("cambiarPassword", cambiarPassword);
+			model.addAttribute("titulo", "Cambio de contraseña");
+			model.addAttribute("cambiarPasswordError", ex.getMessage());
+			return "/usuarios/actualizar-password";
+		} catch (Exception e) {
+			model.addAttribute("cambiarPassword", cambiarPassword);
+			model.addAttribute("titulo", "Cambio de contraseña");
+			model.addAttribute("cambiarPasswordError", e.getMessage());
+			return "/usuarios/actualizar-password";
 		}
 	}
 

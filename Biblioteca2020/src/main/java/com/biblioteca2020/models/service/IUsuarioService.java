@@ -7,26 +7,39 @@ import com.biblioteca2020.models.entity.Usuario;
 public interface IUsuarioService {
 	// USADO
 	public List<Usuario> findAll();
-	// USADO	
+
+	// USADO
 	public Usuario findById(Long id) throws Exception;
+
 	// USADO
 	public Usuario findByUsername(String username);
+
 	// USADO
 	public Usuario findByUsernameAndEstado(String username, boolean estado);
+
 	// USADO
 	public Usuario findByNroDocumento(String nroDocumento);
+
 	// USADO
-	public Usuario findByNroDocumentoAndEmailAndEstado(String nroDocumento, String email, boolean estado);
+	public Usuario findByNroDocumentoAndEmail(String nroDocumento, String email);
+
 	// USADO
-	public List<Usuario> findByNroDocumentoAndEstado(String term, boolean estado);	
-	// USADO	
+	public List<Usuario> findByNroDocumentoAndEstado(String term, boolean estado);
+
+	// USADO
 	public void save(Usuario usuario) throws Exception;
+
 	// USADO
 	public void update(Usuario usuario) throws Exception;
+
 	// USADO
 	public Usuario cambiarPassword(CambiarPassword form) throws Exception;
-	
+
+	// USADO
+	public Usuario recuperarPassword(CambiarPassword form) throws Exception;
+
 	public void borrarUsuario(Long id) throws Exception;
+
 	// USADO
 	public Usuario findByEmailIgnoreCase(String email);
 }
