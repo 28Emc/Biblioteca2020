@@ -231,55 +231,61 @@ public class Scheduler {
     // SE ENVÍA CADA DIA A LAS 12 AM (MEDIANOCHE)
     @Scheduled(cron = "0 0 0 * * ?", zone = "America/Lima")
     public void enviarEmailStockLibrosMensuales() {
-        // ESTABLECER DATASOURCE
-        List<Libro> libros = libroService.fetchWithCategoriaWithLocal();
-        if (libros.size() > 0) {
-            // FILTRAR SOLO LOS RESULTADOS CON STOCK MENORES A 20
-            Locale esp = new Locale("es", "PE");
-            for (int i = 0; i < libros.size(); i++) {
-                libros.removeIf(n -> n.getStock() >= 20);
-                if (libros.size() == 0) {
-                    System.out.println("NO HAY LIBROS CON STOCK MENOR A LAS 20 UNIDADES");
-                } else {
-                    System.out.println(dateFormat.format(new Date())
-                            + " - SE ENCONTRARON LIBROS CON STOCK MENOR A LAS 20 UNIDADES!!");
-                    System.out.println("** LISTA DE LIBROS CON STOCK MENOR A LAS 20 UNIDADES **");
-                    System.out.println("ID: " + libros.get(i).getId());
-                    System.out.println("TITULO: " + libros.get(i).getTitulo());
-                    System.out.println("LOCAL: " + libros.get(i).getLocal().getDireccion());
-                    System.out.println("STOCK: " + libros.get(i).getStock());
-                    System.out.println("--------------");
+        try {
+            // ESTABLECER DATASOURCE
+            List<Libro> libros = libroService.fetchWithCategoriaWithLocal();
+            if (libros.size() != 0) {
+                // FILTRAR SOLO LOS RESULTADOS CON STOCK MENORES A 20
+                Locale esp = new Locale("es", "PE");
+                for (int i = 0; i < libros.size(); i++) {
+                    libros.removeIf(n -> n.getStock() >= 20);
+                    if (libros.size() == 0) {
+                        System.out.println("NO HAY LIBROS CON STOCK MENOR A LAS 20 UNIDADES");
+                    } else {
+                        System.out.println(dateFormat.format(new Date())
+                                + " - SE ENCONTRARON LIBROS CON STOCK MENOR A LAS 20 UNIDADES!!");
+                        System.out.println("** LISTA DE LIBROS CON STOCK MENOR A LAS 20 UNIDADES **");
+                        System.out.println("ID: " + libros.get(i).getId());
+                        System.out.println("TITULO: " + libros.get(i).getTitulo());
+                        System.out.println("LOCAL: " + libros.get(i).getLocal().getDireccion());
+                        System.out.println("STOCK: " + libros.get(i).getStock());
+                        System.out.println("--------------");
+                    }
                 }
+                if (libros.size() > 0) {
+                    // CREAR EMAIL Y ENVIAR AL SYSADMIN
+                    String message = "<html><head><meta charset='UTF-8' />"
+                            + "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
+                            + "<title>Reporte de libros con bajo stock | Biblioteca2020</title>" + "</head>" + "<body>"
+                            + "<div class='container' style='padding-top: 1rem;'>"
+                            + "<img src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
+                            + "<div class='container' style='padding-top: 5rem;'>"
+                            + "<p>Saludos, a continuación se adjunta el reporte de los libros de los locales anexos con un stock bajo (menor a 20).</p><br/>"
+                            + "<p>Si usted no es el destinatario a quien se dirige el presente correo, "
+                            + "favor de contactar al remitente respondiendo al presente correo y eliminar el correo original "
+                            + "incluyendo sus archivos, así como cualquier copia del mismo.</p>" + "</div>" + "</div>"
+                            + "</body>"
+                            + "<div class='footer' style='padding-top: 5rem; padding-bottom:1rem;'>Biblioteca ©2020</div>"
+                            + "</html>";
+                    String fecha = LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, esp) + "-"
+                            + LocalDate.now().getYear();
+                    Model model = null;
+                    emailSenderService.sendMailLibrosWithCron(model, libros, fecha,
+                            "Biblioteca2020 <edmech25@gmail.com>", "edi@live.it",
+                            "Reporte de libros con bajo stock | Biblioteca2020", message);
+                    System.out.println("EMAIL DE STOCK INFERIOR A 20 DE LIBROS ENVIADO!! EL DIA "
+                            + LocalDate.now().getDayOfMonth() + " DE "
+                            + LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, esp).toUpperCase() + " "
+                            + LocalDate.now().getYear());
+                } else {
+                    System.out.println(
+                            "NO HAY LIBROS CON STOCK MENOR A LAS 20 UNIDADES, POR LO TANTO NO SE HA ENVIADO NINGÚN EMAIL");
+                }
+            } else {
+                System.out.println("NO HAY LIBROS");
             }
-            // CREAR EMAIL Y ENVIAR AL SYSADMIN
-            try {
-                String message = "<html><head><meta charset='UTF-8' />"
-                        + "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
-                        + "<title>Reporte de libros con bajo stock | Biblioteca2020</title>" + "</head>" + "<body>"
-                        + "<div class='container' style='padding-top: 1rem;'>"
-                        + "<img src='cid:logo-biblioteca2020' alt='logo-biblioteca2020' />"
-                        + "<div class='container' style='padding-top: 5rem;'>"
-                        + "<p>Saludos, a continuación se adjunta el reporte de los libros de los locales anexos con un stock bajo (menor a 20).</p><br/>"
-                        + "<p>Si usted no es el destinatario a quien se dirige el presente correo, "
-                        + "favor de contactar al remitente respondiendo al presente correo y eliminar el correo original "
-                        + "incluyendo sus archivos, así como cualquier copia del mismo.</p>" + "</div>" + "</div>"
-                        + "</body>"
-                        + "<div class='footer' style='padding-top: 5rem; padding-bottom:1rem;'>Biblioteca ©2020</div>"
-                        + "</html>";
-                String fecha = LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, esp) + "-"
-                        + LocalDate.now().getYear();
-                Model model = null;
-                emailSenderService.sendMailLibrosWithCron(model, libros, fecha, "Biblioteca2020 <edmech25@gmail.com>",
-                        "edi@live.it", "Reporte de libros con bajo stock | Biblioteca2020", message);
-                System.out.println(
-                        "EMAIL DE STOCK INFERIOR A 20 DE LIBROS ENVIADO!! EL DIA " + LocalDate.now().getDayOfMonth()
-                                + " DE " + LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, esp).toUpperCase()
-                                + " " + LocalDate.now().getYear());
-            } catch (MailException ex) {
-                System.out.println(ex.getMessage());
-            }
-        } else {
-            System.out.println("NRO DE LIBROS TOTALES: " + libros.size());
+        } catch (MailException ex) {
+            System.out.println(ex.getMessage());
         }
     }
 }
