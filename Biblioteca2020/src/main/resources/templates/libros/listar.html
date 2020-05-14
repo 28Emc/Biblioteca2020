@@ -82,7 +82,7 @@
             <th>Fecha Registro</th>
             <th>Stock</th>
             <th>Estado</th>
-            <th colspan="3" class="text-center">
+            <th colspan="3" sec:authorize="!hasRole('ROLE_EMPLEADO')" class="text-center">
               Opciones
             </th>
           </tr>

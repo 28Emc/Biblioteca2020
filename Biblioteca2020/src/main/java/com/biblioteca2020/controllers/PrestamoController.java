@@ -2,8 +2,11 @@ package com.biblioteca2020.controllers;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -282,16 +285,29 @@ public class PrestamoController {
 			// USUARIO
 			Usuario usuarioPrestamo = usuarioService.findById(id_usuario);
 			prestamo.setUsuario(usuarioPrestamo);
-			// FECHA DESPACHO
-			Date fechaDespachoPrestamo = new Date();
-			prestamo.setFecha_despacho(fechaDespachoPrestamo);
+			// FECHAS
+			// USO CALENDAR PARA MOSTRAR LA FECHA DE MANERA MAS AMIGABLE
+			Locale locale = new Locale("es", "ES");
+			Calendar calendar = Calendar.getInstance(locale);
+			// FECHA_DESPACHO
+			SimpleDateFormat formatterFDevolucion = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat formatterOut = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+			String charFechaDespacho = formatterOut.format(new Date());
+			prestamo.setFecha_despacho(formatterOut.parse(charFechaDespacho));
+			// FECHA DEVOLUCIÓN
+			String charFechaDevolucion = formatterFDevolucion.format(prestamo.getFecha_devolucion());
+			prestamo.setFecha_devolucion(formatterFDevolucion.parse(charFechaDevolucion));
+			calendar.setTime(prestamo.getFecha_despacho());
+			String anioDevolucion = String.valueOf(calendar.get(Calendar.YEAR));
+			String mesDevolucion = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
+			String diaDevolucion = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+			String fechaDevolucion = diaDevolucion + " de " + mesDevolucion + " " + anioDevolucion;
 			// OBSERVACIONES
-			prestamo.setObservaciones(
-					"El libro: " + prestamo.getLibro().getTitulo() + " ha sido programado para su devolución el día "
-							+ prestamo.getFecha_devolucion() + ", por el empleado: "
-							+ empleadoPrestamo.getNombres().concat(", " + empleadoPrestamo.getApellidos()) + " (código "
-							+ empleadoPrestamo.getId() + ") al usuario: " + prestamo.getUsuario().getNombres()
-							+ " (código " + prestamo.getUsuario().getId() + ")");
+			prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo()
+					+ " ha sido programado para su devolución el día " + fechaDevolucion + ", por el empleado: "
+					+ empleadoPrestamo.getNombres().concat(", " + empleadoPrestamo.getApellidos()) + " (código "
+					+ empleadoPrestamo.getId() + ") al usuario: " + prestamo.getUsuario().getNombres() + " (código "
+					+ prestamo.getUsuario().getId() + ")");
 			// DEVOLUCION
 			prestamo.setDevolucion(false);
 			prestamoService.save(prestamo);
@@ -341,13 +357,28 @@ public class PrestamoController {
 			// USUARIO
 			Usuario usuarioPrestamo = usuarioService.findById(prestamo.getUsuario().getId());
 			prestamo.setUsuario(usuarioPrestamo);
-			// FECHA DESPACHO
-			Date fechaDespacho = new Date();
-			prestamo.setFecha_despacho(fechaDespacho);
+			// FECHAS
+			// USO CALENDAR PARA MOSTRAR LA FECHA DE MANERA MAS AMIGABLE
+			Locale locale = new Locale("es", "ES");
+			Calendar calendar = Calendar.getInstance(locale);
+			// FECHA_DESPACHO
+			SimpleDateFormat formatterFDevolucion = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat formatterOut = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+			String charFechaDespacho = formatterOut.format(new Date());
+			prestamo.setFecha_despacho(formatterOut.parse(charFechaDespacho));
+			// FECHA DEVOLUCIÓN
+			String charFechaDevolucion = formatterFDevolucion.format(prestamo.getFecha_devolucion());
+			prestamo.setFecha_devolucion(formatterFDevolucion.parse(charFechaDevolucion));
+			calendar.setTime(prestamo.getFecha_despacho());
+			// MOSTRAR FECHA POR DIA, MES Y ANIO
+			calendar.setTime(prestamo.getFecha_devolucion());
+			String anioDevolucion = String.valueOf(calendar.get(Calendar.YEAR));
+			String mesDevolucion = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
+			String diaDevolucion = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+			String fechaDevolucion = diaDevolucion + " de " + mesDevolucion + " " + anioDevolucion;
 			// OBSERVACIONES
 			prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo()
-					+ " ha sido programado para su devolución el día " + prestamo.getFecha_devolucion()
-					+ ", por el empleado: "
+					+ " ha sido programado para su devolución el día " + fechaDevolucion + ", por el empleado: "
 					+ empleadoPrestamo.getNombres().concat(", " + empleadoPrestamo.getApellidos())
 					+ " (código empleado " + empleadoPrestamo.getId() + ") al usuario: "
 					+ prestamo.getUsuario().getNombres() + " (código usuario " + prestamo.getUsuario().getId() + ")");
@@ -383,7 +414,7 @@ public class PrestamoController {
 			Prestamo prestamoOld = prestamo;
 			// VERIFICO QUE MI PRÉSTAMO SEA ALGUNO CON EL ROLE_PRUEBA, ES DECIR, UN PRÉSTAMO
 			// GENERADO POR EL USUARIO ..
-			if (prestamo.getEmpleado().getRoles().iterator().next().getAuthority().equals("[ROLE_PRUEBA]")) {
+			if (prestamo.getEmpleado().getRoles().iterator().next().getAuthority().equals("ROLE_PRUEBA")) {
 				// .. SI ES ASI, LO SETEO CON EL EMPLEADO DE TURNO EN ESE MOMENTO
 				prestamo.setEmpleado(empleado);
 				prestamo.setDevolucion(false);
@@ -434,7 +465,6 @@ public class PrestamoController {
 	@RequestMapping(value = "/devolver-libro/{id}")
 	public String devolverLibro(@PathVariable(value = "id") Long id, RedirectAttributes flash,
 			Authentication authentication, Model model) {
-		Date fechaDevolución = new Date();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		try {
@@ -451,12 +481,31 @@ public class PrestamoController {
 				Libro libro;
 				libro = libroService.findOne(prestamo.getLibro().getId());
 				libro.setStock(stockNuevo + 1);
-				// FECHA DEVOLUCION
-				prestamo.setFecha_devolucion(fechaDevolución);
-				prestamo.setObservaciones("El libro: " + prestamo.getLibro().getTitulo() + ", ha sido devuelto el día "
-						+ prestamo.getFecha_devolucion() + ", por el empleado: "
-						+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código " + empleado.getId()
-						+ ")");
+				// FECHAS
+				// USO CALENDAR PARA MOSTRAR LA FECHA DE MANERA MAS AMIGABLE
+				Locale locale = new Locale("es", "ES");
+				Calendar calendar = Calendar.getInstance(locale);
+				// FECHA_DESPACHO
+				SimpleDateFormat formatterFDevolucion = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat formatterOut = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+				String charFechaDespacho = formatterOut.format(new Date());
+				prestamo.setFecha_despacho(formatterOut.parse(charFechaDespacho));
+				// FECHA DEVOLUCIÓN
+				// UN EMPLEADO PUEDE DEVOLVER EL LIBRO ANTES DE LA FECHA DE VENCIMIENTO DE LA
+				// ORDEN
+				String charFechaDevolucion = formatterFDevolucion.format(new Date());
+				prestamo.setFecha_devolucion(formatterFDevolucion.parse(charFechaDevolucion));
+				calendar.setTime(prestamo.getFecha_despacho());
+				// MOSTRAR FECHA POR DIA, MES Y ANIO
+				calendar.setTime(prestamo.getFecha_devolucion());
+				String anioDevolucion = String.valueOf(calendar.get(Calendar.YEAR));
+				String mesDevolucion = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
+				String diaDevolucion = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+				String fechaDevolucion = diaDevolucion + " de " + mesDevolucion + " " + anioDevolucion;
+				prestamo.setObservaciones(
+						"El libro: " + prestamo.getLibro().getTitulo() + ", ha sido devuelto el día " + fechaDevolucion
+								+ ", por el empleado: " + empleado.getNombres().concat(", " + empleado.getApellidos())
+								+ " (código " + empleado.getId() + ")");
 				prestamoService.save(prestamo);
 				String tipoOp = "";
 				switch (userDetails.getAuthorities().toString()) {
@@ -499,7 +548,6 @@ public class PrestamoController {
 	public String anularPrestamo(@PathVariable(value = "id") Long id, RedirectAttributes flash,
 			Authentication authentication, Model model) {
 		Prestamo prestamo;
-		Date fechaDevolución = new Date();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Empleado empleado = empleadoService.findByUsername(userDetails.getUsername());
 		try {
@@ -515,10 +563,29 @@ public class PrestamoController {
 				Libro libro;
 				libro = libroService.findOne(prestamo.getLibro().getId());
 				libro.setStock(stockNuevo + 1);
-				// FECHA DEVOLUCION
-				prestamo.setFecha_devolucion(fechaDevolución);
+				// FECHAS
+				// USO CALENDAR PARA MOSTRAR LA FECHA DE MANERA MAS AMIGABLE
+				Locale locale = new Locale("es", "ES");
+				Calendar calendar = Calendar.getInstance(locale);
+				// FECHA_DESPACHO
+				SimpleDateFormat formatterFDevolucion = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat formatterOut = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+				String charFechaDespacho = formatterOut.format(new Date());
+				prestamo.setFecha_despacho(formatterOut.parse(charFechaDespacho));
+				// FECHA DEVOLUCIÓN
+				// UN EMPLEADO PUEDE ANULARLA ORDEN ANTES DE LA FECHA DE VENCIMIENTO DE LA
+				// MISMA
+				String charFechaDevolucion = formatterFDevolucion.format(new Date());
+				prestamo.setFecha_devolucion(formatterFDevolucion.parse(charFechaDevolucion));
+				calendar.setTime(prestamo.getFecha_despacho());
+				// MOSTRAR FECHA POR DIA, MES Y ANIO
+				calendar.setTime(prestamo.getFecha_devolucion());
+				String anioDevolucion = String.valueOf(calendar.get(Calendar.YEAR));
+				String mesDevolucion = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
+				String diaDevolucion = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+				String fechaDevolucion = diaDevolucion + " de " + mesDevolucion + " " + anioDevolucion;
 				prestamo.setObservaciones("El préstamo del libro: " + prestamo.getLibro().getTitulo() + " (código " + id
-						+ "), ha sido anulado el día " + prestamo.getFecha_devolucion() + ", por el empleado: "
+						+ "), ha sido anulado el día " + fechaDevolucion + ", por el empleado: "
 						+ empleado.getNombres().concat(", " + empleado.getApellidos()) + " (código " + empleado.getId()
 						+ ")");
 				// ENVIO DE MAIL DE CONFIRMACIÓN DE ANULACION AL USUARIO CON MIMEMESSAGE
@@ -613,7 +680,6 @@ public class PrestamoController {
 	public String anularPrestamoUsuario(@PathVariable(value = "id") Long id, RedirectAttributes flash,
 			Authentication authentication, Model model) {
 		Prestamo prestamo;
-		Date fechaDevolución = new Date();
 		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		Usuario usuario = usuarioService.findByUsernameAndEstado(userDetails.getUsername().toString(), true);
 		try {
@@ -626,10 +692,29 @@ public class PrestamoController {
 				Libro libro;
 				libro = libroService.findOne(prestamo.getLibro().getId());
 				libro.setStock(stockNuevo + 1);
-				// FECHA DEVOLUCION
-				prestamo.setFecha_devolucion(fechaDevolución);
+				// FECHAS
+				// USO CALENDAR PARA MOSTRAR LA FECHA DE MANERA MAS AMIGABLE
+				Locale locale = new Locale("es", "ES");
+				Calendar calendar = Calendar.getInstance(locale);
+				// FECHA_DESPACHO
+				SimpleDateFormat formatterFDevolucion = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat formatterOut = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+				String charFechaDespacho = formatterOut.format(new Date());
+				prestamo.setFecha_despacho(formatterOut.parse(charFechaDespacho));
+				// FECHA DEVOLUCIÓN
+				// ASI COMO EL EMPLEADO, UN USUARIO PUEDE ANULAR SU ORDEN ANTES DE LA FECHA DE VENCIMIENTO DE LA
+				// MISMA
+				String charFechaDevolucion = formatterFDevolucion.format(new Date());
+				prestamo.setFecha_devolucion(formatterFDevolucion.parse(charFechaDevolucion));
+				calendar.setTime(prestamo.getFecha_despacho());
+				// MOSTRAR FECHA POR DIA, MES Y ANIO
+				calendar.setTime(prestamo.getFecha_devolucion());
+				String anioDevolucion = String.valueOf(calendar.get(Calendar.YEAR));
+				String mesDevolucion = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
+				String diaDevolucion = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+				String fechaDevolucion = diaDevolucion + " de " + mesDevolucion + " " + anioDevolucion;
 				prestamo.setObservaciones("El préstamo del libro: " + prestamo.getLibro().getTitulo() + " (código " + id
-						+ "), ha sido anulado el día " + prestamo.getFecha_devolucion() + ", por el usuario: "
+						+ "), ha sido anulado el día " + fechaDevolucion + ", por el usuario: "
 						+ prestamo.getUsuario().getNombres().concat(", " + prestamo.getUsuario().getApellidos())
 						+ " (código usuario " + prestamo.getUsuario().getId() + ")");
 				// ENVIO DE MAIL DE CONFIRMACIÓN DE ANULACION AL USUARIO CON MIMEMESSAGE

@@ -80,8 +80,12 @@ public class GenerarReporteExcel {
                 fila.createCell(1).setCellValue(prestamoItem.getLibro().getTitulo());
                 fila.createCell(2).setCellValue(prestamoItem.getLibro().getAutor());
                 fila.createCell(3).setCellValue(prestamoItem.getLibro().getCategoria().getNombre());
-                fila.createCell(4).setCellValue(
-                        prestamoItem.getEmpleado().getNombres() + ", " + prestamoItem.getEmpleado().getApellidos());
+                if (prestamoItem.getEmpleado().getRoles().toString().contains("ROLE_PRUEBA")) {
+                    fila.createCell(4).setCellValue("NO DEFINIDO");
+                } else {
+                    fila.createCell(4).setCellValue(
+                            prestamoItem.getEmpleado().getNombres() + ", " + prestamoItem.getEmpleado().getApellidos());
+                }
                 fila.createCell(5).setCellValue(
                         prestamoItem.getUsuario().getNombres() + ", " + prestamoItem.getUsuario().getApellidos());
                 fila.createCell(6).setCellValue(prestamoItem.getFecha_despacho().toString());

@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -187,7 +186,7 @@ public class UsuarioController {
 					libroService.findOne(id_libro).getLocal().getId(), true);
 			prestamo.setLibro(libroPrestamo);
 			// ACTUALIZAR STOCK DE LIBRO
-			if (libroPrestamo.getStock() <= 0) {
+			if (libroPrestamo.getStock() == 0) {
 				model.addAttribute("error", "Lo sentimos, no hay stock suficiente del libro seleccionado ("
 						+ libroPrestamo.getTitulo() + ")");
 				model.addAttribute("titulo", "Catálogo de libros");
@@ -210,30 +209,37 @@ public class UsuarioController {
 			// EMPLEADO
 			// EL EMPLEADO SE SETEA CON EL USUARIO DE PRUEBA DEL LOCAL DEL LIBRO POR PARTE
 			// DEL USUARIO
-			Empleado empleadoPrestamo = empleadoService.findByRoleAndLocal("[ROLE_PRUEBA]",
+			Empleado empleadoPrestamo = empleadoService.findByRoleAndLocal("ROLE_PRUEBA",
 					libroPrestamo.getLocal().getId());
 			prestamo.setEmpleado(empleadoPrestamo);
+			// FECHAS
+			// USO CALENDAR PARA MOSTRAR LA FECHA DE MANERA MAS AMIGABLE
+			Locale locale = new Locale("es", "ES");
+			Calendar calendar = Calendar.getInstance(locale);
 			// FECHA_DESPACHO
-			Date fechaDespachoPrestamo = new Date();
-			prestamo.setFecha_despacho(fechaDespachoPrestamo);
+			SimpleDateFormat formatterFDevolucion = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat formatterOut = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+			String charFechaDespacho = formatterOut.format(new Date());
+			prestamo.setFecha_despacho(formatterOut.parse(charFechaDespacho));
 			// FECHA DEVOLUCIÓN
-			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-			Date fechaDevolucionPrestamo = null;
-			fechaDevolucionPrestamo = formatter.parse(fecha_devolucion);
+			Date fechaDevolucionPrestamo = formatterFDevolucion.parse(fecha_devolucion);
 			prestamo.setFecha_devolucion(fechaDevolucionPrestamo);
-			// USO CALENDAR PARA MOSTRAR LA FECHA DE DEVOLUCION
-			Calendar calendar = Calendar.getInstance(new Locale("es", "ES"));
 			calendar.setTime(prestamo.getFecha_despacho());
 			// MOSTRAR FECHA POR DIA, MES Y ANIO
-			String anio = String.valueOf(calendar.get(Calendar.YEAR));
-			String mes = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, new Locale("es", "ES"));
-			String dia = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
-			String fechaPrestamoHoy = dia + " de " + mes + " " + anio;
+			String anioDespacho = String.valueOf(calendar.get(Calendar.YEAR));
+			String mesDespacho = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
+			String diaDespacho = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+			String fechaDespacho = diaDespacho + " de " + mesDespacho + " " + anioDespacho;
+			calendar.setTime(prestamo.getFecha_devolucion());
+			String anioDevolucion = String.valueOf(calendar.get(Calendar.YEAR));
+			String mesDevolucion = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
+			String diaDevolucion = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+			String fechaDevolucion = diaDevolucion + " de " + mesDevolucion + " " + anioDevolucion;
 			// OBSERVACIONES
 			prestamo.setObservaciones("El usuario: " + prestamo.getUsuario().getNombres() + ", "
 					+ prestamo.getUsuario().getApellidos() + "(DNI " + prestamo.getUsuario().getNroDocumento()
-					+ ") ha solicitado el libro: " + prestamo.getLibro().getTitulo() + " el dìa " + fechaPrestamoHoy
-					+ ", hasta el dìa " + prestamo.getFecha_devolucion() + ". A la espera de confirmación.");
+					+ ") ha solicitado el libro: " + prestamo.getLibro().getTitulo() + " el dìa " + fechaDespacho
+					+ ", hasta el dìa " + fechaDevolucion + ". A la espera de confirmación.");
 			// DEVOLUCION
 			prestamo.setDevolucion(false);
 			prestamoService.save(prestamo);
@@ -247,6 +253,7 @@ public class UsuarioController {
 					null, prestamo.getObservaciones(), null, new Date(), null, null));
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 			Usuario usuario = usuarioService.findByUsername(userDetails.getUsername());
+
 			// ENVIO DE MAIL DE CONFIRMACIÓN DE ORDEN DE LIBRO CON MIMEMESSAGE
 			String message = "<html><head>" + "<meta charset='UTF-8' />"
 					+ "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
@@ -258,10 +265,8 @@ public class UsuarioController {
 					+ "<th>Código Préstamo</th>" + "<th>Libro</th>" + "<th>Local</th>" + "<th>Fecha Despacho</th>"
 					+ "<th>Fecha Devolución</th>" + "</tr>" + "<tr>" + "<td>" + prestamo.getId() + "</td>" + "<td>"
 					+ prestamo.getLibro().getTitulo() + " - " + prestamo.getLibro().getAutor() + "</td>" + "<td>"
-					+ prestamo.getLibro().getLocal().getDireccion() + "</td>"
-					// FALTA FORMATEAR LAS FECHAS EN EL FORMATO yyyy/mm/dd
-					+ "<td>" + prestamo.getFecha_despacho() + "</td>" + "<td>" + prestamo.getFecha_devolucion()
-					+ "</td>" + "</table><br/>"
+					+ prestamo.getLibro().getLocal().getDireccion() + "</td>" + "<td>" + fechaDespacho + "</td>"
+					+ "<td>" + fechaDevolucion + "</td>" + "</table><br/>"
 					+ "<p>Si usted no es el destinatario a quien se dirige el presente correo, "
 					+ "favor de contactar al remitente respondiendo al presente correo y eliminar el correo original, "
 					+ "incluyendo sus archivos, así como cualquier copia del mismo.</p>" + "</div>" + "</div>"
@@ -324,7 +329,7 @@ public class UsuarioController {
 			return "/usuarios/biblioteca";
 			// ERROR GENERAL
 		} catch (Exception e) {
-			flash.addFlashAttribute("error", e.getMessage());
+			model.addAttribute("error", e.getMessage());
 			// IR A BIBLIOTECA YA QUE HUBO UN ERROR A LA HORA DE GUARDAR LA ORDEN
 			model.addAttribute("titulo", "Catálogo de libros");
 			List<Libro> libros = libroService.findByTituloGroup();
@@ -877,11 +882,6 @@ public class UsuarioController {
 				model.addAttribute("titulo", "Cambio de contraseña");
 				return "/usuarios/actualizar-password";
 			}
-			/*String result = resultForm.getAllErrors().stream().map(x -> x.getDefaultMessage())
-					.collect(Collectors.joining(", "));
-			model.addAttribute("cambiarPasswordError", result);
-			model.addAttribute("titulo", "Cambio de contraseña");
-			return "/usuarios/actualizar-password";*/
 		}
 		try {
 			Usuario usuario = usuarioService.findById(cambiarPassword.getId());

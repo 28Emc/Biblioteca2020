@@ -101,9 +101,13 @@ public class GenerarReportePDF {
             cell.setBorderWidth(0);
             cell.setPadding(10f);
             tabla.addCell(cell);
-            cell = new PdfPCell(new Phrase(
-                    prestamoItem.getEmpleado().getNombres() + ", " + prestamoItem.getEmpleado().getApellidos(),
-                    fontCuerpoTabla));
+            if (prestamoItem.getEmpleado().getRoles().toString().contains("ROLE_PRUEBA")) {
+                cell = new PdfPCell(new Phrase("No definido", fontCuerpoTabla));
+            } else {
+                cell = new PdfPCell(new Phrase(
+                        prestamoItem.getEmpleado().getNombres() + ", " + prestamoItem.getEmpleado().getApellidos(),
+                        fontCuerpoTabla));
+            }
             cell.setBorderWidth(0);
             cell.setPadding(10f);
             tabla.addCell(cell);
