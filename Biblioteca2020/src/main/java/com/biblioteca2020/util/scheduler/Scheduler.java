@@ -14,7 +14,6 @@ import com.biblioteca2020.models.service.EmailSenderService;
 import com.biblioteca2020.models.service.ILibroService;
 import com.biblioteca2020.models.service.IPrestamoService;
 import com.biblioteca2020.models.service.IUsuarioService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,6 +26,7 @@ public class Scheduler {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss dd/mm/yyyy");
     // private static final String correoDiego = "luis290613@gmail.com";
+    private static final String correoSysadmin = "edi@live.it";
 
     @Autowired
     private IPrestamoService prestamoService;
@@ -112,7 +112,7 @@ public class Scheduler {
                     String fecha = LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, esp) + "-"
                             + LocalDate.now().getYear();
                     emailSenderService.sendMailPrestamosWithCron(prestamosMesAnterior, fecha,
-                            "Biblioteca2020 <edmech25@gmail.com>", "edi@live.it",
+                            "Biblioteca2020 <biblioteca.developer@gmail.com>", correoSysadmin,
                             "Reporte de Préstamos del Mes | Biblioteca2020", message);
                     System.out.println("EMAIL ENVIADO!! EL DIA " + LocalDate.now().getDayOfMonth() + " DE "
                             + LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, esp).toUpperCase() + " "
@@ -211,7 +211,7 @@ public class Scheduler {
                     String fecha = LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, esp) + "-"
                             + LocalDate.now().getYear();
                     emailSenderService.sendMailUsuariosWithCron(usuariosMesAnterior, fecha,
-                            "Biblioteca2020 <edmech25@gmail.com>", "edi@live.it",
+                            "Biblioteca2020 <biblioteca.developer@gmail.com>", correoSysadmin,
                             "Reporte de usuarios del último mes | Biblioteca2020", message);
                     System.out.println("EMAIL ENVIADO!! EL DIA " + LocalDate.now().getDayOfMonth() + " DE "
                             + LocalDate.now().getMonth().getDisplayName(TextStyle.FULL, esp).toUpperCase() + " "
@@ -271,7 +271,7 @@ public class Scheduler {
                             + LocalDate.now().getYear();
                     Model model = null;
                     emailSenderService.sendMailLibrosWithCron(model, libros, fecha,
-                            "Biblioteca2020 <edmech25@gmail.com>", "edi@live.it",
+                            "Biblioteca2020 <biblioteca.developer@gmail.com>", correoSysadmin,
                             "Reporte de libros con bajo stock | Biblioteca2020", message);
                     System.out.println("EMAIL DE STOCK INFERIOR A 20 DE LIBROS ENVIADO!! EL DIA "
                             + LocalDate.now().getDayOfMonth() + " DE "
