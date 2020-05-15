@@ -1,117 +1,190 @@
 <!DOCTYPE html>
 <html class="h-100" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="layout/layout :: head"></head>
+  <head th:replace="layout/layout :: head"></head>
 
-<body
-	th:style="'background:url(' + @{/img/body_bg_biblioteca2020.jpg} +') no-repeat fixed center;'">
+  <body
+    th:style="'background:url(' + @{/img/body_bg_biblioteca2020.jpg} +') no-repeat fixed center;'"
+  >
+    <div class="alert-container-login">
+      <div style="padding: 3px;">
+        <div
+          id="alertPers"
+          class="alert alert-success alert-dismissible fade show rounded-0"
+          role="alert"
+          th:if="${success!=null}"
+        >
+          [[${success!=null}?${success}:'']]
+          <button
+            type="button"
+            class="close"
+            data-dismiss="alert"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div
+          id="alertPers"
+          class="alert alert-info alert-dismissible fade show rounded-0"
+          role="alert"
+          th:if="${info!=null}"
+        >
+          [[${info!=null}?${info}:'']]
+          <button
+            type="button"
+            class="close"
+            data-dismiss="alert"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div
+          id="alertPers"
+          class="alert alert-danger alert-dismissible fade show rounded-0"
+          th:if="${param.error}"
+          th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}"
+        ></div>
+      </div>
+    </div>
 
-	<div 
-		class="alert alert-success alert-dismissible fade show rounded-0" role="alert"
-		th:if="${success!=null}" th:text="${success}">
-	</div>
-	<div 
-		class="alert alert-info alert-dismissible fade show rounded-0" role="alert"
-		th:if="${info!=null}" th:text="${info}">
-	</div>
-	<div id="alertPers"
-		class="alert alert-danger alert-dismissible fade show rounded-0"
-		th:if="${param.error}"
-		th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}">
-	</div>
+    <div class="container text-center py-4">
+      <!-- MOVIL -->
+      <div class="d-block d-sm-none">
+        <img alt="logo" th:src="@{'/img/logo.jpg'}" style="width: 190px;" />
+      </div>
+      <!-- WEB -->
+      <div class="d-none d-sm-block pt-4">
+        <img alt="logo" th:src="@{'/img/logo.jpg'}" style="width: 240px;" />
+      </div>
+    </div>
 
-	<div class="container text-center py-4">
-		<!-- MOVIL -->
-		<div class="d-block d-sm-none">
-			<img alt="logo" th:src="@{'/img/logo.jpg'}" style="width: 190px;" />
-		</div>
-		<!-- WEB -->
-		<div class="d-none d-sm-block pt-4">
-			<img alt="logo" th:src="@{'/img/logo.jpg'}" style="width: 240px;" />
-		</div>
-	</div>
+    <div class="container">
+      <div class="col-xl-6 col-lg-7 col-md-8 col-sm-10 col-xs-10 mx-auto">
+        <div class="card rounded-0 border-0 bg-transparent">
+          <div
+            class="card-header text-light border-0"
+            style="background-color: rgba(0, 0, 0, 0.5);"
+          >
+            <h4 class="p-3 font-weight-normal">Inicio Sesión</h4>
+          </div>
+          <div
+            class="card-body rounded-0 border-0"
+            style="background-color: rgba(0, 0, 0, 0.5);"
+          >
+            <form id="form" th:action="@{/login}" method="post">
+              <div class="form-group px-3">
+                <input
+                  type="text"
+                  name="username"
+                  id="username"
+                  class="form-control rounded-0 border-0 shadow-none"
+                  placeholder="Usuario"
+                  required
+                  autofocus
+                />
+              </div>
+              <div class="form-group px-3">
+                <input
+                  type="password"
+                  name="password"
+                  id="password"
+                  class="form-control rounded-0 border-0 shadow-none"
+                  placeholder="Contraseña"
+                  required
+                />
+              </div>
+              <div class="form-group px-3">
+                <!-- MOVIL -->
+                <button
+                  id="snbtnMovil"
+                  type="submit"
+                  class="btn btn-lg btn-info btn-block d-block d-sm-none rounded-0"
+                >
+                  Entrar
+                </button>
+                <!-- WEB -->
+                <button
+                  id="snbtnWeb"
+                  type="submit"
+                  class="btn btn-lg btn-info btn-block d-none d-sm-block"
+                >
+                  Entrar
+                </button>
+              </div>
+            </form>
+          </div>
+          <div
+            class="card-footer rounded-0 border-0 py-4"
+            style="background-color: rgba(0, 0, 0, 0.5);"
+          >
+            <!-- MOVIL -->
+            <span
+              class="px-3 d-block d-sm-none text-center text-light font-weight-light"
+              >¿No tienes una cuenta? <br />
+              Registrate
+              <a
+                class="text-reset font-weight-bold"
+                th:href="@{/usuarios/crear-perfil}"
+                >aquí</a
+              >!
+            </span>
+            <br />
+            <span
+              class="px-3 d-block d-sm-none text-center text-light font-weight-light"
+              >Recupera tu
+              <a
+                class="text-reset font-weight-bold"
+                th:href="@{/usuarios/recuperar-cuenta}"
+                >cuenta</a
+              >
+            </span>
+            <!-- WEB -->
+            <span
+              class="px-3 d-none d-sm-block float-right text-light font-weight-light"
+              >¿No tienes una cuenta? Registrate
+              <a
+                class="text-reset font-weight-bold"
+                th:href="@{/usuarios/crear-perfil}"
+                >aquí</a
+              >!
+            </span>
+            <br />
+            <span
+              class="px-3 d-none d-sm-block float-right text-light font-weight-light"
+              >Recupera tu
+              <a
+                class="text-reset font-weight-bold"
+                th:href="@{/usuarios/recuperar-cuenta}"
+                >cuenta</a
+              ></span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
 
-	<div class="container">
-		<div class="col-xl-6 col-lg-7 col-md-8 col-sm-10 col-xs-10 mx-auto">
-			<div class="card rounded-0 border-0 bg-transparent">
-				<div class="card-header text-light border-0"
-					style="background-color: rgba(0, 0, 0, .5);">
-					<h4 class="p-3 font-weight-normal">Inicio Sesión</h4>
-				</div>
-				<div class="card-body rounded-0 border-0"
-					style="background-color: rgba(0, 0, 0, .5);">
+    <footer class="footer mt-auto py-5 text-center">
+      <p class="text-light">Biblioteca ©2020</p>
+      <script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+      <script th:src="@{/js/snbutton.js}"></script>
+      <script th:src="@{/js/popper.min.js}"></script>
+      <script th:src="@{/js/bootstrap.min.js}"></script>
+      <script th:src="@{/js/jquery-ui.min.js}"></script>
+      <script th:src="@{/js/all.min.js}"></script>
+      <script type="text/javascript">
+        SNButton.init("snbtnMovil", {
+          fields: ["username", "password"],
+        });
 
-					<form id="form" th:action="@{/login}" method="post">
-						<div class="form-group px-3">
-							<input type="text" name="username" id="username"
-								class="form-control rounded-0 border-0 shadow-none" placeholder="Usuario"
-								required autofocus>
-						</div>
-						<div class="form-group px-3">
-							<input type="password" name="password" id="password"
-								class="form-control rounded-0 border-0 shadow-none" placeholder="Contraseña"
-								required />
-						</div>
-						<div class="form-group px-3">
-							<!-- MOVIL -->
-							<button id="snbtnMovil" type="submit"
-								class="btn btn-lg btn-info btn-block d-block d-sm-none rounded-0">Entrar</button>
-							<!-- WEB -->
-							<button id="snbtnWeb" type="submit"
-								class="btn btn-lg btn-info btn-block d-none d-sm-block">Entrar</button>							
-						</div>
-					</form>
+        SNButton.init("snbtnWeb", {
+          fields: ["username", "password"],
+        });
 
-				</div>
-				<div class="card-footer rounded-0 border-0 py-4"
-					style="background-color: rgba(0, 0, 0, .5);">
-					<!-- MOVIL -->
-					<span
-						class="px-3 d-block d-sm-none text-center text-light font-weight-light">¿No
-						tienes una cuenta? <br /> Registrate <a
-						class="text-reset font-weight-bold"
-						th:href="@{/usuarios/crear-perfil}">aquí</a>!
-					</span> <br/> <span
-						class="px-3 d-block d-sm-none text-center text-light font-weight-light">Recupera tu <a
-						class="text-reset font-weight-bold"
-						th:href="@{/usuarios/recuperar-cuenta}">cuenta</a> 
-					</span>
-					<!-- WEB -->
-					<span
-						class="px-3 d-none d-sm-block float-right text-light font-weight-light">¿No
-						tienes una cuenta? Registrate <a
-						class="text-reset font-weight-bold"
-						th:href="@{/usuarios/crear-perfil}">aquí</a>!
-					</span> <br/> <span
-						class="px-3 d-none d-sm-block float-right text-light font-weight-light">Recupera tu <a
-						class="text-reset font-weight-bold"
-						th:href="@{/usuarios/recuperar-cuenta}">cuenta</a></span>
-				</div>
-			</div>
-		</div>
-
-	</div>
-
-	<footer class="footer mt-auto py-5 text-center">
-		<p class="text-light">Biblioteca ©2020</p>
-		<script th:src="@{/js/jquery-3.3.1.min.js}"></script>
-		<script th:src="@{/js/snbutton.js}"></script>
-		<script th:src="@{/js/popper.min.js}"></script>
-		<script th:src="@{/js/bootstrap.min.js}"></script>
-		<script th:src="@{/js/jquery-ui.min.js}"></script>
-		<script th:src="@{/js/all.min.js}"></script>
-		<script type="text/javascript">
-			SNButton.init("snbtnMovil", {
-				fields : [ "username", "password" ]
-			});
-			
-			SNButton.init("snbtnWeb", {
-				fields : [ "username", "password" ]
-			});
-
-			setTimeout(function() {
-				$("#alertPers").alert('close');
-			}, 3000);
-		</script>
-	</footer>
-</body>
+        setTimeout(function () {
+          $("#alertPers").alert("close");
+        }, 5000);
+      </script>
+    </footer>
+  </body>
 </html>

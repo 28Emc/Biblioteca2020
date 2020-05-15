@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <title th:text="'Biblioteca | Error 404'"></title>
+  <head th:replace="layout/layout :: head"></head>
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
+    <div class="container py-4">
+      <h3>Pàgina no encontrada!</h3>
+      <div th:text="${error}"></div>
+      <div th:text="${status}"></div>
+      <div th:text="${timestamp}"></div>
+      <hr />
+      <div sec:authorize="hasRole('ROLE_SYSADMIN')" th:text="${path}"></div>
+    </div>
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
+</html>

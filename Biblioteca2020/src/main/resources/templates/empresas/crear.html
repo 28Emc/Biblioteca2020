@@ -5,8 +5,10 @@
   <body class="bg-light">
     <header th:replace="layout/layout :: header"></header>
 
-    <div class="container my-3 px-5">
-      <h1 class="py-4" th:text="${titulo}"></h1>
+    <div class="container px-5">
+      <div class="jumbotron jumbotron-fluid bg-transparent">
+        <h1 class="display-4" th:text="${titulo}"></h1>
+      </div>
 
       <form
         th:action="@{/empresas/editar}"

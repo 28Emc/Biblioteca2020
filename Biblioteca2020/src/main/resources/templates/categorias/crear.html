@@ -1,59 +1,76 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="layout/layout :: head"></head>
 
-<head th:replace="layout/layout :: head"></head>
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
 
-<body class="bg-light">
+    <div class="container px-5">
+      <div class="jumbotron jumbotron-fluid bg-transparent">
+        <h1 class="display-4" th:text="${titulo}"></h1>
+      </div>
 
-	<header th:replace="layout/layout :: header"></header>
+      <form
+        th:action="${editable} ?@{/categorias/editar} :@{/categorias/crear}"
+        th:object="${categoria}"
+        method="post"
+      >
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-12">
+            <label class="col-form-label" for="nombre">Nombre</label>
+            <input
+              class="form-control rounded-0 shadow-none"
+              type="text"
+              th:field="*{nombre}"
+              th:errorclass="'form-control'"
+              placeholder='Ejm. "Ciencia y Ficción"'
+              autofocus
+            />
+            <small
+              class="form-text text-danger"
+              th:if="${#fields.hasErrors('nombre')}"
+              th:errors="*{nombre}"
+            ></small>
+          </div>
+        </div>
 
-	<div class="container my-3 px-5">
+        <div class="form-group row py-3">
+          <!-- MOVIL -->
+          <div class="col-6 d-block d-sm-none">
+            <a
+              class="btn btn-transparent btn-block rounded-0 shadow-none"
+              th:href="@{'/categorias/cancelar'}"
+              ><i class="fas fa-times fa-2x"></i
+            ></a>
+          </div>
+          <div class="col-6 d-block d-sm-none">
+            <button
+              class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+              type="submit"
+            >
+              <i class="fas fa-check fa-2x"></i>
+            </button>
+          </div>
 
-		<h1 class="py-4" th:text="${titulo}"></h1>
+          <!-- WEB -->
+          <div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+            <a
+              class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+              th:href="@{'/categorias/cancelar'}"
+              >CANCELAR</a
+            >
+          </div>
+          <div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+            <input
+              class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+              type="submit"
+              th:value="${editable}?'GUARDAR CAMBIOS':'CREAR'"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
 
-		<form
-			th:action="${editable} ?@{/categorias/editar} :@{/categorias/crear}"
-			th:object="${categoria}" method="post">
-
-			<div class="form-group row">
-				<div class="col-sm-12 col-md-12">
-					<label class="col-form-label" for="nombre">Nombre</label> <input
-						class="form-control rounded-0 shadow-none" type="text" th:field="*{nombre}"
-						th:errorclass="'form-control'"
-						placeholder="Ejm. &quot;Ciencia y Ficción&quot;" autofocus /> <small
-						class="form-text text-danger"
-						th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></small>
-				</div>
-			</div>
-
-			<div class="form-group row py-3">
-				<!-- MOVIL -->			
-				<div class="col-6 d-block d-sm-none">
-					<a class="btn btn-transparent btn-block rounded-0 shadow-none"
-						th:href="@{'/categorias/cancelar'}"><i class="fas fa-times fa-2x"></i></a>
-				</div>
-				<div class="col-6 d-block d-sm-none">
-					<button class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none" type="submit">
-						<i class="fas fa-check fa-2x"></i>
-					</button>
-				</div>
-				
-				<!-- WEB -->
-				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
-					<a class="btn btn-transparent btn-block shadow-none font-weight-bolder"
-						th:href="@{'/categorias/cancelar'}">CANCELAR</a>
-				</div>
-				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
-					<input class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder" type="submit"
-						th:value="${editable}?'GUARDAR CAMBIOS':'CREAR'" />
-				</div>
-			</div>
-			
-		</form>
-
-	</div>
-
-	<footer th:replace="layout/layout :: footer"></footer>
-
-</body>
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
 </html>

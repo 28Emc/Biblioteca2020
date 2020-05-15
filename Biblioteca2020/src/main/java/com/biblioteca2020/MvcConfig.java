@@ -10,8 +10,8 @@ public class MvcConfig implements WebMvcConfigurer {
 
 	public void addViewControllers(ViewControllerRegistry registry) {
 		// MÉTODO PARA REGISTRAR COMO VISTA PERSONALIZADA LOS ERRORES
-		registry.addViewController("/error_403").setViewName("error_403");
-		registry.addViewController("/error_reporte").setViewName("error_reporte");
+		registry.addViewController("/error/error_403").setViewName("error_403");
+		registry.addViewController("/error/error_reporte").setViewName("error_reporte");
 	}
 
 	@Override

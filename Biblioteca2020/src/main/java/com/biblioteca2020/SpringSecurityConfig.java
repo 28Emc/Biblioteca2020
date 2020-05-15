@@ -62,7 +62,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				// ETC)
 				.antMatchers("/css/**", "/js/**", "/date-picker/**", "/img/**", "/**/crear-perfil", "/**/editar-perfil",
 						"/**/cuenta-verificada/**", "/**/recuperar-cuenta/**", "/**/habilitar-cuenta/**",
-						"/**/**/recuperar-password/**")
+						"/**/**/recuperar-password/**", "/error/**")
 				.permitAll()
 				// AQUI yo gestiono mi LOGIN
 				.and().formLogin().successHandler(loginSuccessHandler)
@@ -72,7 +72,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 				.and().logout().permitAll().logoutSuccessHandler(logoutSuccessHandler)
 				// .and().rememberMe()
 				// AQUI yo gestiono si el acceso es proibido a algun recurso
-				.and().exceptionHandling().accessDeniedPage("/error_403")
+				.and().exceptionHandling().accessDeniedPage("/error/error_403")
 				// AQUI yo gestiono si soy un usuario autenticado para acceder a los demas
 				// recursos
 				.and().authorizeRequests().anyRequest().authenticated();

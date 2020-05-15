@@ -17,10 +17,30 @@
       rel="stylesheet"
       th:href="@{/date-picker/css/bootstrap-datepicker.standalone.css}"
     />
+    <style type="text/css">
+      .alert-container-login {
+        position: fixed;
+        top: 0px;
+        left: 0;
+        width: 100%;
+      }
+      .alert-container {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        width: 100%;
+      }
+      .alert-pers {
+        margin: 0 auto;
+      }
+    </style>
   </head>
   <body class="d-flex flex-column h-100">
     <header th:fragment="header">
-      <nav class="navbar navbar-expand-lg navbar-dark sticky-top bg-dark p-3">
+      <nav
+        class="navbar navbar-expand-lg navbar-dark sticky-top bg-dark"
+        style="padding: 20px;"
+      >
         <a class="navbar-brand" th:href="@{/home}">Biblioteca2020</a>
         <button
           class="navbar-toggler"
@@ -140,34 +160,74 @@
       </nav>
 
       <!-- Mensajes flash para indicar el estado de las peticiones -->
-      <div
-        id="alertPers"
-        class="alert alert-success alert-dismissible fade show rounded-0"
-        role="alert"
-        th:if="${success!=null}"
-        th:text="${success}"
-      ></div>
-      <div
-        id="alertPers"
-        class="alert alert-danger alert-dismissible fade show rounded-0"
-        role="alert"
-        th:if="${error!=null}"
-        th:text="${error}"
-      ></div>
-      <div
-        id="alertPers"
-        class="alert alert-warning alert-dismissible fade show rounded-0"
-        role="alert"
-        th:if="${warning!=null}"
-        th:text="${warning}"
-      ></div>
-      <div
-        id="alertPers"
-        class="alert alert-info alert-dismissible fade show rounded-0"
-        role="alert"
-        th:if="${info!=null}"
-        th:text="${info}"
-      ></div>
+      <div class="alert-container">
+        <div style="padding: 3px;">
+          <div
+            id="alertPers"
+            class="alert alert-success alert-dismissible fade show rounded-0"
+            role="alert"
+            th:if="${success!=null}"
+          >
+            [[${success!=null}?${success}:'']]
+            <button
+              type="button"
+              class="close"
+              data-dismiss="alert"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div
+            id="alertPers"
+            class="alert alert-danger alert-dismissible fade show rounded-0"
+            role="alert"
+            th:if="${error!=null}"
+          >
+            [[${error!=null}?${error}:'']]
+            <button
+              type="button"
+              class="close"
+              data-dismiss="alert"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div
+            id="alertPers"
+            class="alert alert-warning alert-dismissible fade show rounded-0"
+            role="alert"
+            th:if="${warning!=null}"
+          >
+            [[${warning!=null}?${warning}:'']]
+            <button
+              type="button"
+              class="close"
+              data-dismiss="alert"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div
+            id="alertPers"
+            class="alert alert-info alert-dismissible fade show rounded-0"
+            role="alert"
+            th:if="${info!=null}"
+          >
+            [[${info!=null}?${info}:'']]
+            <button
+              type="button"
+              class="close"
+              data-dismiss="alert"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </header>
 
     <footer th:fragment="footer" class="footer mt-auto py-3 text-center">
@@ -187,7 +247,7 @@
       <script type="text/javascript">
         setTimeout(function () {
           $("#alertPers").alert("close");
-        }, 3000);
+        }, 5000);
 
         $(function () {
           $('[data-toggle="tooltip"]').tooltip();

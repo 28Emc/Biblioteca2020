@@ -8,11 +8,13 @@
   <body class="bg-light">
     <header th:replace="layout/layout :: header"></header>
 
-    <div class="container my-3 px-5">
-      <h1 class="py-4" th:text="${titulo}"></h1>
+    <div class="container px-5">
+      <div class="jumbotron jumbotron-fluid bg-transparent">
+        <h1 class="display-4" th:text="${titulo}"></h1>
+      </div>
 
-      <div class="form-group row py-1">
-        <div class="col-12">
+      <div class="form-group row mb-4">
+        <div class="col-12 mb-2">
           <h3>Reporte General</h3>
         </div>
         <div class="col-10 col-md-10 col-lg-10">
@@ -41,12 +43,12 @@
         </div>
       </div>
 
-      <div class="form-group row py-1">
+      <div class="form-group row">
         <div class="col-12">
           <h3>Filtrar Por Estado</h3>
         </div>
       </div>
-      <div class="form-group row" th:each="estado, index : ${estados}">
+      <div class="form-group row mb-4" th:each="estado, index : ${estados}">
         <h4 class="col-12 col-sm-12 col-md-10 text-muted">
           Empleados [[${estado}?'Disponibles':'No Disponibles']]
         </h4>
@@ -78,12 +80,12 @@
         th:action="@{/empleados/reportes/buscar-empleados-por-local}"
         method="GET"
       >
-        <div class="form-group row">
+        <div class="form-group row mb-4">
           <div class="col-12">
             <h3>Filtrar Por Local</h3>
           </div>
         </div>
-        <div class="form-group row pb-3">
+        <div class="form-group row mb-4">
           <div class="col-sm-12 col-md-8 col-xl-8 py-2">
             <input
               type="text"
@@ -105,7 +107,7 @@
 
       <div class="form-group row py-4">
         <!-- WEB -->
-        <div class="col-sm-12 col-md-12 py-2">
+        <div class="col-sm-12 col-md-12 my-4">
           <a
             class="btn btn-transparent btn-block shadow-none font-weight-bolder"
             th:href="@{'/empleados/cancelar'}"

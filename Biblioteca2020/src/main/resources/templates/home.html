@@ -1,59 +1,106 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="layout/layout :: head"></head>
-<body class="bg-light">
-	<header th:replace="layout/layout :: header"></header>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:replace="layout/layout :: head"></head>
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
 
-	<h1 class="py-5 text-center">INICIO DE BIBLIOTECA</h1>
-	<div class="container text-center">
+    <div class="jumbotron bg-transparent">
+      <h1 class="display-4 text-center">Bienvenido a Biblioteca</h1>
+    </div>
 
-		<div class="card bg-light border-0 my-5 py-5">
+    <div class="container text-center">
+      <div class="card bg-light border-0">
+        <div class="card-body">
+          <th:block th:if="${empleado}!=null">
+            <div th:switch="${rol}">
+              <div class="row">
+                <div class="col-sm-12 col-lg-6">
+                  <div class="card border-0 bg-transparent">
+                    <h1 class="card-header border-0 bg-transparent">Usuario</h1>
+                    <div class="card-body border-0 bg-transparent">
+                      <h1
+                        class="text-muted"
+                        th:text="${empleado.username}"
+                      ></h1>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12 col-lg-6">
+                  <div class="card border-0 bg-transparent">
+                    <h1 class="card-header border-0 bg-transparent">Rol</h1>
+                    <div class="card-body border-0 bg-transparent">
+                      <th:block th:case="'[ROLE_SYSADMIN]'">
+                        <h1>
+                          <span
+                            class="badge badge-dark"
+                            th:text="'SYSADMIN'"
+                          ></span>
+                        </h1>
+                      </th:block>
+                      <th:block th:case="'[ROLE_ADMIN]'">
+                        <h1>
+                          <span
+                            class="badge badge-danger"
+                            th:text="'ADMIN'"
+                          ></span>
+                        </h1>
+                      </th:block>
+                      <th:block th:case="'[ROLE_EMPLEADO]'">
+                        <h1>
+                          <span
+                            class="badge badge-success"
+                            th:text="'EMPLEADO'"
+                          ></span>
+                        </h1>
+                      </th:block>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </th:block>
 
-			<div class="card-body">
+          <th:block th:if="${usuario}!=null">
+            <div th:switch="${rol}">
+              <div class="row">
+                <div class="col-sm-12 col-lg-6">
+                  <div class="card border-0 bg-transparent">
+                    <h1 class="card-header border-0 bg-transparent">Usuario</h1>
+                    <div class="card-body border-0 bg-transparent">
+                      <th:block th:case="'[ROLE_USUARIO]'">
+                        <h1
+                          class="text-muted"
+                          th:text="${usuario.username}"
+                        ></h1>
+                      </th:block>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-12 col-lg-6">
+                  <div class="card border-0">
+                    <h5 class="card-header border-0">Rol</h5>
+                    <div class="card-body border-0">
+                      <th:block th:case="'[ROLE_USUARIO]'">
+                        <h1>
+                          <span
+                            class="badge badge-dark"
+                            th:text="'USUARIO'"
+                          ></span>
+                        </h1>
+                      </th:block>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </th:block>
+        </div>
+      </div>
+    </div>
 
-				<th:block th:if="${empleado}!=null">
-					<div th:switch="${rol}">
-						<h1 th:case="'[ROLE_SYSADMIN]'">
-							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
-							<br /> <br /> Rol <span class="badge badge-dark"
-								th:text="'SYSADMIN'"></span>
-						</h1>
-						<h1 th:case="'[ROLE_ADMIN]'">
-							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
-							<br /> <br /> Rol <span class="badge badge-danger"
-								th:text="'ADMIN'"></span>
-						</h1>
-						<h1 th:case="'[ROLE_EMPLEADO]'">
-							Usuario <span class="text-muted" th:text="${empleado.username}"></span>
-							<br /> <br /> Rol <span class="badge badge-success"
-								th:text="'EMPLEADO'"></span>
-						</h1>						
-					</div>
-				</th:block>
-
-				<th:block th:if="${usuario}!=null">
-					<div th:switch="${rol}">						
-						<h1 th:case="'[ROLE_USER]'">
-							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-							<br> <br> Rol <span class="badge badge-primary"
-								th:text="'USUARIO'"></span>
-						</h1>
-						<h1 th:case="*">
-							Usuario: <span class="text-muted" th:text="${usuario.username}"></span>
-							<br> <br> Rol <span class="badge badge-light"
-								th:text="'USUARIO INVITADO'"></span>
-						</h1>
-					</div>
-				</th:block>
-
-			</div>
-
-		</div>
-
-	</div>
-
-	<footer th:replace="layout/layout :: footer"></footer>
-
-</body>
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
 </html>
