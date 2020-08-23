@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <script type="text/javascript" th:fragment="javascript">
+      $(document).ready(function () {
+        $("#nroDocumentoEmpleado").autocomplete({
+          source: function (request, response) {
+            $.ajax({
+              url: "/prestamos/cargar-empleados-reporte/" + request.term,
+              minLength: 2,
+              dataType: "json",
+              data: {
+                term: request.term,
+              },
+              success: function (data) {
+                response(
+                  $.map(data, function (item) {
+                    return {
+                      value: item.id,
+                      label: item.nombres,
+                      documento: item.nroDocumento,
+                    };
+                  })
+                );
+              },
+            });
+          },
+          focus: function (event, ui) {
+            event.preventDefault();
+          },
+          select: function (event, ui) {
+            $("#nroDocumentoEmpleado").val(ui.item.documento);
+            return false;
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

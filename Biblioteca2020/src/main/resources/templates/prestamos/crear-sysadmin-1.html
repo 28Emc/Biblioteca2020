@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+
+<body class="bg-light">
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container my-3 px-5">
+
+		<h1 class="py-4" th:text="${titulo}"></h1>
+
+		<form th:action="@{/prestamos/crear-sysadmin-2}" method="get" autocomplete="off">
+
+			<h4 class="py-4">Usuario</h4>
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-12">
+					<label class="col-form-label" for="buscar_usuario">DNI
+						Usuario</label> <input type="number" name="buscar_usuario"
+						id="buscar_usuario" class="form-control rounded-0 shadow-none"
+						placeholder="Buscar usuario por su DNI"/>
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-4 col-lg-4" id="col_id_usuario">
+					<label class="text-muted col-form-label" for="id_usuario">ID</label>
+					<input type="text" name="id_usuario" id="id_usuario"
+						class="form-control rounded-0 shadow-none"
+						placeholder="Id Usuario" readonly />
+				</div>
+				<div class="col-sm-12 col-md-8 col-lg-8" id="col_nombre_usuario">
+					<label class="text-muted col-form-label" for="nombre_usuario">Nombre</label>
+					<input type="text" name="nombre_usuario" id="nombre_usuario"
+						class="form-control rounded-0 shadow-none"
+						placeholder="Nombres del Usuario" disabled />
+				</div>
+            </div>
+            
+            <h4 class="py-4">Local</h4>
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-12">
+					<label class="col-form-label" for="buscar_local">Dirección</label> <input
+						type="text" name="buscar_local" id="buscar_local"
+						class="form-control rounded-0 shadow-none"
+						placeholder="Buscar local por su dirección" />
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-4 col-lg-4" id="col_id_local">
+					<label class="text-muted col-form-label" for="id_local">ID</label>
+					<input type="text" name="id_local" id="id_local"
+						placeholder="Id Local" class="form-control rounded-0 shadow-none"
+						readonly />
+				</div>
+				<div class="col-sm-12 col-md-8 col-lg-8" id="col_direccion_local">
+					<label class="text-muted col-form-label" for="direccion_local">Dirección</label>
+					<input type="text" name="direccion_local" id="direccion_local"
+						class="form-control rounded-0 shadow-none" placeholder="Dirección"
+					    disabled />
+				</div>
+			</div>
+
+			<div class="form-group row py-3">
+				<!-- MOVIL -->
+				<div class="col-6 d-block d-sm-none">
+					<a class="btn btn-transparent btn-block rounded-0 shadow-none"
+						th:href="@{'/prestamos/cancelar'}"><i
+						class="fas fa-times fa-2x"></i></a>
+				</div>
+				<div class="col-6 d-block d-sm-none">
+					<button
+						class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+						type="submit">
+						<i class="fas fa-check fa-2x"></i>
+					</button>
+				</div>
+
+				<!-- WEB -->
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<a
+						class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+						th:href="@{'/prestamos/cancelar'}">CANCELAR</a>
+				</div>
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<input
+						class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+						type="submit" th:value="'SIGUIENTE'" />
+				</div>
+			</div>
+
+
+		</form>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+	<script th:replace="layout/autocomplete-locales :: javascript"></script>
+	<script th:replace="layout/autocomplete-usuarios :: javascript"></script>
+
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:replace="layout/layout :: head"></head>
+
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
+
+    <div class="container-fluid px-5">
+      <div class="jumbotron jumbotron-fluid bg-transparent">
+        <h1 class="display-4" th:text="${titulo}"></h1>
+      </div>
+
+      <h2 th:if="${#lists.isEmpty(empresas)}">No hay empresas</h2>
+
+      <table
+        class="table table-responsive table-borderless"
+        th:if="${not #lists.isEmpty(empresas)}"
+      >
+        <caption
+          class="py-4"
+          th:text="'Total: ' + ${#lists.size(empresas)}"
+        ></caption>
+        <thead class="table-dark">
+          <tr>
+            <th>Id</th>
+            <th>Razón Social</th>
+            <th>Ruc</th>
+            <th>Dirección</th>
+            <th colspan="2" class="text-center">Opciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="empresa: ${empresas}">
+            <td class="align-middle" th:text="${empresa.id}"></td>
+            <td class="align-middle" th:text="${empresa.razonSocial}"></td>
+            <td class="align-middle" th:text="${empresa.ruc}"></td>
+            <td class="align-middle" th:text="${empresa.direccion}"></td>
+
+            <td class="align-middle" sec:authorize="hasRole('ROLE_SYSADMIN')">
+              <a
+                class="btn btn-transparent btn-block rounded-0 shadow-none"
+                th:href="@{/empresas/editar/}+${empresa.id}"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                th:title="'Editar'"
+                ><i class="far fa-edit fa-lg text-warning"></i
+              ></a>
+            </td>
+            <td class="align-middle" sec:authorize="hasRole('ROLE_ADMIN')">
+              <a
+                class="btn btn-transparent btn-block rounded-0 shadow-none"
+                th:href="@{/locales/listar/}+${empresa.id}"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                th:title="'Ver Locales'"
+                ><i class="fas fa-store-alt fa-lg"></i
+              ></a>
+            </td>
+            <td class="align-middle" sec:authorize="hasRole('ROLE_SYSADMIN')">
+              <a
+                class="btn btn-transparent btn-block rounded-0 shadow-none"
+                th:href="@{/locales/listar}"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                th:title="'Ver Locales'"
+                ><i class="fas fa-store-alt fa-lg"></i
+              ></a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
+</html>

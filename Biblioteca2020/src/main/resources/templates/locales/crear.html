@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+
+<body class="bg-light">
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container my-3 px-5">
+
+		<h1 class="py-4" th:text="${titulo}"></h1>
+
+		<form th:action="${editable} ? @{/locales/editar} : @{/locales/crear}"
+			th:object="${local}" method="post">
+
+			<div class="form-group row" hidden>
+				<div class="col-sm-12 col-md-12 col-lg-6">
+					<label class="col-form-label" for="empresa">Empresa</label> <select
+						name="empresa" id="empresa"
+						class="form-control custom-select rounded-0 shadow-none"
+						th:field="${local.empresa}"
+						th:size="${#lists.size(empresaLocales)}"
+						th:errorclass="'form-control alert-danger'" readonly>
+						<option th:each="empresa : ${empresaLocales}"
+							th:value="${empresa.id}" th:text="${empresa.razonSocial}">
+						</option>
+					</select> <small class="form-text text-danger"
+						th:if="${#fields.hasErrors('empresa')}"
+						th:errors="${local.empresa}"></small>
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-12 col-lg-6">
+					<label class="col-form-label" for="direccion">Dirección</label> <input
+						class="form-control rounded-0 shadow-none" type="text"
+						th:field="${local.direccion}"
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Ejm. Av. Lima 123" name="direccion" id="direccion"
+						autofocus /> <small class="form-text text-danger"
+						th:if="${#fields.hasErrors('direccion')}"
+						th:errors="${local.direccion}"></small>
+				</div>
+				<div class="col-sm-12 col-md-12 col-lg-6">
+					<label class="col-form-label" for="observaciones">Observaciones</label>
+					<textarea class="form-control rounded-0 shadow-none" rows="3"
+						th:field="${local.observaciones}"
+						th:errorclass="'form-control alert-danger'"
+						placeholder="Ejm. 'Este local contiene solo libros de habla hispana.'"
+						name="observaciones" id="observaciones"></textarea>
+					<small class="form-text text-danger"
+						th:if="${#fields.hasErrors('observaciones')}"
+						th:errors="${local.observaciones}"></small>
+				</div>
+			</div>
+
+			<div class="form-group row py-3">
+				<!-- MOVIL -->
+				<div class="col-6 d-block d-sm-none">
+					<a class="btn btn-transparent btn-block rounded-0 shadow-none"
+						th:href="@{'/locales/cancelar'}"><i class="fas fa-times fa-2x"></i></a>
+				</div>
+				<div class="col-6 d-block d-sm-none">
+					<button
+						class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+						type="submit">
+						<i class="fas fa-check fa-2x"></i>
+					</button>
+				</div>
+
+				<!-- WEB -->
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<a
+						class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+						th:href="@{'/locales/cancelar'}">CANCELAR</a>
+				</div>
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<input
+						class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+						type="submit" th:value="${editable}?'GUARDAR CAMBIOS':'CREAR'" />
+				</div>
+			</div>
+
+		</form>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:replace="layout/layout :: head"></head>
+
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
+
+    <div class="container-fluid px-5">
+      <div class="jumbotron jumbotron-fluid bg-transparent">
+        <h1 class="display-4" th:text="${titulo}"></h1>
+      </div>
+
+      <h2 th:if="${#lists.isEmpty(empleados)}">No hay empleados</h2>
+
+      <div class="row">
+        <div class="col-12">
+          <div class="row justify-content-between">
+            <div
+              class="col-sm-4 col-md-3 col-lg-2"
+              sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+            >
+              <a
+                class="btn btn-primary btn-block rounded-0 border-0 py-2"
+                th:href="@{/empleados/crear}"
+                data-toggle="tooltip"
+                data-placement="top"
+                th:title="'Nuevo'"
+                ><i class="fas fa-plus fa-lg"></i
+              ></a>
+            </div>
+            <div class="col-sm-5"></div>
+            <div
+              class="col-sm-3 col-md-3 col-lg-2"
+              th:if="${not #lists.isEmpty(empleados)}"
+            >
+              <a
+                class="btn btn-transparent btn-block rounded-0 border-0"
+                th:href="@{'/empleados/reportes'}"
+                data-toggle="tooltip"
+                data-placement="auto"
+                th:title="'Generar reportes'"
+                ><i class="fas fa-clipboard-list fa-2x"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <table
+            class="table table-responsive table-borderless"
+            th:if="${not #lists.isEmpty(empleados)}"
+          >
+            <caption
+              class="py-4"
+              th:text="'Total: ' + ${#lists.size(empleados)}"
+            ></caption>
+            <thead class="table-dark">
+              <tr>
+                <th hidden>Id</th>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Empresa</th>
+                <th>Dirección</th>
+                <th>Email</th>
+                <th>DNI</th>
+                <th>Celular</th>
+                <th>Fecha Registro</th>
+                <th
+                  sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+                >
+                  Username
+                </th>
+                <th>Estado</th>
+                <th colspan="2" class="text-center">Opciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="empleado: ${empleados}">
+                <td class="align-middle" th:text="${empleado.id}" hidden></td>
+                <td class="align-middle" th:text="${empleado.nombres}"></td>
+                <td class="align-middle" th:text="${empleado.apellidos}"></td>
+                <td
+                  class="align-middle"
+                  th:text="${empleado.local.empresa.razonSocial}"
+                ></td>
+
+                <th:block th:switch="${empleado.direccion}">
+                  <td
+                    class="align-middle"
+                    th:case="null"
+                    th:text="'No disponible'"
+                  ></td>
+                  <td
+                    class="align-middle"
+                    th:case="''"
+                    th:text="'No disponible'"
+                  ></td>
+                  <td
+                    class="align-middle"
+                    th:case="*"
+                    th:text="${empleado.direccion}"
+                  ></td>
+                </th:block>
+
+                <th:block th:switch="${empleado.email}">
+                  <td
+                    class="align-middle"
+                    th:case="null"
+                    th:text="'No disponible'"
+                  ></td>
+                  <td
+                    class="align-middle"
+                    th:case="''"
+                    th:text="'No disponible'"
+                  ></td>
+                  <td
+                    class="align-middle"
+                    th:case="*"
+                    th:text="${empleado.email}"
+                  ></td>
+                </th:block>
+
+                <td
+                  class="align-middle"
+                  th:text="${empleado.nroDocumento}"
+                ></td>
+
+                <th:block th:switch="${empleado.celular}">
+                  <td
+                    class="align-middle"
+                    th:case="null"
+                    th:text="'No disponible'"
+                  ></td>
+                  <td
+                    class="align-middle"
+                    th:case="''"
+                    th:text="'No disponible'"
+                  ></td>
+                  <td
+                    class="align-middle"
+                    th:case="*"
+                    th:text="${empleado.celular}"
+                  ></td>
+                </th:block>
+
+                <td
+                  class="align-middle"
+                  th:text="${empleado.fecha_registro}"
+                ></td>
+                <td
+                  class="align-middle"
+                  th:text="${empleado.username}"
+                  sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+                ></td>
+
+                <th:block th:with="estado=${empleado.estado}">
+                  <th:block th:if="${estado}">
+                    <td class="align-middle pl-2">
+                      <h5>
+                        <span
+                          class="badge badge-transparent text-success font-weight-bold"
+                          th:text="'Activo'"
+                        ></span>
+                      </h5>
+                    </td>
+                    <td
+                      class="align-middle"
+                      sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+                    >
+                      <a
+                        class="btn btn-transparent btn-block rounded-0 shadow-none"
+                        th:href="@{/empleados/editar/}+${empleado.id}"
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        th:title="'Editar'"
+                        ><i class="far fa-edit fa-lg text-warning"></i
+                      ></a>
+                    </td>
+                    <td
+                      class="align-middle"
+                      sec:authorize="hasRole('ROLE_SYSADMIN') || hasRole('ROLE_ADMIN')"
+                    >
+                      <a
+                        class="btn btn-transparent btn-block rounded-0 shadow-none"
+                        th:href="@{/empleados/deshabilitar/}+${empleado.id}"
+                        onclick="return confirm('Seguro de querer deshabilitar el empleado?');"
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        th:title="'Deshabilitar'"
+                        ><i class="fas fa-ban fa-lg text-info"></i
+                      ></a>
+                    </td>
+                  </th:block>
+
+                  <th:block th:unless="${estado}">
+                    <td class="align-middle pl-2">
+                      <h5>
+                        <span
+                          class="badge badge-transparent text-danger font-weight-bold"
+                          th:text="'Inactivo'"
+                        ></span>
+                      </h5>
+                    </td>
+                    <td class="align-middle">
+                      <a
+                        class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
+                        th:href="'#'"
+                        ><i class="far fa-edit fa-lg text-secondary"></i>
+                      </a>
+                    </td>
+                    <td class="align-middle">
+                      <a
+                        class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
+                        th:href="'#'"
+                        ><i class="fas fa-ban fa-lg text-secondary"></i>
+                      </a>
+                    </td>
+                  </th:block>
+                </th:block>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
+</html>

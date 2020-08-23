@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:replace="layout/layout :: head"></head>
+
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
+
+    <div class="container my-3 px-5">
+      <h1 class="py-4" th:text="${titulo}"></h1>
+
+      <div class="form-group row">
+        <div class="col-12">
+          <h3 sec:authorize="hasRole('ROLE_SYSADMIN')">
+            Datos del Local y sus Libros
+          </h3>
+          <h3 sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')">
+            Datos de Libro
+          </h3>
+        </div>
+      </div>
+
+      <form
+        sec:authorize="hasRole('ROLE_SYSADMIN')"
+        th:action="@{/prestamos/reportes/prestamos-por-libro/}+${local.id}"
+        method="GET"
+      >
+        <div class="form-group row py-2">
+          <div class="col-sm-12 col-md-4 col-xl-4">
+            <input
+              type="number"
+              name="id_local"
+              id="id_local"
+              placeholder="Id Local"
+              class="form-control rounded-0 shadow-none"
+              th:attr="value=${local.id}"
+              readonly
+            />
+          </div>
+          <div class="col-sm-12 col-md-6 col-xl-6 pb-4">
+            <input
+              type="text"
+              name="nombre_local"
+              id="nombre_local"
+              placeholder="Dirección Local"
+              class="form-control rounded-0 shadow-none"
+              th:attr="value=${local.direccion}"
+              readonly
+            />
+          </div>
+          <div class="col-sm-12 col-md-10 col-xl-10 py-2">
+            <input
+              type="text"
+              name="buscar_libro"
+              id="buscar_libro"
+              th:attr="value=${buscar_libro}"
+              class="form-control rounded-0 shadow-none"
+              placeholder="Buscar libro por su titulo"
+            />
+          </div>
+          <div class="col-6 col-md-1 col-xl-1">
+            <button
+              type="submit"
+              name="format"
+              value="pdf"
+              th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
+              data-toggle="tooltip"
+              data-placement="auto"
+              th:title="'Exportar PDF'"
+            >
+              <i class="fas fa-file-pdf fa-2x text-danger"></i>
+            </button>
+          </div>
+          <div class="col-6 col-md-1 col-xl-1">
+            <button
+              type="submit"
+              name="format"
+              value="xlsx"
+              th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
+              data-toggle="tooltip"
+              data-placement="auto"
+              th:title="'Exportar XLSX'"
+            >
+              <i class="fas fa-file-excel fa-2x text-success"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+      <form
+        sec:authorize="hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLEADO')"
+        method="GET"
+      >
+        <div class="form-group row py-2">
+          <div class="col-sm-12 col-md-4 col-xl-4">
+            <input
+              type="number"
+              name="id_libro"
+              id="id_libro"
+              placeholder="Id"
+              class="form-control rounded-0 shadow-none"
+              th:attr="value=${libro.id}"
+              readonly
+            />
+          </div>
+          <div class="col-sm-12 col-md-6 col-xl-6 pb-4">
+            <input
+              type="text"
+              name="nombre_libro"
+              id="nombre_libro"
+              placeholder="Titulo Libro"
+              class="form-control rounded-0 shadow-none"
+              th:attr="value=${libro.titulo}"
+              readonly
+            />
+          </div>
+          <div class="col-6 col-md-1 col-xl-1">
+            <a
+              role="button"
+              th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
+              th:href="@{'/prestamos/reportes/pdf/prestamos-por-libro/'}+${libro.id}"
+              target="_blank"
+              data-toggle="tooltip"
+              data-placement="auto"
+              th:title="'Exportar PDF'"
+              ><i class="fas fa-file-pdf fa-2x text-danger"></i
+            ></a>
+          </div>
+          <div class="col-6 col-md-1 col-xl-1">
+            <a
+              role="button"
+              th:class="${enable}?'btn btn-transparent btn-block rounded-0 border-0 py-1':'disabled btn btn-transparent btn-block rounded-0 border-0 py-1'"
+              th:href="@{'/prestamos/reportes/xlsx/prestamos-por-libro/'}+${libro.id}"
+              data-toggle="tooltip"
+              data-placement="auto"
+              th:title="'Exportar XLSX'"
+              ><i class="fas fa-file-excel fa-2x text-success"></i
+            ></a>
+          </div>
+        </div>
+      </form>
+
+      <div class="form-group row py-4">
+        <!-- WEB -->
+        <div class="col-sm-12 col-md-12 py-2">
+          <a
+            class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+            th:href="@{'/prestamos/reportes'}"
+            >CANCELAR</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <footer th:replace="layout/layout :: footer"></footer>
+    <script th:replace="layout/autocomplete-libros :: javascript"></script>
+  </body>
+</html>

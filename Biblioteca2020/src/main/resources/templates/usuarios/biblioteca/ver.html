@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<meta charset="UTF-8" />
+<title th:text="'Biblioteca | '+${titulo}"></title>
+
+<head th:replace="layout/layout :: head"></head>
+
+<body class="bg-light">
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container p-3">
+
+		<h1 class="text-warning py-3" th:text="${titulo}"></h1>
+
+		<th:block>
+			<div class="row">
+				<div class="col-md-7 text-center my-5">
+					<img style="max-width: 300px;" class="responsive px-3"
+						th:src="${libroDetalle.foto_libro}!='' ? @{'/uploads/'}+${libroDetalle.foto_libro} : @{'/uploads/no-book.jpg'}"
+						alt="Imagen libro">
+				</div>
+
+				<div class="col-md-5">
+					<div class="row">
+						<div class="col-md-12 mb-3">
+							<h1 th:text="'Titulo'"></h1>
+							<h2 th:text="${libroDetalle.Titulo}" class="text-muted"></h2>
+						</div>
+						<div class="col-md-12 my-3">
+							<h1 th:text="'Autor'"></h1>
+							<h2 th:text="${libroDetalle.Autor}" class="text-muted"></h2>
+						</div>
+						<div class="col-md-12 my-3">
+							<h1 th:text="'Categoría'"></h1>
+							<h2 th:text="${libroDetalle.categoria.nombre}" class="text-muted"></h2>
+						</div>
+					</div>
+				</div>
+			</div>
+		</th:block>
+
+		<br>
+
+		<table class="table table-responsive m-4">
+			<thead>
+				<tr>
+					<th>Local</th>
+					<th>Disponibilidad</th>
+					<th>Stock</th>
+					<th>Opciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="libro: ${libros}">
+					<td th:text="${libro.local.direccion}"></td>
+
+					<th:block th:switch="${libro.estado}">
+						<td th:case="true" th:text="'Disponible'" class="text-success"></td>
+						<td th:case="*" th:text="'No Disponible'" class="text-danger"></td>
+					</th:block>
+
+					<td th:text="${libro.stock}"></td>
+
+					<td><a class="btn btn-info"
+						th:href="@{'/usuarios/biblioteca/solicitar-libro/'} + ${libro.local.id} + @{'/'} + ${libro.titulo}">
+							<i class="fas fa-book"></i> Solicitar Libro
+					</a></td>
+
+				</tr>
+			</tbody>
+		</table>
+
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+
+</body>
+</html>

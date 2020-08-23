@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+
+<body class="bg-light">
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container-fluid my-3 px-5">
+
+		<h1 class="py-2" th:text="${titulo}"></h1>
+
+		<div class="row pt-5 pb-4" sec:authorize="hasRole('ROLE_USER')">
+			<div class="col-sm-3 col-md-2 col-xl-1">
+				<a class="btn btn-info btn-block rounded-0 border-0 py-2"
+					th:href="@{/prestamos/historial-user}" data-toggle="tooltip"
+					data-placement="top" th:title="'Ver Historial de Préstamos'"><i
+					class="fas fa-clipboard-list fa-lg"></i> <i class="fas fa-check"></i></a>
+			</div>
+		</div>
+
+		<h2 th:if="${#lists.isEmpty(prestamosPendientes)}">No hay
+			préstamos pendientes para mostrar</h2>
+
+		<table class="table table-responsive table-borderless"
+			th:if="${not #lists.isEmpty(prestamosPendientes)}">
+			<caption class="py-4"
+				th:text="'Total: ' + ${#lists.size(prestamosPendientes)}"></caption>
+			<thead class="table-dark">
+				<tr>
+					<th hidden>Id</th>
+					<th>Libro</th>
+					<th>Local</th>
+					<th hidden>Suscriptor</th>
+					<th>Fecha Despacho</th>
+					<th>Fecha Devolución</th>
+					<th>Observaciones</th>
+					<th class="text-center">Opciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="prestamoPendiente: ${prestamosPendientes}">
+
+					<th:block
+						th:if="${#strings.contains(prestamoPendiente.empleado.username, 'Prueba')}">
+						<td class="align-middle" th:text="${prestamoPendiente.id}" hidden></td>
+						<td class="align-middle"
+							th:text="${prestamoPendiente.libro.titulo}+', '+${prestamoPendiente.libro.autor}"></td>
+						<td class="align-middle"
+							th:text="${prestamoPendiente.empleado.local.direccion}"></td>
+						<td class="align-middle"
+							th:text="${prestamoPendiente.usuario.nombres}+', '+${prestamoPendiente.usuario.apellidos}"
+							hidden></td>
+						<td class="align-middle"
+							th:text="${prestamoPendiente.fecha_despacho}"></td>
+						<td class="align-middle"
+							th:text="${prestamoPendiente.fecha_devolucion}"></td>
+						<td class="align-middle text-center" data-toggle="tooltip"
+							data-placement="auto"
+							th:title="${prestamoPendiente.observaciones}"><i
+							class="fas fa-search fa-2x"></i></td>
+						<td class="align-middle" sec:authorize="hasRole('ROLE_USER')"><a
+							class="btn btn-transparent btn-block rounded-0 shadow-none"
+							th:href="@{/prestamos/anular-orden/}+${prestamoPendiente.id}"
+							onclick="return confirm('¿Seguro de querer anular la orden del libro? Esta acción no se puede deshacer');"
+							data-toggle="tooltip" data-placement="bottom"
+							th:title="'Anular Préstamo'"><i
+								class="fas fa-ban fa-lg text-danger"></i></a></td>
+					</th:block>
+
+					<th:block
+						th:unless="${not #lists.contains(prestamoPendiente.empleado.username, 'Prueba')}">
+						<td class="align-middle" th:text="${prestamoPendiente.id}" hidden></td>
+						<td class="align-middle"
+							th:text="${prestamoPendiente.libro.titulo}+', '+${prestamoPendiente.libro.autor}"></td>
+						<!-- <td class="align-middle"
+							th:text="${prestamoPendiente.empleado.nombres}+', '+${prestamoPendiente.empleado.apellidos}"></td> -->
+						<td class="align-middle"
+							th:text="${prestamoPendiente.empleado.local.direccion}"></td>
+						<td class="align-middle"
+							th:text="${prestamoPendiente.usuario.nombres}+', '+${prestamoPendiente.usuario.apellidos}"
+							hidden></td>
+						<td class="align-middle"
+							th:text="${prestamoPendiente.fecha_despacho}"></td>
+						<td class="align-middle"
+							th:text="${prestamoPendiente.fecha_devolucion}"></td>
+						<td class="align-middle text-center" data-toggle="tooltip"
+							data-placement="auto"
+							th:title="${prestamoPendiente.observaciones}"><i
+							class="fas fa-search fa-2x"></i></td>
+						<td th:unless="${devolucion}" class="align-middle" sec:authorize="hasRole('ROLE_USER')"><a
+							class="disabled btn btn-transparent btn-block rounded-0 shadow-none"
+							th:href="'#'"><i class="far fa-edit fa-lg text-secondary"></i></a></td>
+					</th:block>
+
+				</tr>
+			</tbody>
+		</table>
+
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+</body>
+</html>

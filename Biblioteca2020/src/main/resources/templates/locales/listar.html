@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:replace="layout/layout :: head"></head>
+
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
+
+    <div class="container-fluid my-3 px-5">
+      <h1 class="py-2 pb-5 mb-5" th:text="${titulo}"></h1>
+
+      <h2 th:if="${#lists.isEmpty(locales)}">
+        No hay locales asociados a esta empresa
+      </h2>
+
+      <div class="row pb-4" sec:authorize="hasRole('ROLE_SYSADMIN')">
+        <div class="col-sm-3 col-md-2 col-xl-1">
+          <a
+            class="btn btn-primary btn-block rounded-0 border-0 py-2"
+            th:href="@{/locales/crear}"
+            data-toggle="tooltip"
+            data-placement="top"
+            th:title="'Nuevo'"
+            ><i class="fas fa-plus fa-lg"></i
+          ></a>
+        </div>
+      </div>
+
+      <table
+        class="table table-responsive table-borderless"
+        th:if="${not #lists.isEmpty(locales)}"
+      >
+        <caption
+          class="py-4"
+          th:text="'Total: ' + ${#lists.size(locales)}"
+        ></caption>
+        <thead class="table-dark">
+          <tr>
+            <th hidden>Id</th>
+            <th>Dirección Local</th>
+            <th>Observaciones</th>
+            <th>Empresa</th>
+            <th>Estado</th>
+            <th colspan="3" class="text-center">Opciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="local: ${locales}">
+            <td class="align-middle" th:text="${local.id}" hidden></td>
+            <td class="align-middle" th:text="${local.direccion}"></td>
+            <td class="align-middle" th:text="${local.observaciones}"></td>
+            <td
+              class="align-middle"
+              th:text="${local.empresa.razonSocial}"
+            ></td>
+
+            <th:block th:with="estado=${local.estado}">
+              <td class="align-middle pl-2" th:if="${estado}">
+                <h5>
+                  <span
+                    class="badge badge-transparent text-success font-weight-bold"
+                    th:text="'Activo'"
+                  ></span>
+                </h5>
+              </td>
+              <td class="align-middle pl-2" th:unless="${estado}">
+                <h5>
+                  <span
+                    class="badge badge-transparent text-danger font-weight-bold"
+                    th:text="'Inactivo'"
+                  ></span>
+                </h5>
+              </td>
+            </th:block>
+
+            <th:block sec:authorize="hasRole('ROLE_ADMIN')">
+              <td class="align-middle">
+                <a
+                  th:class="${local.estado}?'btn btn-transparent btn-block rounded-0 shadow-none':'btn btn-transparent btn-block rounded-0 shadow-none disabled'"
+                  th:href="${local.estado}?@{/locales/editar/}+${local.id}:''"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  th:title="'Editar'"
+                  ><i
+                    th:class="${local.estado}?'far fa-edit fa-lg text-warning':'far fa-edit fa-lg text-secondary'"
+                  ></i
+                ></a>
+              </td>
+              <td class="align-middle">
+                <a
+                  th:class="${local.estado}?'btn btn-transparent btn-block rounded-0 shadow-none':'btn btn-transparent btn-block rounded-0 shadow-none disabled'"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  th:title="'Ver Libros'"
+                  th:href="${local.estado}?@{/locales/libros/listar}:''"
+                  ><i
+                    th:class="${local.estado}?'fas fa-book-open fa-lg':'fas fa-book-open fa-lg text-secondary'"
+                  ></i
+                ></a>
+              </td>
+            </th:block>
+
+            <th:block sec:authorize="hasRole('ROLE_SYSADMIN')">
+              <td class="align-middle">
+                <a
+                  th:class="${local.estado}?'btn btn-transparent btn-block rounded-0 shadow-none':'btn btn-transparent btn-block rounded-0 shadow-none disabled'"
+                  th:href="${local.estado}?@{/locales/editar/}+${local.id}:''"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  th:title="'Editar'"
+                  ><i
+                    th:class="${local.estado}?'far fa-edit fa-lg text-warning':'far fa-edit fa-lg text-secondary'"
+                  ></i
+                ></a>
+              </td>
+              <td class="align-middle">
+                <a
+                  th:class="${local.estado}?'btn btn-transparent btn-block rounded-0 shadow-none':'btn btn-transparent btn-block rounded-0 shadow-none disabled'"
+                  th:href="${local.estado}?@{/locales/deshabilitar/}+${local.id}:''"
+                  onclick="return confirm('Seguro de querer deshabilitar el local?');"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  th:title="'Deshabilitar'"
+                  ><i
+                    th:class="${local.estado}?'fas fa-ban fa-lg text-info':'fas fa-ban fa-lg text-secondary'"
+                  ></i
+                ></a>
+              </td>
+              <td class="align-middle">
+                <a
+                  th:class="${local.estado}?'btn btn-transparent btn-block rounded-0 shadow-none':'btn btn-transparent btn-block rounded-0 shadow-none disabled'"
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  th:title="'Ver Libros'"
+                  th:href="${local.estado}?@{'/locales/'}+${local.id}+'/libros/listar':''"
+                  ><i
+                    th:class="${local.estado}?'fas fa-book-open fa-lg':'fas fa-book-open fa-lg text-secondary'"
+                  ></i
+                ></a>
+              </td>
+            </th:block>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer th:replace="layout/layout :: footer"></footer>
+  </body>
+</html>

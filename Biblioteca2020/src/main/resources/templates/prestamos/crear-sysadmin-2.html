@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head th:replace="layout/layout :: head"></head>
+
+  <body class="bg-light">
+    <header th:replace="layout/layout :: header"></header>
+
+    <div class="container my-3 px-5">
+      <h1 class="py-4" th:text="${titulo}"></h1>
+
+      <form
+        autocomplete="off"
+        th:action="@{/prestamos/crear-sysadmin-final}"
+        method="post"
+      >
+        <h4 class="py-4">Usuario</h4>
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-3 col-lg-3" id="col_id_usuario">
+            <label class="text-muted col-form-label" for="id_usuario">ID</label>
+            <input
+              type="text"
+              name="id_usuario"
+              id="id_usuario"
+              class="form-control rounded-0 shadow-none"
+              th:attr="value=${usuario.id}"
+              placeholder="Id Usuario"
+              readonly
+            />
+          </div>
+          <div class="col-sm-12 col-md-3 col-lg-3" id="col_dni_usuario">
+            <label class="text-muted col-form-label" for="dni_usuario"
+              >DNI</label
+            >
+            <input
+              type="number"
+              name="dni_usuario"
+              id="dni_usuario"
+              class="form-control rounded-0 shadow-none"
+              th:attr="value=${usuario.nroDocumento}"
+              placeholder="DNI Usuario"
+              disabled
+            />
+          </div>
+          <div class="col-sm-12 col-md-6 col-lg-6" id="col_nombre_usuario">
+            <label class="text-muted col-form-label" for="nombre_usuario"
+              >Nombre</label
+            >
+            <input
+              type="text"
+              name="nombre_usuario"
+              id="nombre_usuario"
+              th:attr="value=${usuario.nombres}+', '+${usuario.apellidos} "
+              class="form-control rounded-0 shadow-none"
+              placeholder="Nombres del Usuario"
+              disabled
+            />
+          </div>
+        </div>
+
+        <h4 class="py-4">Local</h4>
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-4 col-lg-4" id="col_id_local">
+            <label class="text-muted col-form-label" for="id_local">ID</label>
+            <input
+              type="text"
+              name="id_local"
+              id="id_local"
+              th:attr="value=${local.id}"
+              placeholder="Id Local"
+              class="form-control rounded-0 shadow-none"
+              readonly
+            />
+          </div>
+          <div class="col-sm-12 col-md-8 col-lg-8" id="col_direccion_local">
+            <label class="text-muted col-form-label" for="direccion_local"
+              >Dirección</label
+            >
+            <input
+              type="text"
+              name="direccion_local"
+              id="direccion_local"
+              th:attr="value=${local.direccion}"
+              class="form-control rounded-0 shadow-none"
+              placeholder="Dirección"
+              disabled
+            />
+          </div>
+        </div>
+
+        <h4 class="py-4">Libro</h4>
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-12">
+            <select
+              class="form-control custom-select rounded-0 shadow-none"
+              name="id_libro"
+            >
+              <option
+                th:each="libro :${libros}"
+                id="id_libro"
+                name="id_libro"
+                th:value="${libro.id}"
+                th:text="${libro.titulo}"
+              ></option>
+            </select>
+          </div>
+        </div>
+
+        <h4 class="py-4">Empleado</h4>
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-12">
+            <select
+              class="form-control custom-select rounded-0 shadow-none"
+              name="id_empleado"
+            >
+              <option
+                th:each="empleado :${empleados}"
+                id="id_empleado"
+                name="id_empleado"
+                th:value="${empleado.id}"
+                th:text="${empleado.nombres}+', '+${empleado.apellidos}"
+              ></option>
+            </select>
+          </div>
+        </div>
+
+        <h4 class="py-4">Fecha Devolución</h4>
+        <div class="form-group row">
+          <div class="col-sm-12 col-md-6 col-lg-6">
+            <label class="col-form-label" for="fecha_devolucion"
+              >Fecha Devoluciòn</label
+            >
+            <input
+              class="form-control rounded-0 shadow-none datepicker"
+              type="text"
+              placeholder=" yyyy/mm/dd"
+              name="fecha_devolucion"
+              th:attr="value=${fecha_devolucion}"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group row py-3">
+          <!-- MOVIL -->
+          <div class="col-6 d-block d-sm-none">
+            <a
+              class="btn btn-transparent btn-block rounded-0 shadow-none"
+              th:href="@{'/prestamos/cancelar'}"
+              ><i class="fas fa-times fa-2x"></i
+            ></a>
+          </div>
+          <div class="col-6 d-block d-sm-none">
+            <button
+              class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+              type="submit"
+            >
+              <i class="fas fa-check fa-2x"></i>
+            </button>
+          </div>
+
+          <!-- WEB -->
+          <div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+            <a
+              class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+              th:href="@{'/prestamos/cancelar'}"
+              >CANCELAR</a
+            >
+          </div>
+          <div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+            <input
+              class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+              type="submit"
+              th:value="'CREAR'"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <footer th:replace="layout/layout :: footer"></footer>
+    <script th:replace="layout/autocomplete-libros :: javascript"></script>
+    <script th:replace="layout/autocomplete-empleados :: javascript"></script>
+    <script type="text/javascript">
+      // COMPONENTE DE FECHA ESPECIFICO PARA EL FORMULARIO
+      $(".datepicker").datepicker({
+        format: "yyyy-mm-dd", // FORMATO DE FECHA
+        startDate: "+2d", // MUESTRA FECHA DESDE MAÑANA
+        endDate: "+2m", // MUESTRA FECHA HASTA UN MAXIMO DE 3 MESES
+        autoclose: true, // OCULTAR AUTOMATICAMENTE COMPONENTE AL ESCOJER FECHA
+        todayHighlight: true, // ENFASIS EN EL DIA ACTUAL
+        language: "es", // LENGUAJE DEL COMPONENTE
+        templates: {
+          // ELEMENTOS PERSONALIZADOS DEL COMPONENTE
+          leftArrow: '<i class="fa fa-angle-left"></i>',
+          rightArrow: '<i class="fa fa-angle-right"></i>',
+        },
+      });
+    </script>
+  </body>
+</html>

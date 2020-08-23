@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="layout/layout :: head"></head>
+
+<body class="bg-light">
+
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container my-3 px-5">
+
+		<h1 class="py-4" th:text="${titulo}"></h1>
+
+		<form th:action="@{/prestamos/crear}" th:object="${prestamo}"
+			method="post">
+
+			<h4 class="py-4">Libro</h4>
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-12">
+					<label class="col-form-label" for="buscar_libro">Título</label> <input
+						type="text" name="buscar_libro" id="buscar_libro"
+						class="form-control rounded-0 shadow-none"
+						placeholder="Buscar libro por su título"
+						th:field="*{libro.titulo}" autofocus /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('libro.titulo')}"
+						th:errors="*{libro.titulo}"></small>
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-4 col-lg-4" id="col_id_libro">
+					<label class="text-muted col-form-label" for="id_libro">ID</label>
+					<input type="text" name="id_libro" id="id_libro"
+						placeholder="Id Libro" class="form-control rounded-0 shadow-none"
+						th:field="*{libro}" readonly />
+				</div>
+				<div class="col-sm-12 col-md-4 col-lg-4" id="col_autor_libro">
+					<label class="text-muted col-form-label" for="autor_libro">Autor</label>
+					<input type="text" name="autor_libro" id="autor_libro"
+						class="form-control rounded-0 shadow-none" placeholder="Autor"
+						th:field="*{libro.autor}" disabled />
+				</div>
+				<div class="col-sm-12 col-md-4 col-lg-4" id="col_stock_libro">
+					<label class="text-muted col-form-label" for="stock_libro">Stock</label>
+					<input type="text" name="stock_libro" id="stock_libro"
+						class="form-control rounded-0 shadow-none" placeholder="Stock"
+						th:field="*{libro.stock}" disabled />
+				</div>
+			</div>
+
+			<h4 class="py-4">Usuario</h4>
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-12">
+					<label class="col-form-label" for="buscar_usuario">DNI
+						Usuario</label> <input type="number" name="buscar_usuario"
+						id="buscar_usuario" class="form-control rounded-0 shadow-none"
+						placeholder="Buscar usuario por su DNI"
+						th:field="*{usuario.nroDocumento}" /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('usuario.nroDocumento')}"
+						th:errors="*{usuario.nroDocumento}"></small>
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-4 col-lg-4" id="col_id_usuario">
+					<label class="text-muted col-form-label" for="id_usuario">ID</label>
+					<input type="text" name="id_usuario" id="id_usuario"
+						class="form-control rounded-0 shadow-none"
+						placeholder="Id Usuario" th:field="*{usuario}" readonly />
+				</div>
+				<div class="col-sm-12 col-md-8 col-lg-8" id="col_nombre_usuario">
+					<label class="text-muted col-form-label" for="nombre_usuario">Nombre</label>
+					<input type="text" name="nombre_usuario" id="nombre_usuario"
+						class="form-control rounded-0 shadow-none"
+						placeholder="Nombres del Usuario" th:field="*{usuario.nombres}"
+						disabled />
+				</div>
+			</div>
+
+			<h4 class="py-4">Fecha Devolución</h4>
+			<div class="form-group row">
+				<div class="col-sm-12 col-md-6 col-lg-6">
+					<label class="col-form-label" for="fecha_devolucion">Fecha
+						Devoluciòn</label> <input
+						class="form-control rounded-0 shadow-none datepicker" type="text"
+						placeholder=" yyyy/mm/dd" name="fecha_devolucion"
+						th:field=*{fecha_devolucion} required /> <small
+						class="form-text text-danger"
+						th:if="${#fields.hasErrors('fecha_devolucion')}"
+						th:errors="*{fecha_devolucion}"></small>
+				</div>
+			</div>
+
+			<div class="form-group row py-3">
+				<!-- MOVIL -->
+				<div class="col-6 d-block d-sm-none">
+					<a class="btn btn-transparent btn-block rounded-0 shadow-none"
+						th:href="@{'/prestamos/cancelar'}"><i
+						class="fas fa-times fa-2x"></i></a>
+				</div>
+				<div class="col-6 d-block d-sm-none">
+					<button
+						class="btn btn-outline-success btn-block rounded-0 border-0 shadow-none"
+						type="submit">
+						<i class="fas fa-check fa-2x"></i>
+					</button>
+				</div>
+
+				<!-- WEB -->
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<a
+						class="btn btn-transparent btn-block shadow-none font-weight-bolder"
+						th:href="@{'/prestamos/cancelar'}">CANCELAR</a>
+				</div>
+				<div class="col-sm-6 col-md-6 py-2 d-none d-sm-block">
+					<input
+						class="btn btn-outline-success btn-block border-0 shadow-none font-weight-bolder"
+						type="submit" th:value="'CREAR'" />
+				</div>
+			</div>
+
+
+		</form>
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+	<script th:replace="layout/autocomplete-libros :: javascript"></script>
+	<script th:replace="layout/autocomplete-usuarios :: javascript"></script>
+	<script th:replace="layout/autocomplete-empleados :: javascript"></script>
+
+	<script type="text/javascript">
+		// COMPONENTE DE FECHA ESPECIFICO PARA EL FORMULARIO
+		$('.datepicker').datepicker({
+			format : 'yyyy-mm-dd', // FORMATO DE FECHA
+			startDate : '+2d', // MUESTRA FECHA DESDE MAÑANA
+			endDate : '+2m', // MUESTRA FECHA HASTA UN MAXIMO DE 3 MESES
+			autoclose : true, // OCULTAR AUTOMATICAMENTE COMPONENTE AL ESCOJER FECHA
+			todayHighlight : true, // ENFASIS EN EL DIA ACTUAL 
+			language : 'es', // LENGUAJE DEL COMPONENTE
+			templates : { // ELEMENTOS PERSONALIZADOS DEL COMPONENTE
+				leftArrow : '<i class="fa fa-angle-left"></i>',
+				rightArrow : '<i class="fa fa-angle-right"></i>'
+			}
+		});
+	</script>
+</body>
+</html>

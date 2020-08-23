@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<meta charset="UTF-8" />
+<title th:text="'Biblioteca | ' + ${titulo}"></title>
+
+<head th:replace="layout/layout :: head"></head>
+
+<body class="bg-light">
+	
+	<header th:replace="layout/layout :: header"></header>
+
+	<div class="container-md container-lg container-xl mx-5">
+
+		<h1 th:text="${titulo}" class="text-warning py-3"></h1>
+
+		<hr class="col-1 bg-secondary my-1">
+
+		<div class="row">
+
+			<div th:each="libro: ${libros}"
+				class="col-xs-12 col-md-6 col-lg-4 col-xl-3 my-4">
+
+				<div class="card mx-1" style="max-width: 400px;">
+					<div style="text-align: center;">
+						<img class="responsive rounded-0" height="260px" width="210px"
+							th:src="${libro.foto_libro}!='' ? @{'/uploads/'}+${libro.foto_libro} : @{'/uploads/no-book.jpg'}"
+							alt="Imagen libro">
+					</div>
+
+					<div class="card-body">
+						<h5 class="card-title text-right" th:text="${libro.titulo}"></h5>
+
+						<h6 class="card-title text-right text-muted"
+							th:text="${libro.autor}"></h6>
+
+						<p style="height: 150px;" class="card-text text-justify my-auto" id="textArea"
+							th:text="${libro.descripcionMin}"></p>
+
+						<div class="card-footer p-0 pt-2 bg-white">
+							<small class="text-muted"
+								th:text="'Fecha de Publicación: ' + ${libro.fechaPublicacion}"></small><br />
+							<small class="text-muted"
+								th:text="'Género: ' + ${libro.categoria.nombre}"></small>
+
+							<div class="row h-100 mt-2">
+
+								<div class="col-sm-12 col-md-12 my-auto">
+									<h6>
+										<span class="badge badge-success"
+											th:text="'Stock: ' + ${libro.stock}"></span>
+									</h6>
+								</div>
+
+								<div class="col-sm-12 col-md-12">
+									<div class="p-0 py-2">
+										<a th:href="@{'/usuarios/biblioteca/ver/'}+${libro.titulo}"
+											class="btn btn-info btn-block text-white"
+											th:text="'Ver Disponibilidad'"></a>
+									</div>
+								</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+	</div>
+
+	<footer th:replace="layout/layout :: footer"></footer>
+
+</body>
+</html>

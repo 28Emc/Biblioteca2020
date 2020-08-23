@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <script type="text/javascript" th:fragment="javascript">
+      $(document).ready(function () {
+        $("#categoria_libro").autocomplete({
+          source: function (request, response) {
+            $.ajax({
+              url: "/libros/cargar-categorias/" + request.term,
+              minLength: 2,
+              dataType: "json",
+              data: {
+                term: request.term,
+              },
+              success: function (data) {
+                response(
+                  $.map(data, function (item) {
+                    return {
+                      value: item.id,
+                      label: item.nombre,
+                    };
+                  })
+                );
+              },
+            });
+          },
+          focus: function (event, ui) {
+            event.preventDefault();
+          },
+          select: function (event, ui) {
+            $("#categoria_libro").val(ui.item.label);
+            return false;
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

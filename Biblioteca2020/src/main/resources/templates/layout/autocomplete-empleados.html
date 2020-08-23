@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+	<script type="text/javascript" th:fragment="javascript">
+		$(document).ready(function() {
+			
+			$("#buscar_empleado").autocomplete({
+				
+				source : function(request, response) {
+					$.ajax({
+						url : "/prestamos/cargar-empleados/" + request.term,
+						minLength : 2,
+						dataType : "json",
+						data : {
+							term : request.term
+						},
+						success : function(data) {
+							response($.map(data, function(item) {
+								return {
+									value : item.id,
+									label : item.nombres,
+									documento : item.nroDocumento,
+									full : item.nombres + ", " + item.apellidos,
+									error : item.error
+								};
+							}));
+						}
+					});
+				},
+				focus : function(event, ui) {
+					event.preventDefault();
+				},
+				select : function(event, ui) {
+					$("#buscar_empleado").val(ui.item.documento);
+					$("#id_empleado").val(ui.item.value);
+					$("#nombre_empleado").val(ui.item.full);
+					return false;
+				}
+			});
+		});
+	</script>
+</body>
+
+</html>
