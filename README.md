@@ -1,15 +1,17 @@
 # Biblioteca2020
-Sistema de gestión de préstamos de libros de Biblioteca (versión 2020).
+Este es un proyecto de práctica pensado para la gestión de préstamos de libros de una biblioteca (versión 2020).
 
-* Contiene 2 interfaces:
+* Contiene 2 roles:
   - Usuario
-Por la cual se pueden revisar el catálogo de libros disponibles en el sistema y adquirirlos en préstamo mediante la generación de tickets. 
-Pueden también ver su historial de 
-préstamos realizados y pendientes.
+    El cual puede revisar el catálogo de libros disponibles en el sistema y adquirirlos en préstamo mediante la generación de tickets.
+    Pueden también ver su historial de préstamos realizados y pendientes de confirmación por parte del sistema.
+    
   - Admin/Empleado
-Los cuales pueden gestionar los préstamos y la data referente a ello, de acuerdo a su rol específico (locales, empleados, usuarios, libros y sus categorías).
+    Los cuales pueden gestionar los préstamos y la data referente a ello, de acuerdo a su rol específico (locales, empleados, usuarios, libros y sus categorías).
+  
+  - SysAdmin
+    El cual es único por biblioteca y permite revisar todos los recursos.
 
-* Se pueden generar y exportar tablas 
-   mediante reportes.
+* Se pueden generar y exportar tablas mediante reportes en formato PDF y/o Excel.
 
-* Multilenguaje (ESP, EN),
+* Multilenguaje (ESP, EN)
